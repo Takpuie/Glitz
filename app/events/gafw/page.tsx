@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { gafwProgramme, gafwTickets, getEvent } from "@/data/events";
-import { editorialImage } from "@/lib/img";
+import { gafwGallery, gafwProgramme, gafwTickets, getEvent } from "@/data/events";
 
 const sponsors = ["MTN", "Kempinski", "Vodafone", "Absa", "Fidelity Bank", "Delta Air Lines"];
 
@@ -124,7 +123,27 @@ export default function GafwPage() {
             <Link href="/nominate" className="btn-primary mt-8 inline-flex">Start Application</Link>
           </div>
           <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
-            <Image unoptimized src={editorialImage("gafw-young-designers", 1000, 1300)} alt="Young Designers Showcase" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src="/images/gafw/accessory-beaded-backpack.jpg" alt="Beaded backpack, GAFW runway" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section className="hairline bg-smoke">
+        <div className="container-editorial py-16 md:py-20">
+          <div className="mb-10 border-b border-ink/15 pb-5 md:mb-12">
+            <p className="eyebrow mb-2">On the Runway</p>
+            <h2 className="font-display text-4xl sm:text-5xl">From GAFW</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-5">
+            {gafwGallery.map((g) => (
+              <div key={g.src}>
+                <div className="photo-card relative aspect-[3/4] w-full bg-gray-200">
+                  <Image unoptimized src={g.src} alt={g.caption} fill sizes="(max-width: 768px) 50vw, 20vw" className="object-cover" />
+                </div>
+                <p className="mt-3 font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">{g.caption}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

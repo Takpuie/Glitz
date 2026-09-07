@@ -2,10 +2,10 @@ import Image from "next/image";
 import { editorialImage } from "@/lib/img";
 
 const archive = [
-  { name: "GAFW 2025", year: "2025", winner: "Best Collection: Aisha Obed", img: editorialImage("archive-gafw-2025", 900, 700) },
+  { name: "GAFW 2025", year: "2025", winner: "Best Collection: Aisha Obed", img: "/images/gafw/look-red-rope-belt.jpg" },
   { name: "Ghana Women of the Year 2025", year: "2025", winner: "16 honourees celebrated", img: editorialImage("archive-gwoty-2025", 900, 700) },
   { name: "Glitz Style Awards 2025", year: "2025", winner: "Best Dressed: Efya", img: editorialImage("archive-style-2025", 900, 700) },
-  { name: "GAFW 2024", year: "2024", winner: "Best Collection: Christie Brown", img: editorialImage("archive-gafw-2024", 900, 700) },
+  { name: "GAFW 2024", year: "2024", winner: "Best Collection: Christie Brown", img: "/images/gafw/look-menswear-necklace.jpg" },
   { name: "SheBoss Global 2024", year: "2024", winner: "200+ founders convened", img: editorialImage("archive-sheboss-2024", 900, 700) },
   { name: "Female CEO Summit 2024", year: "2024", winner: "Keynote: Bozoma Saint John", img: editorialImage("archive-ceo-2024", 900, 700) },
 ];

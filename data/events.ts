@@ -20,7 +20,7 @@ export const events: EventEdition[] = [
     tagline: "The continent's runway, three days in Accra.",
     dates: "10–13 November 2026",
     venue: "Accra International Conference Centre",
-    image: editorialImage("event-gafw", 1600, 1000),
+    image: "/images/gafw/group-finale-walk.jpg",
     status: "On sale",
     description:
       "Runway, exhibitions and the Young Designers Showcase — GAFW 2026 brings together established houses and emerging talent from across Africa and the diaspora for its landmark 3-day edition.",
@@ -144,6 +144,14 @@ export const gafwTickets = [
     price: "GHS 18,000",
     detail: "Reserved table, finale runway and closing gala, Day Four.",
   },
+];
+
+export const gafwGallery = [
+  { src: "/images/gafw/look-yellow-fringe.jpg", caption: "Asantewaa — beaded fringe collar" },
+  { src: "/images/gafw/look-red-rope-belt.jpg", caption: "Asantewaa — rope-belt evening look" },
+  { src: "/images/gafw/look-menswear-necklace.jpg", caption: "Menswear — beaded statement necklace" },
+  { src: "/images/gafw/accessory-crossbody-bag.jpg", caption: "Menswear — beaded crossbody" },
+  { src: "/images/gafw/accessory-beaded-backpack.jpg", caption: "Accessories — beaded backpack" },
 ];
 
 export function getEvent(slug: string) {

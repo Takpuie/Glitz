@@ -24,7 +24,7 @@ export const articles: Article[] = [
     author: "Ama Boateng",
     date: "Sep 2, 2026",
     readTime: "8 min read",
-    image: editorialImage("gafw-2026-lineup", 1600, 2000),
+    image: "/images/gafw/hero-designer-and-model.jpg",
     featured: true,
   },
   {
