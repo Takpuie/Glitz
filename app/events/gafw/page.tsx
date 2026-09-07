@@ -11,25 +11,20 @@ export default function GafwPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative h-[70vh] min-h-[520px] w-full overflow-hidden bg-ink">
-        <Image unoptimized src={event.image} alt={event.name} fill priority sizes="100vw" className="object-cover opacity-85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40" />
-        <div className="container-editorial absolute inset-x-0 bottom-0 pb-12">
-          <p className="font-nav text-[11px] uppercase tracking-widest2 text-gray-300">
+      <section className="container-editorial grid grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
+        <div>
+          <p className="eyebrow mb-4">
             {event.status} &middot; {event.dates} &middot; {event.venue}
           </p>
-          <h1 className="mt-4 max-w-2xl font-display text-5xl leading-[1.02] text-paper sm:text-6xl md:text-7xl">
-            {event.name}
-          </h1>
-          <p className="mt-5 max-w-lg text-sm text-gray-200 md:text-base">{event.description}</p>
+          <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{event.name}</h1>
+          <p className="mt-5 max-w-md text-base text-gray-600">{event.description}</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <a href="#tickets" className="inline-flex items-center justify-center gap-2 bg-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors hover:bg-gray-200">
-              Get Tickets
-            </a>
-            <a href="#apply" className="inline-flex items-center justify-center gap-2 border border-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-paper transition-colors hover:bg-paper hover:text-ink">
-              Apply: Young Designers
-            </a>
+            <a href="#tickets" className="btn-primary">Get Tickets</a>
+            <a href="#apply" className="btn-outline">Apply: Young Designers</a>
           </div>
+        </div>
+        <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
+          <Image unoptimized src={event.image} alt={event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
         </div>
       </section>
 
@@ -128,7 +123,7 @@ export default function GafwPage() {
             </dl>
             <Link href="/nominate" className="btn-primary mt-8 inline-flex">Start Application</Link>
           </div>
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
+          <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
             <Image unoptimized src={editorialImage("gafw-young-designers", 1000, 1300)} alt="Young Designers Showcase" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
         </div>

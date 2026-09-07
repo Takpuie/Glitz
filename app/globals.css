@@ -35,16 +35,20 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-paper transition-colors duration-200 hover:bg-gray-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-paper transition-colors duration-200 hover:bg-gray-700;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 border border-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors duration-200 hover:bg-ink hover:text-paper;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors duration-200 hover:bg-ink hover:text-paper;
   }
 
   .link-underline {
     @apply bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat transition-[background-size] duration-300 hover:bg-[length:100%_1px];
     background-position: 0 100%;
+  }
+
+  .photo-card {
+    @apply overflow-hidden rounded-md shadow-[0_18px_40px_-20px_rgba(0,0,0,0.35)];
   }
 }
 

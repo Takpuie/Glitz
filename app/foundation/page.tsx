@@ -1,6 +1,3 @@
-import Image from "next/image";
-import { editorialImage } from "@/lib/img";
-
 const programmes = [
   { title: "Designer Mentorship", copy: "Pairing emerging talent from the Young Designers Showcase with established mentors for a full year." },
   { title: "Girls in Business", copy: "Workshops and micro-grants for young women launching their first ventures across Ghana." },
@@ -10,18 +7,14 @@ const programmes = [
 export default function FoundationPage() {
   return (
     <div>
-      <section className="relative h-[56vh] min-h-[420px] w-full overflow-hidden bg-ink">
-        <Image unoptimized src={editorialImage("foundation-hero", 1800, 1000)} alt="Glitz Africa Care Foundation" fill priority sizes="100vw" className="object-cover opacity-80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/30" />
-        <div className="container-editorial absolute inset-x-0 bottom-0 pb-10">
-          <p className="font-nav text-[11px] uppercase tracking-widest2 text-gray-300">Kollage Media</p>
-          <h1 className="mt-4 font-display text-5xl text-paper sm:text-6xl">Glitz Africa Care Foundation</h1>
-          <p className="mt-4 max-w-lg text-sm text-gray-200 md:text-base">
-            The philanthropic arm behind the brand — investing in the next
-            generation of African designers, founders and storytellers.
-          </p>
-        </div>
-      </section>
+      <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
+        <p className="eyebrow mb-3">Kollage Media</p>
+        <h1 className="font-display text-5xl sm:text-6xl">Glitz Africa Care Foundation</h1>
+        <p className="mt-4 max-w-lg text-sm text-gray-600 md:text-base">
+          The philanthropic arm behind the brand — investing in the next
+          generation of African designers, founders and storytellers.
+        </p>
+      </header>
 
       <section className="container-editorial py-16 md:py-20">
         <div className="mb-10 border-b border-ink/15 pb-5">

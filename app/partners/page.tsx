@@ -1,6 +1,3 @@
-import Image from "next/image";
-import { editorialImage } from "@/lib/img";
-
 const packages = [
   { tier: "Media Partner", detail: "Print + digital placements across issues, editorial integrations, newsletter sponsorship." },
   { tier: "Event Sponsor", detail: "Branding across a chosen event edition — logo placement, stage presence, delegate bags." },
@@ -16,14 +13,10 @@ const stats = [
 export default function PartnersPage() {
   return (
     <div>
-      <section className="relative h-[52vh] min-h-[380px] w-full overflow-hidden bg-ink">
-        <Image unoptimized src={editorialImage("partners-hero", 1800, 900)} alt="Advertise with Glitz Africa" fill priority sizes="100vw" className="object-cover opacity-80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/30" />
-        <div className="container-editorial absolute inset-x-0 bottom-0 pb-10">
-          <p className="font-nav text-[11px] uppercase tracking-widest2 text-gray-300">For Brands &amp; Agencies</p>
-          <h1 className="mt-4 font-display text-5xl text-paper sm:text-6xl">Advertise &amp; Partner</h1>
-        </div>
-      </section>
+      <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
+        <p className="eyebrow mb-3">For Brands &amp; Agencies</p>
+        <h1 className="font-display text-5xl sm:text-6xl">Advertise &amp; Partner</h1>
+      </header>
 
       <section className="hairline">
         <div className="container-editorial grid grid-cols-1 divide-y divide-ink/15 py-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">

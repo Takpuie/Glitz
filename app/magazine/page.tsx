@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { backIssues, currentIssue, subscriptionPlans } from "@/data/issues";
 
-export default function ShopPage() {
+export default function MagazinePage() {
   return (
     <div>
       <header className="container-editorial border-b border-ink/15 py-12 md:py-16">
-        <p className="eyebrow mb-3">Shop the Magazine</p>
-        <h1 className="font-display text-5xl sm:text-6xl">The Glitz Africa Store</h1>
+        <p className="eyebrow mb-3">Glitz Magazine</p>
+        <h1 className="font-display text-5xl sm:text-6xl">Read Something Glitzy</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
           Single issues and subscriptions, print and digital — shipped across
           Ghana, the continent and internationally.
@@ -16,7 +16,7 @@ export default function ShopPage() {
 
       {/* Current issue */}
       <section className="container-editorial grid grid-cols-1 gap-10 py-16 md:grid-cols-2 md:py-20">
-        <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden bg-gray-100 md:mx-0">
+        <div className="photo-card relative mx-auto aspect-[4/5] w-full max-w-sm bg-gray-100 md:mx-0">
           <Image unoptimized src={currentIssue.image} alt={currentIssue.title} fill sizes="(max-width: 768px) 80vw, 40vw" className="object-cover" />
         </div>
         <div className="flex flex-col justify-center">
@@ -91,7 +91,7 @@ export default function ShopPage() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-3 lg:grid-cols-6">
           {backIssues.map((issue) => (
             <div key={issue.slug}>
-              <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
+              <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
                 <Image unoptimized src={issue.image} alt={issue.title} fill sizes="(max-width: 768px) 45vw, 16vw" className="object-cover" />
                 {issue.soldOut && (
                   <div className="absolute inset-x-0 bottom-0 bg-ink py-1.5 text-center font-nav text-[9.5px] uppercase tracking-widest2 text-paper">

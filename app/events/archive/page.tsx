@@ -25,7 +25,7 @@ export default function EventsArchivePage() {
       <div className="grid grid-cols-1 gap-x-8 gap-y-14 pt-12 sm:grid-cols-2 lg:grid-cols-3">
         {archive.map((a) => (
           <div key={a.name} className="group">
-            <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+            <div className="photo-card relative aspect-[4/3] w-full bg-gray-100">
               <Image unoptimized src={a.img} alt={a.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
             </div>
             <p className="mt-4 font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">{a.year}</p>

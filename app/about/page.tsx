@@ -3,7 +3,6 @@ import { editorialImage } from "@/lib/img";
 
 const brands = [
   "Glitz Africa Magazine",
-  "Glitz Africa Living",
   "Ghana Women of the Year Honours",
   "Ghana Female CEO Summit",
   "SheBoss Global",
@@ -27,14 +26,14 @@ export default function AboutPage() {
             digital and events.
           </p>
         </div>
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
+        <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
           <Image unoptimized src={editorialImage("about-founder", 1000, 1250)} alt="Claudia Lumor, Founder" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
         </div>
       </section>
 
       <section className="container-editorial py-16 md:py-20">
         <p className="eyebrow mb-2">The Portfolio</p>
-        <h2 className="mb-10 font-display text-4xl sm:text-5xl">One House, Seven Brands</h2>
+        <h2 className="mb-10 font-display text-4xl sm:text-5xl">One House, Six Brands</h2>
         <ul className="grid grid-cols-1 divide-y divide-ink/15 border-y border-ink/15 sm:grid-cols-2">
           {brands.map((b, i) => (
             <li key={b} className="flex items-center gap-4 py-5 sm:px-6">

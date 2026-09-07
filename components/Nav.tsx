@@ -4,26 +4,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const PRIMARY_LINKS = [
-  { label: "News & Style", href: "/news" },
-  { label: "Glitz Africa Living", href: "/living" },
-  { label: "Shop the Magazine", href: "/shop" },
-  { label: "Events", href: "/events" },
-  { label: "Awards & Nominations", href: "/nominate" },
-  { label: "Advertise & Partner", href: "/partners" },
-  { label: "Care Foundation", href: "/foundation" },
-  { label: "About", href: "/about" },
+  { label: "Home", href: "/" },
+  { label: "News", href: "/articles?category=News" },
+  { label: "Entertainment", href: "/articles?category=Entertainment" },
+  { label: "Fashion", href: "/articles?category=Fashion" },
+  { label: "Hair & Beauty", href: "/articles?category=Hair+%26+Beauty" },
+  { label: "Lifestyle", href: "/articles?category=Lifestyle" },
+  { label: "Magazine", href: "/magazine" },
+  { label: "Glitz Events", href: "/events" },
+  { label: "Media", href: "/media" },
 ];
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -32,27 +25,18 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-50 bg-paper">
       {/* utility bar */}
-      <div className="hidden border-b border-ink/10 bg-ink text-paper md:block">
-        <div className="container-editorial flex h-9 items-center justify-between font-nav text-[10.5px] uppercase tracking-widest2 text-gray-300">
-          <p>Pan-African fashion, power &amp; culture — since 1997</p>
-          <div className="flex items-center gap-6">
-            <Link href="/foundation" className="link-underline hover:text-paper">
-              Care Foundation
-            </Link>
-            <Link href="/partners" className="link-underline hover:text-paper">
-              Advertise
-            </Link>
-            <Link href="/about" className="link-underline hover:text-paper">
-              About Kollage Media
-            </Link>
-          </div>
+      <div className="bg-ink text-paper">
+        <div className="container-editorial flex h-8 items-center justify-center">
+          <p className="font-nav text-[10px] uppercase tracking-widest2 text-gray-300 sm:text-[10.5px]">
+            Glitz Africa &middot; Fashion, Culture, Lifestyle &amp; Entertainment
+          </p>
         </div>
       </div>
 
       {/* main bar */}
-      <div className={`border-b border-ink/15 transition-shadow ${scrolled ? "shadow-[0_1px_0_rgba(0,0,0,0.08)]" : ""}`}>
-        <div className="container-editorial grid h-16 grid-cols-3 items-center md:h-20">
-          <div className="flex items-center gap-4">
+      <div className="border-b border-ink/12">
+        <div className="container-editorial grid h-16 grid-cols-3 items-center md:h-[72px]">
+          <div className="flex items-center">
             <button
               aria-label="Toggle menu"
               onClick={() => setOpen((v) => !v)}
@@ -62,37 +46,34 @@ export default function Nav() {
               <span className={`h-px w-6 bg-ink transition-opacity ${open ? "opacity-0" : ""}`} />
               <span className={`h-px w-6 bg-ink transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
             </button>
-            <nav className="hidden font-nav text-[11px] uppercase tracking-widest2 md:flex md:gap-5 lg:gap-6">
-              {PRIMARY_LINKS.slice(0, 3).map((l) => (
-                <Link key={l.href} href={l.href} className="link-underline py-1">
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
           </div>
 
-          <Link href="/" className="justify-self-center text-center">
-            <span className="block whitespace-nowrap font-display text-[18px] font-semibold tracking-[0.01em] sm:text-[32px] md:text-[38px]">
-              GLITZ AFRICA
+          <Link href="/" className="justify-self-center text-center leading-none">
+            <span className="block whitespace-nowrap font-display text-[22px] font-bold tracking-[0.06em] sm:text-[26px]">
+              GLITZ
+            </span>
+            <span className="mt-0.5 block font-nav text-[8px] uppercase tracking-widest2 text-gray-500">
+              Africa
             </span>
           </Link>
 
-          <div className="flex items-center justify-end gap-4 md:gap-6">
-            <nav className="hidden font-nav text-[11px] uppercase tracking-widest2 md:flex md:gap-5 lg:gap-6">
-              {PRIMARY_LINKS.slice(3, 6).map((l) => (
-                <Link key={l.href} href={l.href} className="link-underline py-1">
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-            <button aria-label="Search" className="hidden h-5 w-5 items-center justify-center md:flex">
+          <div className="flex items-center justify-end gap-5">
+            <button aria-label="Search" className="flex h-[18px] w-[18px] items-center justify-center">
               <SearchIcon />
             </button>
-            <Link href="/account" aria-label="Account" className="flex h-5 w-5 items-center justify-center">
-              <AccountIcon />
+            <Link href="/cart" aria-label="Your bag" className="flex h-[18px] w-[18px] items-center justify-center">
+              <BagIcon />
             </Link>
           </div>
         </div>
+
+        <nav className="hidden justify-center gap-7 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 md:flex lg:gap-9">
+          {PRIMARY_LINKS.map((l) => (
+            <Link key={l.label} href={l.href} className="link-underline hover:text-ink">
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       {/* mobile drawer */}
@@ -104,7 +85,7 @@ export default function Nav() {
         <nav className="container-editorial flex flex-col divide-y divide-ink/10 pt-2">
           {PRIMARY_LINKS.map((l) => (
             <Link
-              key={l.href}
+              key={l.label}
               href={l.href}
               onClick={() => setOpen(false)}
               className="py-4 font-display text-xl"
@@ -130,11 +111,11 @@ function SearchIcon() {
   );
 }
 
-function AccountIcon() {
+function BagIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="h-full w-full stroke-ink" strokeWidth="1.4">
-      <circle cx="10" cy="6.5" r="3.5" />
-      <path d="M2.5 18c1.4-3.8 4.6-5.7 7.5-5.7s6.1 1.9 7.5 5.7" strokeLinecap="round" />
+      <path d="M5.5 7h9l.7 10.5a1 1 0 0 1-1 1.07H5.8a1 1 0 0 1-1-1.07L5.5 7Z" strokeLinejoin="round" />
+      <path d="M7.3 7V5.3a2.7 2.7 0 0 1 5.4 0V7" strokeLinecap="round" />
     </svg>
   );
 }

@@ -19,8 +19,8 @@ export default function ArticleCard({
       : "text-xl sm:text-2xl";
 
   return (
-    <Link href={`/news/${article.slug}`} className="group block">
-      <div className={`relative w-full overflow-hidden bg-gray-100 ${aspect}`}>
+    <Link href={`/articles/${article.slug}`} className="group block">
+      <div className={`photo-card relative w-full bg-gray-100 ${aspect}`}>
         <Image
           unoptimized
           src={article.image}

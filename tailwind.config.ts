@@ -5,9 +5,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0a0a0a",
-        paper: "#ffffff",
-        smoke: "#f4f4f2",
+        ink: "#0f0e0c",
+        paper: "#f6f2ea",
+        smoke: "#efe9dd",
         line: "#1a1a1a",
         gray: {
           50: "#fafafa",

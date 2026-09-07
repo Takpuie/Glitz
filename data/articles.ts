@@ -1,8 +1,11 @@
 import { editorialImage } from "@/lib/img";
 
+export const CATEGORIES = ["News", "Entertainment", "Fashion", "Hair & Beauty", "Lifestyle"] as const;
+export type Category = (typeof CATEGORIES)[number];
+
 export type Article = {
   slug: string;
-  category: "Fashion" | "Beauty" | "Culture" | "Business" | "Opinion" | "Living";
+  category: Category;
   title: string;
   dek: string;
   author: string;
@@ -26,7 +29,7 @@ export const articles: Article[] = [
   },
   {
     slug: "claudia-lumor-interview",
-    category: "Business",
+    category: "News",
     title: "Claudia Lumor on Building a Media House That Refuses to Choose One Lane",
     dek: "The Glitz Africa founder on publishing, events, and why the brand had to become a platform.",
     author: "Nana Yaa Asante",
@@ -36,7 +39,7 @@ export const articles: Article[] = [
   },
   {
     slug: "gwoty-honourees-announced",
-    category: "Culture",
+    category: "News",
     title: "Ghana Women of the Year 2026: Meet the Honourees",
     dek: "Sixteen women across business, government, arts and advocacy join the GWOTY roll of honour.",
     author: "Efua Mensah",
@@ -56,7 +59,7 @@ export const articles: Article[] = [
   },
   {
     slug: "sheboss-founders-watchlist",
-    category: "Business",
+    category: "News",
     title: "The SheBoss Global Founders Watchlist for 2026",
     dek: "Twelve entrepreneurs across fintech, fashion and consumer goods to know before the summit.",
     author: "Adjoa Darko",
@@ -66,7 +69,7 @@ export const articles: Article[] = [
   },
   {
     slug: "skincare-harmattan-edit",
-    category: "Beauty",
+    category: "Hair & Beauty",
     title: "The Harmattan Edit: Skincare for West Africa's Dry Season",
     dek: "Dermatologists and editors weigh in on the routine that actually survives the dust and the dry heat.",
     author: "Linda Appiah",
@@ -76,7 +79,7 @@ export const articles: Article[] = [
   },
   {
     slug: "why-african-fashion-weeks-matter",
-    category: "Opinion",
+    category: "Entertainment",
     title: "Why Africa Needs More Fashion Weeks, Not Fewer",
     dek: "An argument for platform over prestige — and why GAFW's model of trade tents alongside runway is worth copying.",
     author: "Editorial Board",
@@ -86,7 +89,7 @@ export const articles: Article[] = [
   },
   {
     slug: "living-accra-design-district",
-    category: "Living",
+    category: "Lifestyle",
     title: "A Design-Lover's Weekend Guide to Accra's Osu District",
     dek: "Studios, concept stores and the best light for a Sunday walk, mapped by Glitz Africa Living.",
     author: "Selasi Tetteh",

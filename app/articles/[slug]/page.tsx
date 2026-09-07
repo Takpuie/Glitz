@@ -22,26 +22,27 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   return (
     <article>
-      <div className="relative h-[62vh] min-h-[420px] w-full overflow-hidden bg-ink">
-        <Image unoptimized src={article.image} alt={article.title} fill priority sizes="100vw" className="object-cover opacity-90" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20" />
-        <div className="container-editorial absolute inset-x-0 bottom-0 pb-10">
-          <p className="font-nav text-[11px] uppercase tracking-widest2 text-gray-200">{article.category}</p>
-          <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.05] text-paper sm:text-5xl">
-            {article.title}
-          </h1>
-        </div>
-      </div>
+      <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
+        <p className="eyebrow mb-3">{article.category}</p>
+        <h1 className="max-w-3xl font-display text-4xl leading-[1.05] sm:text-5xl md:text-6xl">
+          {article.title}
+        </h1>
+        <p className="mt-5 max-w-xl text-base text-gray-600 md:text-lg">{article.dek}</p>
+        <p className="mt-6 font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">
+          By {article.author} &middot; {article.date} &middot; {article.readTime}
+        </p>
+      </header>
 
-      <div className="container-editorial grid grid-cols-1 gap-12 py-14 md:grid-cols-[1fr_260px] md:py-20">
+      <div className="container-editorial grid grid-cols-1 gap-12 py-14 md:grid-cols-[1fr_260px] md:py-16">
         <div className="mx-auto w-full max-w-2xl">
-          <p className="font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">
-            By {article.author} &middot; {article.date} &middot; {article.readTime}
-          </p>
-          <p className="mt-6 font-display text-xl leading-relaxed text-gray-800 sm:text-2xl">
-            {article.dek}
-          </p>
-          <div className="mt-8 space-y-6 text-[17px] leading-relaxed text-gray-800">
+          <div className="photo-card relative aspect-[16/10] w-full bg-gray-200">
+            <Image unoptimized src={article.image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 700px" className="object-cover" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-5 py-4">
+              <p className="font-nav text-[10px] uppercase tracking-widest2 text-paper">Featured Story</p>
+            </div>
+          </div>
+
+          <div className="mt-10 space-y-6 text-[17px] leading-relaxed text-gray-800">
             {body.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -60,7 +61,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             <p className="eyebrow mb-4">Read Next</p>
             <div className="space-y-6">
               {related.map((r) => (
-                <Link key={r.slug} href={`/news/${r.slug}`} className="group block">
+                <Link key={r.slug} href={`/articles/${r.slug}`} className="group block">
                   <p className="font-display text-lg leading-snug group-hover:underline underline-offset-4">
                     {r.title}
                   </p>

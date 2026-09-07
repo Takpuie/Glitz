@@ -23,7 +23,7 @@ export default function EventsPage() {
             className="group block border-b border-ink/15"
           >
             <div className="container-editorial grid grid-cols-1 items-center gap-8 py-10 md:grid-cols-[220px_1fr_auto] md:gap-12 md:py-12">
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 md:aspect-square">
+              <div className="photo-card relative aspect-[4/3] w-full bg-gray-100 md:aspect-square">
                 <Image
                   unoptimized
                   src={event.image}
