@@ -40,7 +40,7 @@ export default function Nav() {
             <button
               aria-label="Toggle menu"
               onClick={() => setOpen((v) => !v)}
-              className="group flex h-9 w-9 flex-col items-start justify-center gap-[5px] md:hidden"
+              className="group flex h-9 w-9 flex-col items-start justify-center gap-[5px] lg:hidden"
             >
               <span className={`h-px w-6 bg-ink transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} />
               <span className={`h-px w-6 bg-ink transition-opacity ${open ? "opacity-0" : ""}`} />
@@ -67,7 +67,7 @@ export default function Nav() {
           </div>
         </div>
 
-        <nav className="hidden justify-center gap-7 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 md:flex lg:gap-9">
+        <nav className="hidden justify-center gap-6 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 lg:flex xl:gap-9">
           {PRIMARY_LINKS.map((l) => (
             <Link key={l.label} href={l.href} className="link-underline hover:text-ink">
               {l.label}
@@ -78,7 +78,7 @@ export default function Nav() {
 
       {/* mobile drawer */}
       <div
-        className={`fixed inset-0 top-16 z-40 bg-paper transition-transform duration-300 md:hidden ${
+        className={`fixed inset-0 top-16 z-40 bg-paper transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

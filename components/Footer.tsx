@@ -25,8 +25,8 @@ const COMPANY: { label: string; href: string }[] = [
 export default function Footer() {
   return (
     <footer className="bg-ink text-gray-300">
-      <div className="container-editorial grid grid-cols-2 gap-10 py-16 md:grid-cols-4 md:py-20">
-        <div className="col-span-2 md:col-span-1">
+      <div className="container-editorial grid grid-cols-2 gap-10 py-16 lg:grid-cols-4 lg:py-20">
+        <div className="col-span-2 lg:col-span-1">
           <span className="block font-display text-2xl font-bold tracking-[0.06em] text-paper">GLITZ</span>
           <span className="mt-0.5 block font-nav text-[9px] uppercase tracking-widest2 text-gray-500">Africa</span>
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-gray-400">
@@ -66,7 +66,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="col-span-2 lg:col-span-1">
           <p className="font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">Stay in the Know</p>
           <p className="mt-5 max-w-[220px] text-sm text-gray-400">
             The best of GLITZ, delivered monthly.
