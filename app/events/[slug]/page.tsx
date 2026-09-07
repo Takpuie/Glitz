@@ -64,6 +64,27 @@ export default function EventEditionPage({ params }: { params: { slug: string } 
           </aside>
         </div>
       </section>
+
+      {event.gallery && (
+        <section className="hairline bg-smoke">
+          <div className="container-editorial py-16 md:py-20">
+            <div className="mb-10 border-b border-ink/15 pb-5 md:mb-12">
+              <p className="eyebrow mb-2">In Pictures</p>
+              <h2 className="font-display text-4xl sm:text-5xl">From {event.shortName}</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-3">
+              {event.gallery.map((g) => (
+                <div key={g.src}>
+                  <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
+                    <Image unoptimized src={g.src} alt={g.caption} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+                  </div>
+                  <p className="mt-3 text-sm text-gray-600">{g.caption}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

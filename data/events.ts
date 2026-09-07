@@ -10,6 +10,7 @@ export type EventEdition = {
   image: string;
   status: "On sale" | "Applications open" | "Save the date" | "Archived";
   description: string;
+  gallery?: { src: string; caption: string }[];
 };
 
 export const events: EventEdition[] = [
@@ -44,10 +45,15 @@ export const events: EventEdition[] = [
     tagline: "Where Ghana's women in leadership convene.",
     dates: "18 March 2027",
     venue: "Mövenpick Ambassador Hotel, Accra",
-    image: editorialImage("event-ceo-summit", 1600, 1000),
+    image: "/images/female-ceo-summit/panel-trade-opportunities.jpg",
     status: "Save the date",
     description:
       "A day of panels, workshops and closed-door roundtables for women leading companies across every sector in Ghana.",
+    gallery: [
+      { src: "/images/female-ceo-summit/panel-trade-opportunities.jpg", caption: "Panel — Expanding Trade Opportunities & Market Access for Women-Led Enterprises" },
+      { src: "/images/female-ceo-summit/podium-speaker.jpg", caption: "Keynote address" },
+      { src: "/images/female-ceo-summit/podium-red-dress.jpg", caption: "Closing remarks" },
+    ],
   },
   {
     slug: "sheboss-global",
