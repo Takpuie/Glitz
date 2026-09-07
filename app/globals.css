@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-line/10;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    @apply bg-ink text-paper;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-nav text-[11px] uppercase tracking-widest2 text-gray-600;
+  }
+
+  .hairline {
+    @apply border-t border-ink/15;
+  }
+
+  .container-editorial {
+    @apply mx-auto w-full max-w-content px-5 sm:px-8 lg:px-12;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-paper transition-colors duration-200 hover:bg-gray-700;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 border border-ink px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors duration-200 hover:bg-ink hover:text-paper;
+  }
+
+  .link-underline {
+    @apply bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat transition-[background-size] duration-300 hover:bg-[length:100%_1px];
+    background-position: 0 100%;
+  }
+}
+
+@layer utilities {
+  .grayscale-editorial {
+    filter: grayscale(1) contrast(1.08);
+  }
+}
