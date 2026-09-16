@@ -7,7 +7,8 @@ import { events } from "@/data/events";
 import { editorialImage } from "@/lib/img";
 
 export default function Home() {
-  const [cover, ...rest] = articles;
+  const [cover, ...allRest] = articles;
+  const rest = allRest.slice(0, 7);
   const gafw = events[0];
 
   return (
