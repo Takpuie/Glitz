@@ -1,6 +1,7 @@
 """Ticket checkout: create a pending Ticket, open a Paystack transaction,
-and the two ways a ticket gets marked paid — the webhook (source of truth)
-and the frontend's post-redirect verify call (belt-and-braces, idempotent).
+and the two ways a ticket gets marked paid — the webhook (source of truth,
+see glitz_backend/webhooks.py) and the frontend's post-redirect verify call
+(belt-and-braces, idempotent).
 """
 
 import uuid
@@ -12,8 +13,8 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from glitz_backend.paystack import PaystackError, initialize_transaction, verify_transaction
 from .models import Event, Ticket, TicketType
-from .paystack import PaystackError, initialize_transaction, verify_transaction, verify_webhook_signature
 
 
 class TicketStatusSerializer(serializers.ModelSerializer):
@@ -39,10 +40,18 @@ class TicketCheckoutSerializer(serializers.Serializer):
     buyer_email = serializers.EmailField()
 
 
-def _mark_ticket_paid(reference):
-    Ticket.objects.filter(paystack_reference=reference, status=Ticket.Status.PENDING).update(
-        status=Ticket.Status.PAID
-    )
+def mark_ticket_paid(reference):
+    """Idempotent — used by both the webhook and the verify-on-callback
+    path. Returns True if this reference belongs to a Ticket at all (paid
+    or not), so the shared webhook knows not to also check Order — a
+    duplicate webhook delivery must not be mistaken for "not mine"."""
+    ticket = Ticket.objects.filter(paystack_reference=reference).first()
+    if not ticket:
+        return False
+    if ticket.status == Ticket.Status.PENDING:
+        ticket.status = Ticket.Status.PAID
+        ticket.save(update_fields=["status"])
+    return True
 
 
 class TicketCheckoutView(APIView):
@@ -111,26 +120,6 @@ class TicketVerifyView(APIView):
             except PaystackError:
                 result = None
             if result and result.get("status") == "success":
-                _mark_ticket_paid(reference)
+                mark_ticket_paid(reference)
                 ticket.refresh_from_db()
         return Response(TicketStatusSerializer(ticket).data)
-
-
-class PaystackWebhookView(APIView):
-    """POST /api/webhooks/paystack/ — the source of truth for payment
-    confirmation. Signature-verified; everything else is untrusted input."""
-
-    permission_classes = []
-    authentication_classes = []
-
-    def post(self, request):
-        signature = request.headers.get("X-Paystack-Signature", "")
-        if not verify_webhook_signature(request.body, signature):
-            return Response(status=401)
-
-        event_type = request.data.get("event")
-        if event_type == "charge.success":
-            reference = request.data.get("data", {}).get("reference")
-            if reference:
-                _mark_ticket_paid(reference)
-        return Response(status=200)

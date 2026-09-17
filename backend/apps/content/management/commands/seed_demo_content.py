@@ -409,9 +409,9 @@ class Command(BaseCommand):
             )
         self.stdout.write(self.style.SUCCESS(f"Event: {event.name} ({event.ticket_types.count()} ticket types)"))
 
-        MagazineIssue.objects.update_or_create(
-            slug="issue-118",
-            defaults={
+        issues = [
+            {
+                "slug": "issue-118",
                 "title": "The Power Issue",
                 "issue_number": "Issue 118",
                 "season": "October / November 2026",
@@ -422,10 +422,52 @@ class Command(BaseCommand):
                 "price": 60,
                 "is_digital_available": True,
                 "is_print_available": True,
+                "print_sold_out": False,
                 "publish_date": date(2026, 10, 1),
                 "is_current_issue": True,
             },
-        )
-        self.stdout.write(self.style.SUCCESS("Magazine issue: The Power Issue"))
+            {
+                "slug": "issue-117",
+                "title": "The Bridal Issue",
+                "issue_number": "Issue 117",
+                "season": "August / September 2026",
+                "description": "Ghana's wedding season, styled — designers, venues and the real budgets behind the big day.",
+                "price": 55,
+                "is_digital_available": True,
+                "is_print_available": True,
+                "print_sold_out": False,
+                "publish_date": date(2026, 8, 1),
+                "is_current_issue": False,
+            },
+            {
+                "slug": "issue-116",
+                "title": "The Beauty Issue",
+                "issue_number": "Issue 116",
+                "season": "June / July 2026",
+                "description": "Skincare for the harmattan and beyond, and the founders building Ghana's beauty industry.",
+                "price": 55,
+                "is_digital_available": True,
+                "is_print_available": True,
+                "print_sold_out": False,
+                "publish_date": date(2026, 6, 1),
+                "is_current_issue": False,
+            },
+            {
+                "slug": "issue-115",
+                "title": "The GAFW Issue",
+                "issue_number": "Issue 115",
+                "season": "April / May 2026",
+                "description": "The full GAFW 2025 recap — every look, every designer, every trend that mattered.",
+                "price": 55,
+                "is_digital_available": True,
+                "is_print_available": True,
+                "print_sold_out": True,
+                "publish_date": date(2026, 4, 1),
+                "is_current_issue": False,
+            },
+        ]
+        for data in issues:
+            MagazineIssue.objects.update_or_create(slug=data["slug"], defaults={k: v for k, v in data.items() if k != "slug"})
+        self.stdout.write(self.style.SUCCESS(f"Magazine issues: {len(issues)}"))
 
         self.stdout.write(self.style.SUCCESS("Done."))

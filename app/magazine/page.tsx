@@ -1,8 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { backIssues, currentIssue, subscriptionPlans } from "@/data/issues";
+import { subscriptionPlans } from "@/data/issues";
+import { getMagazineIssues } from "@/lib/backend";
+import { editorialImage } from "@/lib/img";
+import MagazineCheckout from "./MagazineCheckout";
 
-export default function MagazinePage() {
+export default async function MagazinePage() {
+  const issues = await getMagazineIssues();
+  const currentIssue = issues.find((i) => i.is_current_issue) ?? issues[0];
+  const backIssues = issues.filter((i) => i.slug !== currentIssue?.slug);
+
   return (
     <div>
       <header className="container-editorial border-b border-ink/15 py-12 md:py-16">
@@ -15,24 +22,29 @@ export default function MagazinePage() {
       </header>
 
       {/* Current issue */}
-      <section className="container-editorial grid grid-cols-1 gap-10 py-16 md:grid-cols-2 md:py-20">
-        <div className="photo-card relative mx-auto aspect-[4/5] w-full max-w-sm bg-gray-100 md:mx-0">
-          <Image unoptimized src={currentIssue.image} alt={currentIssue.title} fill sizes="(max-width: 768px) 80vw, 40vw" className="object-cover" />
-        </div>
-        <div className="flex flex-col justify-center">
-          <p className="eyebrow mb-3">{currentIssue.issueNumber} &middot; On Sale Now</p>
-          <h2 className="font-display text-4xl leading-tight sm:text-5xl">{currentIssue.title}</h2>
-          <p className="mt-2 text-sm text-gray-500">{currentIssue.season}</p>
-          <p className="mt-5 max-w-md text-sm leading-relaxed text-gray-600 md:text-base">
-            The women redefining power across business and culture, a first look
-            at GAFW 2026, and the interviews that opened doors this year.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <button className="btn-primary">Buy Print &mdash; {currentIssue.price}</button>
-            <button className="btn-outline" id="digital">Buy Digital &mdash; GHS 25</button>
+      {currentIssue && (
+        <section className="container-editorial grid grid-cols-1 gap-10 py-16 md:grid-cols-2 md:py-20">
+          <div className="photo-card relative mx-auto aspect-[4/5] w-full max-w-sm bg-gray-100 md:mx-0">
+            <Image
+              unoptimized
+              src={currentIssue.cover_image?.full_url ?? editorialImage(currentIssue.slug, 1000, 1300)}
+              alt={currentIssue.title}
+              fill
+              sizes="(max-width: 768px) 80vw, 40vw"
+              className="object-cover"
+            />
           </div>
-        </div>
-      </section>
+          <div className="flex flex-col justify-center">
+            <p className="eyebrow mb-3">{currentIssue.issue_number} &middot; On Sale Now</p>
+            <h2 className="font-display text-4xl leading-tight sm:text-5xl">{currentIssue.title}</h2>
+            <p className="mt-2 text-sm text-gray-500">{currentIssue.season}</p>
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-gray-600 md:text-base">
+              {currentIssue.description}
+            </p>
+            <MagazineCheckout issue={currentIssue} />
+          </div>
+        </section>
+      )}
 
       {/* Subscriptions */}
       <section id="subscribe" className="hairline bg-smoke">
@@ -92,17 +104,25 @@ export default function MagazinePage() {
           {backIssues.map((issue) => (
             <div key={issue.slug}>
               <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
-                <Image unoptimized src={issue.image} alt={issue.title} fill sizes="(max-width: 768px) 45vw, 16vw" className="object-cover" />
-                {issue.soldOut && (
+                <Image
+                  unoptimized
+                  src={issue.cover_image?.full_url ?? editorialImage(issue.slug, 1000, 1300)}
+                  alt={issue.title}
+                  fill
+                  sizes="(max-width: 768px) 45vw, 16vw"
+                  className="object-cover"
+                />
+                {issue.print_sold_out && (
                   <div className="absolute inset-x-0 bottom-0 bg-ink py-1.5 text-center font-nav text-[9.5px] uppercase tracking-widest2 text-paper">
                     Print Sold Out &middot; Digital Only
                   </div>
                 )}
               </div>
-              <p className="mt-3 font-nav text-[10px] uppercase tracking-widest2 text-gray-500">{issue.issueNumber}</p>
+              <p className="mt-3 font-nav text-[10px] uppercase tracking-widest2 text-gray-500">{issue.issue_number}</p>
               <p className="font-display text-lg leading-snug">{issue.title}</p>
               <p className="mt-1 text-xs text-gray-500">{issue.season}</p>
-              <p className="mt-1 font-nav text-xs tracking-wide">{issue.price}</p>
+              <p className="mt-1 font-nav text-xs tracking-wide">GHS {Math.round(parseFloat(issue.price)).toLocaleString()}</p>
+              <MagazineCheckout issue={issue} compact />
             </div>
           ))}
         </div>

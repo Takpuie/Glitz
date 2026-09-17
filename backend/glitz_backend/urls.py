@@ -9,11 +9,13 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from apps.content.api import CategoryViewSet
 from apps.events.api import EventViewSet
-from apps.events.checkout import PaystackWebhookView, TicketCheckoutView, TicketVerifyView
+from apps.events.checkout import TicketCheckoutView, TicketVerifyView
 from apps.magazine.api import MagazineIssueViewSet
+from apps.magazine.checkout import DigitalDownloadView, MagazineCheckoutView, OrderVerifyView
 from search import views as search_views
 
 from .api import api_router
+from .webhooks import PaystackWebhookView
 
 drf_router = DefaultRouter()
 drf_router.register("categories", CategoryViewSet, basename="category")
@@ -35,6 +37,21 @@ urlpatterns = [
         "api/tickets/verify/<str:reference>/",
         TicketVerifyView.as_view(),
         name="ticket-verify",
+    ),
+    path(
+        "api/magazine-issues/<slug:slug>/checkout/",
+        MagazineCheckoutView.as_view(),
+        name="magazine-checkout",
+    ),
+    path(
+        "api/orders/verify/<str:reference>/",
+        OrderVerifyView.as_view(),
+        name="order-verify",
+    ),
+    path(
+        "api/orders/<str:reference>/download/",
+        DigitalDownloadView.as_view(),
+        name="order-download",
     ),
     path("api/webhooks/paystack/", PaystackWebhookView.as_view(), name="paystack-webhook"),
     path("api/", include(drf_router.urls)),

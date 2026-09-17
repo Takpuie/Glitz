@@ -135,3 +135,25 @@ export async function getBackendEvent(slug: string): Promise<BackendEvent | unde
   if (!res.ok) throw new Error(`Backend request failed: /api/events/${slug}/ (${res.status})`);
   return res.json();
 }
+
+export type BackendMagazineIssue = {
+  id: number;
+  title: string;
+  slug: string;
+  issue_number: string;
+  season: string;
+  description: string;
+  cover_image: { url: string; full_url: string; width: number; height: number } | null;
+  price: string;
+  is_digital_available: boolean;
+  is_print_available: boolean;
+  print_sold_out: boolean;
+  publish_date: string;
+  is_current_issue: boolean;
+};
+
+export async function getMagazineIssues(): Promise<BackendMagazineIssue[]> {
+  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/`, { next: { revalidate: 60 } });
+  if (!res.ok) throw new Error(`Backend request failed: /api/magazine-issues/ (${res.status})`);
+  return res.json();
+}

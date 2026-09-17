@@ -9,6 +9,9 @@ Framework, backing the Next.js frontend in the repo root.
   ticket creation with an atomic capacity check, a signature-verified
   Paystack webhook, and a verify-by-reference endpoint for the frontend's
   post-payment callback page.
+- **Phase 3 (Commerce)** — live Paystack checkout for magazine issues,
+  digital or print, with a gated digital-download link on payment
+  confirmation. Shares the webhook and Paystack client with Phase 2.
 
 ## Stack
 
@@ -121,6 +124,26 @@ support that.
   - `python manage.py release_stale_tickets` — cancels pending tickets
     older than 30 minutes so an abandoned checkout doesn't permanently
     hold a seat. Meant to run on a schedule (TechNE Cron Jobs).
+- **Magazine checkout** (`apps/magazine/checkout.py`) — same shape as
+  ticket checkout, one issue at a time:
+  - `POST /api/magazine-issues/<slug>/checkout/` — body
+    `{format: "digital"|"print", buyer_email, shipping_address}`
+    (`shipping_address` required for `print`). Validates the issue is
+    actually available in that format (`is_digital_available`,
+    `is_print_available` and not `print_sold_out`) before creating a
+    pending `Order` + `OrderItem` and opening a Paystack transaction.
+  - `GET /api/orders/verify/<reference>/` — same belt-and-braces pattern
+    as ticket verify.
+  - `GET /api/orders/<reference>/download/?email=...` — where a paid
+    digital order's `delivery_link` points, instead of the raw media
+    path: 403 unless the order is `paid` *and* the email matches, 404 if
+    no digital file has been uploaded for the issue yet.
+  - The Paystack webhook (`glitz_backend/webhooks.py`) is shared between
+    tickets and orders: it tries `mark_ticket_paid` first, then
+    `mark_order_paid`, keyed off whichever reference actually exists —
+    ticket and order references use different prefixes
+    (`<EVENT>-...` vs `MAG-...`) but the dispatch doesn't rely on that,
+    it just checks which one owns the reference.
 
 ## Frontend integration
 
@@ -144,13 +167,17 @@ existing page imports didn't need to change shape — only `await`ed.
 
 ## What's not built yet (later phases)
 
-- Paystack checkout for magazine orders (Phase 3 — ticket checkout is done)
-- Digital magazine delivery vs. print fulfillment (undecided in the plan)
 - Production deployment to TechNE (Dockerfile exists from the Wagtail
   scaffold; not yet adapted/tested against TechNE's VPS setup)
 - Auth-gated endpoints for the customer account area
 - Events hub (`/events`) and the other four event pages still read from
   the frontend's static `data/events.ts` — only GAFW is backend-wired,
   matching Phase 2's explicit scope
-- A real Paystack test key hasn't been used against this checkout (see
-  above) — the integration is verified up to the Paystack API call
+- Magazine subscriptions (the three plans on `/magazine`) are display-only
+  — not in the plan's data model, only single-issue purchases are wired
+- No real magazine PDF has been uploaded for any issue yet
+  (`MagazineIssue.digital_file` is empty), so a paid digital order's
+  `delivery_link` stays blank until one is uploaded via the Wagtail admin
+  — verified behavior (404 with a clear message), not a bug
+- A real Paystack test key hasn't been used against either checkout flow
+  (see above) — both are verified up to the Paystack API call
