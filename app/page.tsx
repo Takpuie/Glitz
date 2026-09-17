@@ -2,11 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import SectionHeading from "@/components/SectionHeading";
-import { articles } from "@/data/articles";
+import { getArticles } from "@/data/articles";
 import { events } from "@/data/events";
 import { editorialImage } from "@/lib/img";
 
-export default function Home() {
+export default async function Home() {
+  const articles = await getArticles();
   const [cover, ...allRest] = articles;
   const rest = allRest.slice(0, 7);
   const gafw = events[0];

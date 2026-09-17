@@ -1,12 +1,13 @@
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
-import { articles, CATEGORIES } from "@/data/articles";
+import { getArticles, CATEGORIES } from "@/data/articles";
 
-export default function ArticlesPage({
+export default async function ArticlesPage({
   searchParams,
 }: {
   searchParams: { category?: string };
 }) {
+  const articles = await getArticles();
   const active = searchParams.category;
   const filtered = active ? articles.filter((a) => a.category === active) : articles;
 

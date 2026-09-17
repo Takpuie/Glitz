@@ -2,23 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
-import { articles, getArticle, relatedArticles } from "@/data/articles";
+import { getArticles, getArticle, relatedArticles } from "@/data/articles";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const articles = await getArticles();
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = getArticle(params.slug);
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const article = await getArticle(params.slug);
   if (!article) return notFound();
-  const related = relatedArticles(article.slug);
-
-  const body = [
-    "It is easy to talk about African fashion as a single story — one continent, one aesthetic, one moment. Spend an afternoon on the trade tent floor and that story falls apart within minutes.",
-    "What emerges instead is closer to the truth: a hundred smaller stories, each with its own supply chain, its own client base, its own argument about what luxury means outside of Paris and Milan. This is the story Glitz Africa keeps returning to, issue after issue, event after event.",
-    "“We are not asking for a seat at someone else's table anymore,” one designer told us backstage, still pinning a hem minutes before doors opened. “We built our own table. Now we're deciding who sits where.”",
-    "That confidence is new, or at least newly visible — and it is exactly the shift this publication exists to document.",
-  ];
+  const related = await relatedArticles(article.slug);
+  const body = article.body;
 
   return (
     <article>
