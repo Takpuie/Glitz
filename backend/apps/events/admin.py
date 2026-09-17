@@ -9,11 +9,12 @@ class TicketAdmin(admin.ModelAdmin):
         "check_in_code",
         "event",
         "ticket_type",
+        "buyer_name",
         "buyer_email",
         "status",
         "checked_in_at",
         "created_at",
     )
     list_filter = ("status", "event")
-    search_fields = ("check_in_code", "buyer_email", "paystack_reference")
+    search_fields = ("check_in_code", "buyer_name", "buyer_email", "paystack_reference")
     readonly_fields = ("check_in_code", "paystack_reference", "created_at")

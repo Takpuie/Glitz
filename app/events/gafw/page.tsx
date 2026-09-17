@@ -1,11 +1,41 @@
 import Image from "next/image";
 import Link from "next/link";
-import { gafwGallery, gafwProgramme, gafwTickets, getEvent } from "@/data/events";
+import { notFound } from "next/navigation";
+import { gafwGallery, gafwProgramme, getEvent } from "@/data/events";
+import { getBackendEvent } from "@/lib/backend";
+import TicketSelector from "./TicketSelector";
 
 const sponsors = ["MTN", "Kempinski", "Vodafone", "Absa", "Fidelity Bank", "Delta Air Lines"];
 
-export default function GafwPage() {
-  const event = getEvent("gafw")!;
+const STATUS_LABELS: Record<string, string> = {
+  on_sale: "On sale",
+  applications_open: "Applications open",
+  save_the_date: "Save the date",
+  archived: "Archived",
+};
+
+function formatDateRange(start: string, end: string | null) {
+  const startDate = new Date(`${start}T00:00:00Z`);
+  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" };
+  if (!end || end === start) return startDate.toLocaleDateString("en-GB", opts);
+  const endDate = new Date(`${end}T00:00:00Z`);
+  const startDay = startDate.getUTCDate();
+  const endLabel = endDate.toLocaleDateString("en-GB", opts);
+  return `${startDay}–${endLabel}`;
+}
+
+function daysUntil(dateStr: string) {
+  const target = new Date(`${dateStr}T00:00:00Z`).getTime();
+  const now = Date.now();
+  return Math.max(Math.ceil((target - now) / (1000 * 60 * 60 * 24)), 0);
+}
+
+export default async function GafwPage() {
+  const event = await getBackendEvent("gafw");
+  if (!event) return notFound();
+
+  // Placeholder fallback (editorial copy not yet in the backend for these).
+  const staticFallback = getEvent("gafw")!;
 
   return (
     <div>
@@ -13,7 +43,8 @@ export default function GafwPage() {
       <section className="container-editorial grid grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
         <div>
           <p className="eyebrow mb-4">
-            {event.status} &middot; {event.dates} &middot; {event.venue}
+            {STATUS_LABELS[event.status] ?? event.status} &middot; {formatDateRange(event.start_date, event.end_date)}{" "}
+            &middot; {event.venue}
           </p>
           <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{event.name}</h1>
           <p className="mt-5 max-w-md text-base text-gray-600">{event.description}</p>
@@ -23,7 +54,15 @@ export default function GafwPage() {
           </div>
         </div>
         <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
-          <Image unoptimized src={event.image} alt={event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          <Image
+            unoptimized
+            src={event.cover_image?.full_url ?? staticFallback.image}
+            alt={event.name}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
         </div>
       </section>
 
@@ -31,7 +70,7 @@ export default function GafwPage() {
       <section className="hairline">
         <div className="container-editorial grid grid-cols-2 divide-x divide-ink/15 border-x border-ink/15 md:grid-cols-4">
           {[
-            { label: "Days", value: "64" },
+            { label: "Days", value: String(daysUntil(event.start_date)) },
             { label: "Designers", value: "20+" },
             { label: "Runway Shows", value: "4" },
             { label: "Trade Tents", value: "35" },
@@ -76,24 +115,7 @@ export default function GafwPage() {
             <p className="eyebrow mb-2">Ticketing</p>
             <h2 className="font-display text-4xl sm:text-5xl">Choose Your Access</h2>
           </div>
-          <div className="divide-y divide-ink/15 border-y border-ink/15">
-            {gafwTickets.map((t) => (
-              <div key={t.tier} className="flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="font-display text-xl">{t.tier}</h3>
-                  <p className="mt-1 max-w-md text-sm text-gray-600">{t.detail}</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <span className="font-nav text-sm tracking-wide">{t.price}</span>
-                  <button className="btn-outline">Select</button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-6 text-xs text-gray-500">
-            QR e-tickets issued instantly on purchase. Refunds and transfers available up to 7 days
-            before each date, per event policy.
-          </p>
+          <TicketSelector slug={event.slug} ticketTypes={event.ticket_types} />
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 from rest_framework import serializers, viewsets
 
+from apps.content.image_utils import rendition_dict
 from .models import MagazineIssue
 
 
@@ -27,8 +28,7 @@ class MagazineIssueSerializer(serializers.ModelSerializer):
     def get_cover_image(self, obj):
         if not obj.cover_image:
             return None
-        rendition = obj.cover_image.get_rendition("fill-1000x1300")
-        return {"url": rendition.url, "width": rendition.width, "height": rendition.height}
+        return rendition_dict(obj.cover_image.get_rendition("fill-1000x1300"))
 
 
 class MagazineIssueViewSet(viewsets.ReadOnlyModelViewSet):

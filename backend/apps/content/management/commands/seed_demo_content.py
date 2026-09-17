@@ -369,20 +369,44 @@ class Command(BaseCommand):
                 "cover_image": gafw_cover,
             },
         )
-        TicketType.objects.update_or_create(
-            event=event,
-            name="Runway — General",
-            defaults={"description": "Single-day mainstage runway access.", "price": 450, "capacity": 800},
-        )
-        TicketType.objects.update_or_create(
-            event=event,
-            name="Runway — VIP",
-            defaults={
+        ticket_tiers = [
+            {
+                "name": "Runway — General",
+                "description": "Single-day mainstage runway access, Day Three or Day Four.",
+                "price": 450,
+                "capacity": 800,
+            },
+            {
+                "name": "Runway — VIP",
                 "description": "Front-section seating, VIP reception access, gift bag.",
                 "price": 1200,
                 "capacity": 150,
             },
-        )
+            {
+                "name": "Trade Tents Pass",
+                "description": "All-access to exhibitions and trade tents, Days One & Two.",
+                "price": 150,
+                "capacity": 2000,
+            },
+            {
+                "name": "Full Festival Pass",
+                "description": "All four days, VIP runway seating, GAFW Village access.",
+                "price": 2800,
+                "capacity": 300,
+            },
+            {
+                "name": "Table of 10 — Finale Gala",
+                "description": "Reserved table, finale runway and closing gala, Day Four.",
+                "price": 18000,
+                "capacity": 20,
+            },
+        ]
+        for tier in ticket_tiers:
+            TicketType.objects.update_or_create(
+                event=event,
+                name=tier["name"],
+                defaults={"description": tier["description"], "price": tier["price"], "capacity": tier["capacity"]},
+            )
         self.stdout.write(self.style.SUCCESS(f"Event: {event.name} ({event.ticket_types.count()} ticket types)"))
 
         MagazineIssue.objects.update_or_create(

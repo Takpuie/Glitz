@@ -228,3 +228,7 @@ CORS_ALLOW_CREDENTIALS = True
 # handed to the frontend (via Next.js env, not this settings module).
 PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
 PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
+
+# Where Paystack redirects the browser after checkout, and where webhook
+# fulfillment sends the buyer — the Next.js origin.
+FRONTEND_BASE_URL = config("FRONTEND_BASE_URL", default="http://localhost:3000")

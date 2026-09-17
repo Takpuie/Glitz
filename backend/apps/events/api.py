@@ -1,5 +1,6 @@
 from rest_framework import serializers, viewsets
 
+from apps.content.image_utils import rendition_dict
 from apps.content.models import MediaAsset
 from .models import Event, TicketType
 
@@ -14,8 +15,7 @@ class GalleryItemSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if not obj.image:
             return None
-        rendition = obj.image.get_rendition("fill-1200x900")
-        return {"url": rendition.url, "width": rendition.width, "height": rendition.height}
+        return rendition_dict(obj.image.get_rendition("fill-1200x900"))
 
 
 class TicketTypeSerializer(serializers.ModelSerializer):
@@ -51,8 +51,7 @@ class EventSerializer(serializers.ModelSerializer):
     def get_cover_image(self, obj):
         if not obj.cover_image:
             return None
-        rendition = obj.cover_image.get_rendition("fill-1600x1000")
-        return {"url": rendition.url, "width": rendition.width, "height": rendition.height}
+        return rendition_dict(obj.cover_image.get_rendition("fill-1600x1000"))
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):

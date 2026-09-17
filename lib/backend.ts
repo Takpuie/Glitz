@@ -103,3 +103,35 @@ export async function relatedArticles(slug: string, count = 3): Promise<Article[
   const all = await getArticles();
   return all.filter((a) => a.slug !== slug).slice(0, count);
 }
+
+export type TicketTier = {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  capacity: number;
+  remaining: number;
+};
+
+export type BackendEvent = {
+  id: number;
+  name: string;
+  slug: string;
+  tagline: string;
+  description: string;
+  venue: string;
+  start_date: string;
+  end_date: string | null;
+  status: "on_sale" | "applications_open" | "save_the_date" | "archived";
+  cover_image: { url: string; full_url: string; width: number; height: number } | null;
+  ticket_types: TicketTier[];
+};
+
+export async function getBackendEvent(slug: string): Promise<BackendEvent | undefined> {
+  const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/`, {
+    next: { revalidate: 30 },
+  });
+  if (res.status === 404) return undefined;
+  if (!res.ok) throw new Error(`Backend request failed: /api/events/${slug}/ (${res.status})`);
+  return res.json();
+}

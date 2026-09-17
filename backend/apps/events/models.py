@@ -94,7 +94,11 @@ class TicketType(models.Model):
 
     @property
     def sold_count(self):
-        return self.tickets.filter(status=Ticket.Status.PAID).count()
+        # Counts pending tickets too, not just paid ones — a tier at its last
+        # few seats must not let two concurrent checkouts both "succeed" the
+        # capacity check while their payments are still in flight. Abandoned
+        # pending tickets are released by the release_stale_tickets command.
+        return self.tickets.filter(status__in=[Ticket.Status.PENDING, Ticket.Status.PAID]).count()
 
     @property
     def remaining(self):
@@ -119,8 +123,9 @@ class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
     ticket_type = models.ForeignKey(TicketType, on_delete=models.PROTECT, related_name="tickets")
     buyer = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="tickets"
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="tickets"
     )
+    buyer_name = models.CharField(max_length=150, blank=True)
     buyer_email = models.EmailField()
     paystack_reference = models.CharField(max_length=120, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
