@@ -1,8 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
 import { events } from "@/data/events";
+import { getBackendEvents } from "@/lib/backend";
 
-export default function EventsPage() {
+const STATUS_LABELS: Record<string, string> = {
+  on_sale: "On sale",
+  applications_open: "Applications open",
+  save_the_date: "Save the date",
+  archived: "Archived",
+};
+
+function formatDate(start: string, end: string | null) {
+  const startDate = new Date(`${start}T00:00:00Z`);
+  const formatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  if (!end || end === start) return formatter.format(startDate);
+  return `${formatter.format(startDate)} - ${formatter.format(new Date(`${end}T00:00:00Z`))}`;
+}
+
+export default async function EventsPage() {
+  const backendEvents = await getBackendEvents(events.map((event) => event.slug));
+  const eventList = events.map((fallback) => {
+    const backend = backendEvents.find((event) => event.slug === fallback.slug);
+    if (!backend) return { ...fallback, statusLabel: fallback.status };
+    return {
+      ...fallback,
+      ...backend,
+      dates: formatDate(backend.start_date, backend.end_date),
+      statusLabel: STATUS_LABELS[backend.status] ?? backend.status,
+      image: backend.cover_image?.full_url ?? fallback.image,
+    };
+  });
+
   return (
     <div>
       <header className="container-editorial border-b border-ink/15 py-12 md:py-16">
@@ -16,7 +44,7 @@ export default function EventsPage() {
       </header>
 
       <div>
-        {events.map((event, i) => (
+        {eventList.map((event, i) => (
           <Link
             key={event.slug}
             href={`/events/${event.slug}`}
@@ -35,7 +63,7 @@ export default function EventsPage() {
               </div>
               <div>
                 <p className="font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">
-                  {String(i + 1).padStart(2, "0")} &middot; {event.status}
+                  {String(i + 1).padStart(2, "0")} &middot; {event.statusLabel}
                 </p>
                 <h2 className="mt-3 font-display text-3xl leading-tight group-hover:underline underline-offset-4 sm:text-4xl">
                   {event.name}

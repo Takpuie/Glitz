@@ -136,6 +136,11 @@ export async function getBackendEvent(slug: string): Promise<BackendEvent | unde
   return res.json();
 }
 
+export async function getBackendEvents(slugs: string[]): Promise<BackendEvent[]> {
+  const results = await Promise.all(slugs.map((slug) => getBackendEvent(slug)));
+  return results.filter((event): event is BackendEvent => Boolean(event));
+}
+
 export type BackendMagazineIssue = {
   id: number;
   title: string;

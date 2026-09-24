@@ -1,6 +1,6 @@
 """Seeds enough real content to prove the pipeline end to end: categories,
-a Stories index page with the full article catalog, one live event (GAFW)
-with ticket types, and the current magazine issue. Safe to re-run — it
+a Stories index page with the full article catalog, the event catalog with
+ticket types for GAFW, and the current magazine issue. Safe to re-run — it
 updates in place rather than duplicating.
 
 Reuses the real GAFW / Female CEO Summit photography already approved for
@@ -34,6 +34,62 @@ def get_or_create_image(relative_path: str, title: str) -> Image | None:
 
 
 CATEGORIES = ["News", "Entertainment", "Fashion", "Hair & Beauty", "Lifestyle"]
+
+EVENTS = [
+    {
+        "slug": "gwoty",
+        "name": "Ghana Women of the Year Honours",
+        "tagline": "Honouring the women shaping Ghana.",
+        "description": "A black-tie honours evening recognising sixteen women across business, government, arts and advocacy — permanent profiles published for every honouree, every year.",
+        "venue": "Kempinski Hotel Gold Coast City, Accra",
+        "start_date": date(2026, 12, 6),
+        "end_date": None,
+        "status": Event.Status.APPLICATIONS_OPEN,
+        "image": ("female-ceo-summit/podium-red-dress.jpg", "GWOTY 2026 — podium portrait"),
+    },
+    {
+        "slug": "female-ceo-summit",
+        "name": "Ghana Female CEO Summit",
+        "tagline": "Where Ghana's women in leadership convene.",
+        "description": "A day of panels, workshops and closed-door roundtables for women leading companies across every sector in Ghana.",
+        "venue": "Mövenpick Ambassador Hotel, Accra",
+        "start_date": date(2027, 3, 18),
+        "end_date": None,
+        "status": Event.Status.SAVE_THE_DATE,
+        "image": ("female-ceo-summit/panel-trade-opportunities.jpg", "Female CEO Summit — trade opportunities panel"),
+    },
+    {
+        "slug": "sheboss-global",
+        "name": "SheBoss Global",
+        "tagline": "Entrepreneurship, scaled beyond borders.",
+        "description": "Glitz Africa's founder-focused summit expands to Lagos — bringing SheBoss Global's mentorship, capital and community programming to a second market.",
+        "venue": "Lagos, Nigeria",
+        "start_date": date(2027, 4, 1),
+        "end_date": None,
+        "status": Event.Status.SAVE_THE_DATE,
+        "image": ("female-ceo-summit/podium-speaker.jpg", "SheBoss Global — keynote speaker"),
+    },
+    {
+        "slug": "style-awards",
+        "name": "Glitz Style Awards",
+        "tagline": "Africa's night of the best-dressed.",
+        "description": "The definitive celebration of style across fashion, entertainment and culture, with categories voted on by readers and a panel of editors.",
+        "venue": "Accra",
+        "start_date": date(2027, 8, 1),
+        "end_date": None,
+        "status": Event.Status.SAVE_THE_DATE,
+        "image": ("gafw/look-yellow-fringe.jpg", "Glitz Style Awards — runway look"),
+    },
+]
+
+DEFAULT_ARTICLE_IMAGES = [
+    ("gafw/look-yellow-fringe.jpg", "Editorial image — yellow fringe look"),
+    ("gafw/look-red-rope-belt.jpg", "Editorial image — red rope belt look"),
+    ("gafw/look-menswear-necklace.jpg", "Editorial image — menswear necklace look"),
+    ("gafw/accessory-crossbody-bag.jpg", "Editorial image — crossbody bag"),
+    ("gafw/accessory-beaded-backpack.jpg", "Editorial image — beaded backpack"),
+    ("female-ceo-summit/podium-speaker.jpg", "Editorial image — keynote speaker"),
+]
 
 POSTS = [
     {
@@ -297,7 +353,7 @@ POSTS = [
 
 
 class Command(BaseCommand):
-    help = "Seed categories, the full article catalog, the GAFW event, and the current magazine issue."
+    help = "Seed categories, editable articles and events, and the current magazine issue."
 
     def handle(self, *args, **options):
         categories = {}
@@ -315,12 +371,12 @@ class Command(BaseCommand):
             index_page.save_revision().publish()
         self.stdout.write(self.style.SUCCESS(f"Post index page: {index_page.url_path}"))
 
-        for data in POSTS:
+        for index, data in enumerate(POSTS):
             post = Post.objects.filter(slug=data["slug"]).first()
             cover_image = None
-            if data["image"]:
-                rel_path, image_title = data["image"]
-                cover_image = get_or_create_image(rel_path, image_title)
+            image_spec = data["image"] or DEFAULT_ARTICLE_IMAGES[index % len(DEFAULT_ARTICLE_IMAGES)]
+            rel_path, image_title = image_spec
+            cover_image = get_or_create_image(rel_path, image_title)
 
             body = [{"type": "paragraph", "value": p} for p in data["body"]]
 
@@ -408,6 +464,14 @@ class Command(BaseCommand):
                 defaults={"description": tier["description"], "price": tier["price"], "capacity": tier["capacity"]},
             )
         self.stdout.write(self.style.SUCCESS(f"Event: {event.name} ({event.ticket_types.count()} ticket types)"))
+
+        for data in EVENTS:
+            rel_path, image_title = data["image"]
+            cover_image = get_or_create_image(rel_path, image_title)
+            defaults = {key: value for key, value in data.items() if key not in {"slug", "image"}}
+            defaults["cover_image"] = cover_image
+            event, _ = Event.objects.update_or_create(slug=data["slug"], defaults=defaults)
+            self.stdout.write(self.style.SUCCESS(f"Event: {event.name}"))
 
         issues = [
             {
