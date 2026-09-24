@@ -82,9 +82,6 @@ class Order(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total, in GHS.")
     stripe_session_id = models.CharField(max_length=120, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    delivery_link = models.URLField(
-        blank=True, help_text="Signed digital-download link, set once payment is confirmed."
-    )
     shipping_address = models.TextField(blank=True, help_text="Required only for print items.")
     created_at = models.DateTimeField(auto_now_add=True)
 

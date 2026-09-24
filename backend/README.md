@@ -81,8 +81,8 @@ placeholder values.
 
 **Checkout needs a real Stripe secret key to actually complete a payment.**
 Without one (the local default), `POST /api/events/<slug>/checkout/` and
-`POST /api/magazine-issues/<slug>/checkout/` still create the pending
-Ticket/Order and enforce capacity/availability correctly, but fail at the
+`POST /api/magazine/checkout/` still create the pending Ticket/Order and
+enforce capacity/availability correctly, but fail at the
 Stripe API call with a clear `STRIPE_SECRET_KEY is not configured` error
 and mark the row cancelled/failed — verified behavior, not a guess. Get a
 free test secret key from the Stripe Dashboard and set it (plus
@@ -143,20 +143,23 @@ support that.
   - `python manage.py release_stale_tickets` — cancels pending tickets
     older than 30 minutes so an abandoned checkout doesn't permanently
     hold a seat. Meant to run on a schedule (TechNE Cron Jobs).
-- **Magazine checkout** (`apps/magazine/checkout.py`) — same shape as
-  ticket checkout, one issue at a time:
-  - `POST /api/magazine-issues/<slug>/checkout/` — body
-    `{format: "digital"|"print", buyer_email, shipping_address}`
-    (`shipping_address` required for `print`). Validates the issue is
-    actually available in that format (`is_digital_available`,
-    `is_print_available` and not `print_sold_out`) before creating a
-    pending `Order` + `OrderItem` and opening a Stripe Checkout Session.
+- **Magazine checkout** (`apps/magazine/checkout.py`) — cart-based, one
+  Order can cover several issues:
+  - `POST /api/magazine/checkout/` — body `{items: [{slug, format,
+    quantity}], buyer_email, shipping_address}` (`shipping_address`
+    required if any item is `print`). Validates each item's availability
+    (`is_digital_available`, `is_print_available` and not
+    `print_sold_out`) before creating one pending `Order` with one
+    `OrderItem` per cart line and opening a single Stripe Checkout
+    Session with one line item per cart line.
   - `GET /api/orders/verify/<reference>/` — same belt-and-braces pattern
-    as ticket verify.
-  - `GET /api/orders/<reference>/download/?email=...` — where a paid
-    digital order's `delivery_link` points, instead of the raw media
-    path: 403 unless the order is `paid` *and* the email matches, 404 if
-    no digital file has been uploaded for the issue yet.
+    as ticket verify; returns the order with its full `items` list, each
+    carrying a `download_url` once paid (digital items with a file only).
+  - `GET /api/orders/<reference>/download/?email=...&issue=<slug>` —
+    where each digital `OrderItem`'s `download_url` points, instead of
+    the raw media path: 403 unless the order is `paid` *and* the email
+    matches, 404 if that issue isn't a digital item on this order or has
+    no file uploaded yet.
   - The Stripe webhook (`glitz_backend/webhooks.py`) is shared between
     tickets and orders: on `checkout.session.completed` it tries
     `mark_ticket_paid` first, then `mark_order_paid`, keyed off the
@@ -170,6 +173,13 @@ The Next.js app (`../lib/backend.ts`) fetches from this API as Server
 Components, using `BACKEND_API_URL` (see `../.env.local`, defaults to
 `http://localhost:8000`). `data/articles.ts` re-exports that client so
 existing page imports didn't need to change shape — only `await`ed.
+
+`../lib/cart-context.tsx` is a real shopping cart (add/remove/quantity),
+client-side and `localStorage`-backed — there's no customer account
+system yet, so the cart is guest-only and doesn't survive a device
+switch. `/cart` posts the whole cart in one call to
+`POST /api/magazine/checkout/` and is cleared once the post-payment
+callback page confirms the order is paid.
 
 ## Deployment (TechNE)
 

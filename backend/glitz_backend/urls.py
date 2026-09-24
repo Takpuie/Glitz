@@ -39,7 +39,7 @@ urlpatterns = [
         name="ticket-verify",
     ),
     path(
-        "api/magazine-issues/<slug:slug>/checkout/",
+        "api/magazine/checkout/",
         MagazineCheckoutView.as_view(),
         name="magazine-checkout",
     ),

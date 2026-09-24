@@ -4,16 +4,16 @@ const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
-  const { slug, format, buyer_email, shipping_address } = body ?? {};
+  const { items, buyer_email, shipping_address } = body ?? {};
 
-  if (!slug || !format || !buyer_email) {
+  if (!Array.isArray(items) || items.length === 0 || !buyer_email) {
     return NextResponse.json({ detail: "Missing required fields." }, { status: 400 });
   }
 
-  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/${encodeURIComponent(slug)}/checkout/`, {
+  const res = await fetch(`${BACKEND_URL}/api/magazine/checkout/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ format, buyer_email, shipping_address }),
+    body: JSON.stringify({ items, buyer_email, shipping_address }),
     cache: "no-store",
   });
   const data = await res.json();

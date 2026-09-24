@@ -1,18 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCart } from "@/lib/cart-context";
+
+type OrderItem = {
+  issue_title: string;
+  issue_slug: string;
+  format: "digital" | "print";
+  quantity: number;
+  unit_price: string;
+  download_url: string | null;
+};
 
 type OrderStatus = {
   stripe_session_id: string;
   status: "pending" | "paid" | "failed" | "refunded";
   email: string;
   amount: string;
-  delivery_link: string;
-  issue_title: string;
-  format: "digital" | "print";
+  items: OrderItem[];
 };
 
 export default function OrderStatus({ reference }: { reference: string }) {
+  const { clearCart } = useCart();
   const [order, setOrder] = useState<OrderStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -40,6 +49,11 @@ export default function OrderStatus({ reference }: { reference: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reference]);
 
+  useEffect(() => {
+    if (order?.status === "paid") clearCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.status]);
+
   if (loading) {
     return (
       <>
@@ -63,28 +77,40 @@ export default function OrderStatus({ reference }: { reference: string }) {
   }
 
   if (order.status === "paid") {
+    const hasPrint = order.items.some((i) => i.format === "print");
     return (
       <>
         <p className="eyebrow mb-3">Confirmed</p>
         <h1 className="font-display text-4xl">Thank you for your order.</h1>
-        <p className="mt-4 text-sm text-gray-600">
-          {order.issue_title} — {order.format === "print" ? "Print edition" : "Digital edition"}. A
-          confirmation has been sent to {order.email}.
-        </p>
-        {order.format === "digital" &&
-          (order.delivery_link ? (
-            <a href={order.delivery_link} className="btn-primary mt-8 inline-flex">
-              Download Your Issue
-            </a>
-          ) : (
-            <p className="mt-8 text-sm text-gray-600">
-              Your digital download link will be emailed to you shortly.
-            </p>
+        <p className="mt-4 text-sm text-gray-600">A confirmation has been sent to {order.email}.</p>
+
+        <div className="mt-8 space-y-4 text-left">
+          {order.items.map((item) => (
+            <div
+              key={`${item.issue_slug}-${item.format}`}
+              className="flex items-center justify-between border-b border-ink/12 pb-4"
+            >
+              <div>
+                <p className="font-display text-base">{item.issue_title}</p>
+                <p className="mt-1 font-nav text-[10px] uppercase tracking-widest2 text-gray-500">
+                  {item.format} &middot; Qty {item.quantity}
+                </p>
+              </div>
+              {item.download_url ? (
+                <a href={item.download_url} className="btn-outline">
+                  Download
+                </a>
+              ) : item.format === "digital" ? (
+                <p className="text-xs text-gray-500">Link emailed shortly</p>
+              ) : null}
+            </div>
           ))}
-        {order.format === "print" && (
-          <p className="mt-8 text-sm text-gray-600">
-            Your copy ships to the address you provided — we&apos;ll email tracking once it&apos;s on
-            its way.
+        </div>
+
+        {hasPrint && (
+          <p className="mt-6 text-sm text-gray-600">
+            Print copies ship to the address you provided — we&apos;ll email tracking once they&apos;re
+            on the way.
           </p>
         )}
       </>

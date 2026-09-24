@@ -17,12 +17,14 @@ def _configure():
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def create_checkout_session(
-    *, email, amount_minor_units, currency, product_name, success_url, cancel_url, metadata=None
-):
-    """Creates a Stripe Checkout Session for a single line item and returns
-    it. `session.id` is what we store as our own reference — Stripe
-    generates it, we don't get to pick it the way Paystack let us."""
+def create_checkout_session(*, email, currency, line_items, success_url, cancel_url, metadata=None):
+    """Creates a Stripe Checkout Session and returns it. `session.id` is
+    what we store as our own reference — Stripe generates it, we don't get
+    to pick it the way Paystack let us.
+
+    `line_items` is our own simplified shape: a list of
+    {name, unit_amount, quantity} — one per cart line — translated here
+    into Stripe's price_data structure so callers don't need to know it."""
     _configure()
     try:
         return stripe.checkout.Session.create(
@@ -33,11 +35,12 @@ def create_checkout_session(
                 {
                     "price_data": {
                         "currency": currency,
-                        "unit_amount": amount_minor_units,
-                        "product_data": {"name": product_name},
+                        "unit_amount": item["unit_amount"],
+                        "product_data": {"name": item["name"]},
                     },
-                    "quantity": 1,
+                    "quantity": item["quantity"],
                 }
+                for item in line_items
             ],
             success_url=success_url,
             cancel_url=cancel_url,

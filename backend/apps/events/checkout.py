@@ -84,9 +84,14 @@ class TicketCheckoutView(APIView):
         try:
             session = create_checkout_session(
                 email=data["buyer_email"],
-                amount_minor_units=int(ticket_type.price * 100),
                 currency="ghs",
-                product_name=f"{event.name} — {ticket_type.name}",
+                line_items=[
+                    {
+                        "name": f"{event.name} — {ticket_type.name}",
+                        "unit_amount": int(ticket_type.price * 100),
+                        "quantity": 1,
+                    }
+                ],
                 success_url=f"{callback_url}?reference={{CHECKOUT_SESSION_ID}}",
                 cancel_url=f"{settings.FRONTEND_BASE_URL}/events/{event.slug}",
                 metadata={"ticket_id": ticket.id, "event_slug": event.slug},

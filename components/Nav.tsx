@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useCart } from "@/lib/cart-context";
 
 const PRIMARY_LINKS = [
   { label: "Home", href: "/" },
@@ -17,6 +18,7 @@ const PRIMARY_LINKS = [
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const { count } = useCart();
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -61,8 +63,13 @@ export default function Nav() {
             <button aria-label="Search" className="flex h-[18px] w-[18px] items-center justify-center">
               <SearchIcon />
             </button>
-            <Link href="/cart" aria-label="Your bag" className="flex h-[18px] w-[18px] items-center justify-center">
+            <Link href="/cart" aria-label="Your bag" className="relative flex h-[18px] w-[18px] items-center justify-center">
               <BagIcon />
+              {count > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-ink px-[3px] font-nav text-[9px] leading-none text-paper">
+                  {count}
+                </span>
+              )}
             </Link>
           </div>
         </div>
