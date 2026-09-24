@@ -110,7 +110,7 @@ def generate_check_in_code():
 
 
 class Ticket(models.Model):
-    """A ticket / event registration. `status` tracks the Paystack payment
+    """A ticket / event registration. `status` tracks the Stripe payment
     lifecycle; `check_in_code` is issued once and scanned at the door.
     """
 
@@ -127,7 +127,7 @@ class Ticket(models.Model):
     )
     buyer_name = models.CharField(max_length=150, blank=True)
     buyer_email = models.EmailField()
-    paystack_reference = models.CharField(max_length=120, unique=True, null=True, blank=True)
+    stripe_session_id = models.CharField(max_length=120, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     check_in_code = models.CharField(
         max_length=16, unique=True, default=generate_check_in_code, editable=False

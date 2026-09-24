@@ -45,7 +45,7 @@ export default function MagazineCheckout({
         setLoading(false);
         return;
       }
-      window.location.href = data.authorization_url;
+      window.location.href = data.checkout_url;
     } catch {
       setError("Network error — please try again.");
       setLoading(false);

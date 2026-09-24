@@ -224,11 +224,17 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
 
-# Paystack — secret key never leaves the backend; only the public key is
-# handed to the frontend (via Next.js env, not this settings module).
-PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
-PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
+# Stripe — the secret key never leaves the backend; only the publishable
+# key is meant for the frontend (via Next.js env, not this settings
+# module — Stripe Checkout is a hosted page, so the frontend doesn't
+# currently need it at all, but it's here for a future Elements-based flow).
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+# Signing secret for the /api/webhooks/stripe/ endpoint (from the Stripe
+# Dashboard or `stripe listen` in development) — distinct from the API
+# secret key, used only to verify webhook payloads are really from Stripe.
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
 
-# Where Paystack redirects the browser after checkout, and where webhook
+# Where Stripe redirects the browser after checkout, and where webhook
 # fulfillment sends the buyer — the Next.js origin.
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL", default="http://localhost:3000")

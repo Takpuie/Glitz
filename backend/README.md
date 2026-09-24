@@ -5,13 +5,17 @@ Framework, backing the Next.js frontend in the repo root.
 
 - **Phase 1 (Foundation)** — CMS-driven articles, events, and magazine
   issues, all served as JSON.
-- **Phase 2 (Events)** — live Paystack ticket checkout for GAFW: pending
+- **Phase 2 (Events)** — live Stripe Checkout for GAFW tickets: pending
   ticket creation with an atomic capacity check, a signature-verified
-  Paystack webhook, and a verify-by-reference endpoint for the frontend's
+  Stripe webhook, and a verify-by-session endpoint for the frontend's
   post-payment callback page.
-- **Phase 3 (Commerce)** — live Paystack checkout for magazine issues,
+- **Phase 3 (Commerce)** — live Stripe Checkout for magazine issues,
   digital or print, with a gated digital-download link on payment
-  confirmation. Shares the webhook and Paystack client with Phase 2.
+  confirmation. Shares the webhook and Stripe client with Phase 2.
+- Originally built against Paystack (the build plan's choice, for its
+  flat 1.95% fee and Ghana-market fit) and switched to Stripe on request.
+  The switch is a straight swap of the payment layer — capacity checks,
+  fulfillment, and the webhook dispatch pattern are unchanged.
 - **Phase 4 (Polish & buffer)** — deploy-readiness checks, dependency
   audits, an N+1 query fix, and the FastCGI deployment finding below.
   What this phase *couldn't* cover from a dev sandbox: a real load test
@@ -66,20 +70,25 @@ See `.env.example` for the full list. Notable ones:
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Postgres connection |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated; the Next.js origin(s) only — never `*` |
 | `WAGTAILADMIN_BASE_URL` | Used to build absolute image URLs returned by the API |
-| `PAYSTACK_SECRET_KEY` / `PAYSTACK_PUBLIC_KEY` | Empty locally; only the public key ever reaches the frontend |
-| `FRONTEND_BASE_URL` | The Next.js origin — used to build the Paystack `callback_url` |
+| `STRIPE_SECRET_KEY` | Empty locally; never reaches the frontend |
+| `STRIPE_PUBLISHABLE_KEY` | Not currently used (Stripe Checkout is a hosted page) — reserved for a future Elements-based flow |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret for `/api/webhooks/stripe/`, from the Stripe Dashboard or `stripe listen` in development |
+| `FRONTEND_BASE_URL` | The Next.js origin — used to build Stripe Checkout's `success_url`/`cancel_url` |
 
 Production secrets are entered directly into TechNE's config panel, never
 committed — `backend/.env` is gitignored and `.env.example` holds only
 placeholder values.
 
-**Ticket checkout needs a real Paystack secret key to actually complete a
-payment.** Without one (the local default), `POST /api/events/<slug>/checkout/`
-still creates the pending ticket and enforces capacity correctly, but fails
-at the Paystack API call with a clear `PAYSTACK_SECRET_KEY is not configured`
-error and cancels the ticket — verified behavior, not a guess. Get a free
-test secret key from the Paystack dashboard and set it in `.env` to test a
-real checkout end to end (use Paystack's test-mode card numbers).
+**Checkout needs a real Stripe secret key to actually complete a payment.**
+Without one (the local default), `POST /api/events/<slug>/checkout/` and
+`POST /api/magazine-issues/<slug>/checkout/` still create the pending
+Ticket/Order and enforce capacity/availability correctly, but fail at the
+Stripe API call with a clear `STRIPE_SECRET_KEY is not configured` error
+and mark the row cancelled/failed — verified behavior, not a guess. Get a
+free test secret key from the Stripe Dashboard and set it (plus
+`STRIPE_WEBHOOK_SECRET`, from `stripe listen --forward-to
+localhost:8000/api/webhooks/stripe/`) in `.env` to test a real checkout
+end to end with Stripe's test-mode card numbers.
 
 ## Data model
 
@@ -89,7 +98,7 @@ real checkout end to end (use Paystack's test-mode card numbers).
   (parent page for the article tree), `MediaAsset` (gallery image/video,
   belongs to a `Post` or an `Event`)
 - **`apps.events`** — `Event` (snippet, with ticket types + gallery inline),
-  `TicketType`, `Ticket` (buyer, Paystack reference, check-in code)
+  `TicketType`, `Ticket` (buyer, Stripe session id, check-in code)
 - **`apps.magazine`** — `MagazineIssue`, `Order`, `OrderItem` (issue
   purchases, digital and/or print)
 
@@ -115,18 +124,22 @@ support that.
   - `POST /api/events/<slug>/checkout/` — body `{ticket_type_id, buyer_name,
     buyer_email}`. Creates a `Ticket` (status `pending`) inside a
     `select_for_update()` transaction so two concurrent buyers can't both
-    pass the capacity check for the last seat, then opens a Paystack
-    transaction and returns `{reference, authorization_url}` for the
-    browser to redirect to. `TicketType.remaining` counts pending *and*
-    paid tickets against capacity — see `release_stale_tickets` below.
-  - `POST /api/webhooks/paystack/` — the source of truth for payment
-    confirmation. Verifies `X-Paystack-Signature` (HMAC-SHA512 over the
-    raw body) before trusting anything in the payload; marks the ticket
-    `paid` on `charge.success`.
+    pass the capacity check for the last seat, then opens a Stripe
+    Checkout Session and returns `{reference, checkout_url}` — `reference`
+    is Stripe's own session id (`cs_test_...`/`cs_live_...`; unlike
+    Paystack, Stripe generates this, we don't get to pick it), stored on
+    the Ticket once the session exists. `TicketType.remaining` counts
+    pending *and* paid tickets against capacity — see
+    `release_stale_tickets` below.
+  - `POST /api/webhooks/stripe/` — the source of truth for payment
+    confirmation. Verifies the `Stripe-Signature` header via the Stripe
+    SDK's `Webhook.construct_event` before trusting anything in the
+    payload; marks the ticket `paid` on `checkout.session.completed`.
   - `GET /api/tickets/verify/<reference>/` — used by the frontend's
-    post-redirect callback page. If the ticket is still `pending`, it
-    re-checks directly with Paystack (belt-and-braces in case the webhook
-    is slow or missed) before returning status.
+    post-redirect callback page (`reference` is the Stripe session id).
+    If the ticket is still `pending`, it re-checks directly with Stripe
+    (belt-and-braces in case the webhook is slow or missed) before
+    returning status.
   - `python manage.py release_stale_tickets` — cancels pending tickets
     older than 30 minutes so an abandoned checkout doesn't permanently
     hold a seat. Meant to run on a schedule (TechNE Cron Jobs).
@@ -137,19 +150,19 @@ support that.
     (`shipping_address` required for `print`). Validates the issue is
     actually available in that format (`is_digital_available`,
     `is_print_available` and not `print_sold_out`) before creating a
-    pending `Order` + `OrderItem` and opening a Paystack transaction.
+    pending `Order` + `OrderItem` and opening a Stripe Checkout Session.
   - `GET /api/orders/verify/<reference>/` — same belt-and-braces pattern
     as ticket verify.
   - `GET /api/orders/<reference>/download/?email=...` — where a paid
     digital order's `delivery_link` points, instead of the raw media
     path: 403 unless the order is `paid` *and* the email matches, 404 if
     no digital file has been uploaded for the issue yet.
-  - The Paystack webhook (`glitz_backend/webhooks.py`) is shared between
-    tickets and orders: it tries `mark_ticket_paid` first, then
-    `mark_order_paid`, keyed off whichever reference actually exists —
-    ticket and order references use different prefixes
-    (`<EVENT>-...` vs `MAG-...`) but the dispatch doesn't rely on that,
-    it just checks which one owns the reference.
+  - The Stripe webhook (`glitz_backend/webhooks.py`) is shared between
+    tickets and orders: on `checkout.session.completed` it tries
+    `mark_ticket_paid` first, then `mark_order_paid`, keyed off the
+    Stripe session id — each function reports whether that session id
+    belongs to it, so the shared dispatcher doesn't need to know
+    anything about which domain owns which session ahead of time.
 
 ## Frontend integration
 
@@ -199,8 +212,8 @@ To deploy:
 - HTTPS enforced in production (`SECURE_SSL_REDIRECT`, HSTS) — see
   `glitz_backend/settings/production.py`
 - CORS restricted to the Next.js origin(s), credentials allowed, never `*`
-- Paystack webhook signatures are verified before marking a ticket paid
-  (`PaystackWebhookView`) — the secret key never reaches the frontend
+- Stripe webhook signatures are verified before marking a ticket/order
+  paid (`StripeWebhookView`) — the secret key never reaches the frontend
 - All write endpoints go through DRF serializers for validation
 - Upload size is capped (`WAGTAILIMAGES_MAX_UPLOAD_SIZE`,
   `WAGTAILDOCS_MAX_UPLOAD_SIZE`)
@@ -226,8 +239,10 @@ To deploy:
 ## Deployment: what's proven vs. what isn't
 
 **Proven from this dev sandbox:**
-- The full request path (Wagtail API, DRF endpoints, both Paystack
-  checkout flows, the shared webhook) against production Django settings
+- The full request path (Wagtail API, DRF endpoints, both Stripe checkout
+  flows, the shared webhook — including a real signature-verified
+  `checkout.session.completed` dispatched through to both a Ticket and an
+  Order from the same endpoint) against production Django settings
 - `index.fcgi` correctly bridges FastCGI to Django's WSGI app via
   `flup6`, verified by speaking raw FastCGI protocol to a running
   instance and getting real API responses back — see "Deployment
@@ -257,8 +272,8 @@ To deploy:
   (`MagazineIssue.digital_file` is empty), so a paid digital order's
   `delivery_link` stays blank until one is uploaded via the Wagtail admin
   — verified behavior (404 with a clear message), not a bug
-- A real Paystack test key hasn't been used against either checkout flow
-  — both are verified up to the Paystack API call
+- A real Stripe test key hasn't been used against either checkout flow —
+  both are verified up to the Stripe API call
 - GAFW's day-by-day programme and the runway gallery are still static
   frontend content, not modeled in the backend (not part of any phase's
   explicit data-model scope so far)

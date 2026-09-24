@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type OrderStatus = {
-  paystack_reference: string;
+  stripe_session_id: string;
   status: "pending" | "paid" | "failed" | "refunded";
   email: string;
   amount: string;

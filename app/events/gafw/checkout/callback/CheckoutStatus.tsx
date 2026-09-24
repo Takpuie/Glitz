@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type TicketStatus = {
-  paystack_reference: string;
+  stripe_session_id: string;
   status: "pending" | "paid" | "cancelled" | "refunded";
   check_in_code: string;
   buyer_name: string;

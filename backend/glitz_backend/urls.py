@@ -15,7 +15,7 @@ from apps.magazine.checkout import DigitalDownloadView, MagazineCheckoutView, Or
 from search import views as search_views
 
 from .api import api_router
-from .webhooks import PaystackWebhookView
+from .webhooks import StripeWebhookView
 
 drf_router = DefaultRouter()
 drf_router.register("categories", CategoryViewSet, basename="category")
@@ -53,7 +53,7 @@ urlpatterns = [
         DigitalDownloadView.as_view(),
         name="order-download",
     ),
-    path("api/webhooks/paystack/", PaystackWebhookView.as_view(), name="paystack-webhook"),
+    path("api/webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
     path("api/", include(drf_router.urls)),
 ]
 

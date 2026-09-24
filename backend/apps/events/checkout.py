@@ -1,10 +1,8 @@
-"""Ticket checkout: create a pending Ticket, open a Paystack transaction,
-and the two ways a ticket gets marked paid — the webhook (source of truth,
-see glitz_backend/webhooks.py) and the frontend's post-redirect verify call
-(belt-and-braces, idempotent).
+"""Ticket checkout: create a pending Ticket, open a Stripe Checkout
+Session, and the two ways a ticket gets marked paid — the webhook (source
+of truth, see glitz_backend/webhooks.py) and the frontend's post-redirect
+verify call (belt-and-braces, idempotent).
 """
-
-import uuid
 
 from django.conf import settings
 from django.db import transaction
@@ -13,7 +11,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from glitz_backend.paystack import PaystackError, initialize_transaction, verify_transaction
+from glitz_backend.stripe_client import StripeError, create_checkout_session, retrieve_checkout_session
 from .models import Event, Ticket, TicketType
 
 
@@ -24,7 +22,7 @@ class TicketStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = [
-            "paystack_reference",
+            "stripe_session_id",
             "status",
             "check_in_code",
             "buyer_name",
@@ -40,12 +38,12 @@ class TicketCheckoutSerializer(serializers.Serializer):
     buyer_email = serializers.EmailField()
 
 
-def mark_ticket_paid(reference):
+def mark_ticket_paid(session_id):
     """Idempotent — used by both the webhook and the verify-on-callback
-    path. Returns True if this reference belongs to a Ticket at all (paid
+    path. Returns True if this session id belongs to a Ticket at all (paid
     or not), so the shared webhook knows not to also check Order — a
     duplicate webhook delivery must not be mistaken for "not mine"."""
-    ticket = Ticket.objects.filter(paystack_reference=reference).first()
+    ticket = Ticket.objects.filter(stripe_session_id=session_id).first()
     if not ticket:
         return False
     if ticket.status == Ticket.Status.PENDING:
@@ -56,7 +54,7 @@ def mark_ticket_paid(reference):
 
 class TicketCheckoutView(APIView):
     """POST /api/events/<slug>/checkout/ — creates a pending Ticket and
-    returns a Paystack authorization_url for the browser to redirect to."""
+    returns a Stripe Checkout Session url for the browser to redirect to."""
 
     permission_classes = []
     authentication_classes = []
@@ -74,52 +72,52 @@ class TicketCheckoutView(APIView):
             if ticket_type.remaining <= 0:
                 return Response({"detail": "This ticket tier is sold out."}, status=409)
 
-            reference = f"{event.slug.upper()}-{uuid.uuid4().hex[:10].upper()}"
             ticket = Ticket.objects.create(
                 event=event,
                 ticket_type=ticket_type,
                 buyer_name=data["buyer_name"],
                 buyer_email=data["buyer_email"],
-                paystack_reference=reference,
                 status=Ticket.Status.PENDING,
             )
 
         callback_url = f"{settings.FRONTEND_BASE_URL}/events/{event.slug}/checkout/callback"
         try:
-            init_data = initialize_transaction(
+            session = create_checkout_session(
                 email=data["buyer_email"],
-                amount_kobo=int(ticket_type.price * 100),
-                reference=reference,
-                callback_url=f"{callback_url}?reference={reference}",
+                amount_minor_units=int(ticket_type.price * 100),
+                currency="ghs",
+                product_name=f"{event.name} — {ticket_type.name}",
+                success_url=f"{callback_url}?reference={{CHECKOUT_SESSION_ID}}",
+                cancel_url=f"{settings.FRONTEND_BASE_URL}/events/{event.slug}",
                 metadata={"ticket_id": ticket.id, "event_slug": event.slug},
             )
-        except PaystackError as exc:
+        except StripeError as exc:
             ticket.status = Ticket.Status.CANCELLED
             ticket.save(update_fields=["status"])
             return Response({"detail": str(exc)}, status=502)
 
-        return Response(
-            {"reference": reference, "authorization_url": init_data["authorization_url"]},
-            status=201,
-        )
+        ticket.stripe_session_id = session.id
+        ticket.save(update_fields=["stripe_session_id"])
+
+        return Response({"reference": session.id, "checkout_url": session.url}, status=201)
 
 
 class TicketVerifyView(APIView):
     """GET /api/tickets/verify/<reference>/ — used by the checkout callback
-    page. Re-checks with Paystack directly if the ticket is still pending,
-    so a slow or missed webhook doesn't strand the buyer on a spinner."""
+    page. Re-checks with Stripe directly if the ticket is still pending, so
+    a slow or missed webhook doesn't strand the buyer on a spinner."""
 
     permission_classes = []
     authentication_classes = []
 
     def get(self, request, reference):
-        ticket = get_object_or_404(Ticket, paystack_reference=reference)
+        ticket = get_object_or_404(Ticket, stripe_session_id=reference)
         if ticket.status == Ticket.Status.PENDING:
             try:
-                result = verify_transaction(reference)
-            except PaystackError:
-                result = None
-            if result and result.get("status") == "success":
+                session = retrieve_checkout_session(reference)
+            except StripeError:
+                session = None
+            if session and session.payment_status == "paid":
                 mark_ticket_paid(reference)
                 ticket.refresh_from_db()
         return Response(TicketStatusSerializer(ticket).data)

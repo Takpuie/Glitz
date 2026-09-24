@@ -80,7 +80,7 @@ class Order(models.Model):
     )
     email = models.EmailField(help_text="Captured even for guest checkout.")
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total, in GHS.")
-    paystack_reference = models.CharField(max_length=120, unique=True, null=True, blank=True)
+    stripe_session_id = models.CharField(max_length=120, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     delivery_link = models.URLField(
         blank=True, help_text="Signed digital-download link, set once payment is confirmed."
