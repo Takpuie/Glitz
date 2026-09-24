@@ -12,6 +12,12 @@ Framework, backing the Next.js frontend in the repo root.
 - **Phase 3 (Commerce)** — live Paystack checkout for magazine issues,
   digital or print, with a gated digital-download link on payment
   confirmation. Shares the webhook and Paystack client with Phase 2.
+- **Phase 4 (Polish & buffer)** — deploy-readiness checks, dependency
+  audits, an N+1 query fix, and the FastCGI deployment finding below.
+  What this phase *couldn't* cover from a dev sandbox: a real load test
+  against TechNE's actual 10% CPU limit, and proving `index.fcgi` against
+  TechNE's real Apache + FastCGI setup rather than a local protocol-level
+  simulation. See "Deployment (TechNE)" and "What's not built yet" below.
 
 ## Stack
 
@@ -152,6 +158,40 @@ Components, using `BACKEND_API_URL` (see `../.env.local`, defaults to
 `http://localhost:8000`). `data/articles.ts` re-exports that client so
 existing page imports didn't need to change shape — only `await`ed.
 
+## Deployment (TechNE)
+
+TechNE's Python hosting fronts Django apps with Apache via FastCGI
+(`.htaccess` routes requests to an `index.fcgi` script), not a direct
+WSGI/reverse-proxy setup — different from what the build plan originally
+assumed and from how this repo's Dockerfile/gunicorn are set up for local
+dev and other hosts.
+
+`backend/index.fcgi` is that entry point, using
+[`flup6`](https://pypi.org/project/flup6/) to bridge FastCGI to Django's
+WSGI application. **Not `django-fastcgi`** — that package (the one
+sometimes suggested for exactly this kind of hosting) is Python 2-only
+(`import msvcrt`, Python 2 `except`/`raise` syntax, `dict.has_key()`) and
+fails outright under Python 3. `flup6` is the maintained, Python
+3-compatible fork of the same classic FastCGI bridge library.
+
+Verified locally by speaking raw FastCGI protocol to a `flup6`
+`WSGIServer` wrapping this app's real WSGI application (not just checking
+that it imports) — full requests through `/api/categories/` and
+`/api/events/gafw/` round-tripped correctly, including the
+`SECURE_SSL_REDIRECT`/HSTS middleware firing as expected. Not yet proven
+against TechNE's actual Apache + mod_fastcgi/mod_fcgid — only the Python
+side of the bridge.
+
+To deploy:
+1. `pip install -r requirements.txt` in the TechNE-provisioned virtualenv
+   (installs `flup6` along with everything else).
+2. Point `.htaccess` (or however TechNE's panel wants it configured) at
+   `backend/index.fcgi`.
+3. Set the same environment variables as `.env.example`, through TechNE's
+   Python App config panel — not a committed `.env` file.
+4. `index.fcgi` defaults `DJANGO_SETTINGS_MODULE` to
+   `glitz_backend.settings.production`.
+
 ## Security notes (see the build plan for full detail)
 
 - Secrets only via environment variables, never committed
@@ -164,11 +204,49 @@ existing page imports didn't need to change shape — only `await`ed.
 - All write endpoints go through DRF serializers for validation
 - Upload size is capped (`WAGTAILIMAGES_MAX_UPLOAD_SIZE`,
   `WAGTAILDOCS_MAX_UPLOAD_SIZE`)
+- `python manage.py check --deploy` passes cleanly against production
+  settings (DEBUG=False, real ALLOWED_HOSTS) — no warnings
+- `collectstatic` (not `--dry-run`) succeeds under
+  `ManifestStaticFilesStorage` — all 241 static files post-process without
+  a missing-reference error, the most common real failure mode with that
+  storage backend
+- `pip-audit` clean (a `setuptools` CVE was patched); `npm audit` flags
+  several Next.js CVEs only fixed in Next 16 — checked exposure (no
+  middleware, no custom server, no Server Actions, no next.config.js
+  rewrites in this codebase) and closed the one actually reachable one
+  (Image Optimization API RCE/DoS) by setting `images.unoptimized: true`
+  in `next.config.js`, since every `<Image>` already used that prop
+  anyway. Deliberately not bumping the Next major version 7 weeks before
+  GAFW — revisit after launch
+- Fixed an N+1 query on the article list endpoint (18 posts → 18 separate
+  `Category` queries) with `select_related` on `Post`'s manager — verified
+  by counting real queries before/after (30 → 12), not just reasoning
+  about it
+
+## Deployment: what's proven vs. what isn't
+
+**Proven from this dev sandbox:**
+- The full request path (Wagtail API, DRF endpoints, both Paystack
+  checkout flows, the shared webhook) against production Django settings
+- `index.fcgi` correctly bridges FastCGI to Django's WSGI app via
+  `flup6`, verified by speaking raw FastCGI protocol to a running
+  instance and getting real API responses back — see "Deployment
+  (TechNE)" above
+
+**Not provable without real TechNE access — genuinely open:**
+- A real load test against TechNE's 10% CPU limit (the build plan flags
+  this as an explicit open risk — it still is)
+- `index.fcgi` against TechNE's actual Apache + mod_fastcgi/mod_fcgid,
+  as opposed to a local protocol-level simulation of the same bridge
+- Whether SSH/Shell access and PostgreSQL Databases are actually
+  available on this specific TechNE account (TechNE support could
+  describe the platform in general but not this account's specifics)
 
 ## What's not built yet (later phases)
 
-- Production deployment to TechNE (Dockerfile exists from the Wagtail
-  scaffold; not yet adapted/tested against TechNE's VPS setup)
+- Production deployment to TechNE itself — the deployment *mechanism*
+  (`index.fcgi`) is built and locally verified, but nobody has run it
+  against the real TechNE panel yet
 - Auth-gated endpoints for the customer account area
 - Events hub (`/events`) and the other four event pages still read from
   the frontend's static `data/events.ts` — only GAFW is backend-wired,
@@ -180,4 +258,7 @@ existing page imports didn't need to change shape — only `await`ed.
   `delivery_link` stays blank until one is uploaded via the Wagtail admin
   — verified behavior (404 with a clear message), not a bug
 - A real Paystack test key hasn't been used against either checkout flow
-  (see above) — both are verified up to the Paystack API call
+  — both are verified up to the Paystack API call
+- GAFW's day-by-day programme and the runway gallery are still static
+  frontend content, not modeled in the backend (not part of any phase's
+  explicit data-model scope so far)

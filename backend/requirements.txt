@@ -7,3 +7,8 @@ python-decouple>=3.8,<3.9
 Pillow>=12.0,<13.0
 gunicorn>=23.0,<24.0
 requests>=2.32,<3.0
+
+# Only needed on hosting that fronts Django with FastCGI instead of a
+# direct WSGI/reverse-proxy setup (see index.fcgi + README's Deployment
+# section) — not used by gunicorn or `manage.py runserver`.
+flup6>=1.1,<2.0

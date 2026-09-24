@@ -4,7 +4,7 @@ from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.api import APIField
 from wagtail.fields import StreamField
 from wagtail.images.api.fields import ImageRenditionField
-from wagtail.models import Page
+from wagtail.models import Page, PageManager
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
@@ -52,6 +52,16 @@ class PostIndexPage(Page):
     api_fields = [APIField("intro")]
 
 
+class PostManager(PageManager):
+    def get_queryset(self):
+        # The Wagtail API lists every Post at once (the frontend's article
+        # feed) — without this, each post's `category(name,slug)` field
+        # expansion fires its own query (N+1: 18 posts, 18 identical-shape
+        # queries against a 5-row table). select_related folds it into the
+        # single base query instead.
+        return super().get_queryset().select_related("category")
+
+
 class Post(Page):
     dek = models.CharField(
         max_length=300,
@@ -92,6 +102,8 @@ class Post(Page):
 
     parent_page_types = ["content.PostIndexPage"]
     subpage_types = []
+
+    objects = PostManager()
 
     api_fields = [
         APIField("dek"),
