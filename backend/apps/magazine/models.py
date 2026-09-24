@@ -1,9 +1,12 @@
 from django.conf import settings
 from django.db import models
-from wagtail.admin.panels import FieldPanel
+from modelcluster.fields import ParentalKey
+from modelcluster.models import ClusterableModel
+from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.api import APIField
 from wagtail.images.api.fields import ImageRenditionField
 from wagtail.snippets.models import register_snippet
+from wagtail.snippets.views.snippets import SnippetViewSet
 
 
 @register_snippet
@@ -68,7 +71,7 @@ class MagazineIssue(models.Model):
         return self.title
 
 
-class Order(models.Model):
+class Order(ClusterableModel):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending payment"
         PAID = "paid", "Paid"
@@ -85,6 +88,16 @@ class Order(models.Model):
     shipping_address = models.TextField(blank=True, help_text="Required only for print items.")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    panels = [
+        FieldPanel("email"),
+        FieldPanel("amount"),
+        FieldPanel("status"),
+        FieldPanel("shipping_address"),
+        FieldPanel("stripe_session_id", read_only=True),
+        FieldPanel("created_at", read_only=True),
+        InlinePanel("items", label="Order items"),
+    ]
+
     class Meta:
         ordering = ["-created_at"]
 
@@ -92,18 +105,39 @@ class Order(models.Model):
         return f"Order #{self.pk} — {self.get_status_display()}"
 
 
+class OrderViewSet(SnippetViewSet):
+    model = Order
+    icon = "doc-full"
+    menu_label = "Orders"
+    menu_order = 300
+    list_display = ["id", "email", "amount", "status", "stripe_session_id", "created_at"]
+    list_filter = ["status"]
+    search_fields = ["email", "stripe_session_id"]
+    ordering = ["-created_at"]
+
+
+register_snippet(Order, viewset=OrderViewSet)
+
+
 class OrderItem(models.Model):
     class Format(models.TextChoices):
         DIGITAL = "digital", "Digital"
         PRINT = "print", "Print"
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    order = ParentalKey(Order, on_delete=models.CASCADE, related_name="items")
     issue = models.ForeignKey(MagazineIssue, on_delete=models.PROTECT, related_name="order_items")
     format = models.CharField(max_length=10, choices=Format.choices, default=Format.DIGITAL)
     quantity = models.PositiveSmallIntegerField(default=1)
     unit_price = models.DecimalField(
         max_digits=8, decimal_places=2, help_text="Price at time of purchase, not the issue's current price."
     )
+
+    panels = [
+        FieldPanel("issue"),
+        FieldPanel("format"),
+        FieldPanel("quantity"),
+        FieldPanel("unit_price", read_only=True),
+    ]
 
     def __str__(self):
         return f"{self.issue.title} × {self.quantity} ({self.get_format_display()})"

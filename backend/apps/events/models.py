@@ -8,6 +8,7 @@ from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.api import APIField
 from wagtail.images.api.fields import ImageRenditionField
 from wagtail.snippets.models import register_snippet
+from wagtail.snippets.views.snippets import SnippetViewSet
 
 
 @register_snippet
@@ -135,8 +136,34 @@ class Ticket(models.Model):
     checked_in_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    panels = [
+        FieldPanel("event"),
+        FieldPanel("ticket_type"),
+        FieldPanel("buyer_name"),
+        FieldPanel("buyer_email"),
+        FieldPanel("status"),
+        FieldPanel("checked_in_at"),
+        FieldPanel("check_in_code", read_only=True),
+        FieldPanel("stripe_session_id", read_only=True),
+        FieldPanel("created_at", read_only=True),
+    ]
+
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.check_in_code} — {self.event.name} ({self.get_status_display()})"
+
+
+class TicketViewSet(SnippetViewSet):
+    model = Ticket
+    icon = "tag"
+    menu_label = "Tickets"
+    menu_order = 301
+    list_display = ["check_in_code", "event", "ticket_type", "buyer_name", "buyer_email", "status", "created_at"]
+    list_filter = ["status", "event"]
+    search_fields = ["check_in_code", "buyer_name", "buyer_email", "stripe_session_id"]
+    ordering = ["-created_at"]
+
+
+register_snippet(Ticket, viewset=TicketViewSet)

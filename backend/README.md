@@ -58,6 +58,17 @@ python manage.py runserver 0.0.0.0:8000
 Wagtail admin: `http://localhost:8000/admin/`
 Django admin: `http://localhost:8000/django-admin/`
 
+All content — articles, events, magazine issues, and now orders/tickets —
+is manageable from the Wagtail admin's **Snippets** menu, so day-to-day
+staff work never needs the Django admin. `Order` (Snippets → Orders) and
+`Ticket` (Snippets → Tickets) are registered there alongside `Event` and
+`MagazineIssue`, with read-only panels for the fields the checkout/webhook
+flow owns (`stripe_session_id`, `check_in_code`, `created_at`, etc.) so
+staff can review or manually correct a status without touching data that
+must stay consistent with Stripe. The Django admin registrations
+(`OrderAdmin`, `TicketAdmin`) are left in place too — both interfaces read
+and write the same tables, so use whichever is convenient.
+
 ## Environment variables
 
 See `.env.example` for the full list. Notable ones:
@@ -98,14 +109,16 @@ end to end with Stripe's test-mode card numbers.
   (parent page for the article tree), `MediaAsset` (gallery image/video,
   belongs to a `Post` or an `Event`)
 - **`apps.events`** — `Event` (snippet, with ticket types + gallery inline),
-  `TicketType`, `Ticket` (buyer, Stripe session id, check-in code)
-- **`apps.magazine`** — `MagazineIssue`, `Order`, `OrderItem` (issue
-  purchases, digital and/or print)
+  `TicketType`, `Ticket` (snippet — buyer, Stripe session id, check-in code)
+- **`apps.magazine`** — `MagazineIssue` (snippet), `Order` (snippet, with
+  order items inline), `OrderItem` (issue purchases, digital and/or print)
 
-`Event` and `Post` are `ClusterableModel`/Wagtail `Page` subclasses so their
-child relations (`TicketType`, `MediaAsset`) use `ParentalKey` +
-`InlinePanel` for inline editing in the CMS — a plain `ForeignKey` does not
-support that.
+`Event`, `Post`, and `Order` are `ClusterableModel`/Wagtail `Page`
+subclasses so their child relations (`TicketType`, `MediaAsset`,
+`OrderItem`) use `ParentalKey` + `InlinePanel` for inline editing in the
+CMS — a plain `ForeignKey` does not support that. `Ticket` has no child
+relations of its own, so it's registered as a plain Wagtail snippet
+without needing `ClusterableModel`.
 
 ## API
 
