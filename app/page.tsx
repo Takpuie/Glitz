@@ -4,6 +4,7 @@ import ArticleCard from "@/components/ArticleCard";
 import SectionHeading from "@/components/SectionHeading";
 import { getArticles } from "@/data/articles";
 import { events } from "@/data/events";
+import { getBackendEvent, getMagazineIssues } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 
 export default async function Home() {
@@ -11,6 +12,11 @@ export default async function Home() {
   const [cover, ...allRest] = articles;
   const rest = allRest.slice(0, 7);
   const gafw = events[0];
+  const [backendGafw, magazineIssues] = await Promise.all([
+    getBackendEvent("gafw"),
+    getMagazineIssues(),
+  ]);
+  const currentIssue = magazineIssues.find((issue) => issue.is_current_issue) ?? magazineIssues[0];
 
   return (
     <>
@@ -82,7 +88,7 @@ export default async function Home() {
             </Link>
           </div>
           <div className="photo-card relative aspect-[4/5] w-full max-w-sm justify-self-center bg-gray-200 md:justify-self-end">
-            <Image unoptimized src={editorialImage("magazine-cover-home", 1000, 1300)} alt="Glitz Africa Magazine" fill sizes="(max-width: 768px) 80vw, 40vw" className="object-cover" />
+            <Image unoptimized src={currentIssue?.cover_image?.full_url ?? editorialImage("magazine-cover-home", 1000, 1300)} alt={currentIssue?.title ?? "Glitz Africa Magazine"} fill sizes="(max-width: 768px) 80vw, 40vw" className="object-cover" />
           </div>
         </div>
       </section>
@@ -91,7 +97,7 @@ export default async function Home() {
       <section className="container-editorial py-16 md:py-20">
         <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
           <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
-            <Image unoptimized src={gafw.image} alt={gafw.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src={backendGafw?.cover_image?.full_url ?? gafw.image} alt={backendGafw?.name ?? gafw.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
           <div>
             <p className="eyebrow mb-4">Glitz Events &middot; {gafw.dates}</p>
