@@ -85,17 +85,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "glitz_backend.wsgi.application"
 
 
-# Database — PostgreSQL, credentials from environment variables only.
+# Database — MySQL, credentials from environment variables only. Started
+# as PostgreSQL (see git history); switched because TechNE's managed
+# Postgres pool (uk1.pgsqlserver.com) turned out to be version 9.3 —
+# long EOL, and below Django 5.2's hard minimum of 14 — while TechNE's
+# MySQL offering is current. Nothing in this codebase uses a
+# Postgres-specific field (no ArrayField/HStoreField/contrib.postgres),
+# so the swap is confined to this file, requirements.txt, and env vars.
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.db.backends.mysql",
         "NAME": config("DB_NAME"),
         "USER": config("DB_USER"),
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "PORT": config("DB_PORT", default="3306"),
+        "OPTIONS": {"charset": "utf8mb4"},
     }
 }
 

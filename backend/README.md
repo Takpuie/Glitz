@@ -22,6 +22,15 @@ Framework, backing the Next.js frontend in the repo root.
   against TechNE's actual 10% CPU limit, and proving `index.fcgi` against
   TechNE's real Apache + FastCGI setup rather than a local protocol-level
   simulation. See "Deployment (TechNE)" and "What's not built yet" below.
+- **Database swap: PostgreSQL → MySQL**, discovered and fixed during the
+  real TechNE deployment (not before) — TechNE's managed PostgreSQL pool
+  turned out to be version 9.3, long past end-of-life and below Django
+  5.2's hard-enforced minimum of 14, while their MySQL 8 offering is
+  current. Nothing in this codebase used a Postgres-specific field, so the
+  swap is confined to `settings/base.py`, `requirements.txt`, and env
+  vars — re-verified end to end against a real local MySQL 8 instance
+  (full migration chain, seed data, a real checkout write) before
+  touching TechNE again.
 
 ## Stack
 
@@ -30,8 +39,11 @@ Framework, backing the Next.js frontend in the repo root.
   read-only via `wagtail.api.v2`
 - **Django REST Framework** — read-only endpoints for `Category`, `Event`,
   `MagazineIssue` (custom apps, not Wagtail pages)
-- **PostgreSQL 16** — local dev and production both run Postgres (no SQLite
-  fallback, to keep dev/prod parity)
+- **MySQL 8** — local dev and production both run MySQL (no SQLite
+  fallback, to keep dev/prod parity). Uses `PyMySQL` (pure Python, no
+  native build toolchain needed — chosen for TechNE's jailed shared
+  hosting) shimmed as `MySQLdb` in `glitz_backend/__init__.py`, plus
+  `cryptography` for MySQL 8's default `caching_sha2_password` auth.
 - **python-decouple** — all config via environment variables / `.env`
 
 ## Local setup
@@ -44,10 +56,13 @@ pip install -r requirements.txt
 
 cp .env.example .env   # then fill in real local values — never commit .env
 
-# Postgres: create a local database + role matching your .env, e.g.
-#   sudo -u postgres psql -c "CREATE DATABASE glitz_dev;"
-#   sudo -u postgres psql -c "CREATE USER glitz WITH PASSWORD '...';"
-#   sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE glitz_dev TO glitz;"
+# MySQL: create a local database + user matching your .env, e.g.
+#   mysql -u root -e "CREATE DATABASE glitz_dev CHARACTER SET utf8mb4;"
+#   mysql -u root -e "CREATE USER 'glitz'@'localhost' IDENTIFIED BY '...';"
+#   mysql -u root -e "GRANT ALL PRIVILEGES ON glitz_dev.* TO 'glitz'@'localhost';"
+# Use the server's own default collation (don't force one) — mixing an
+# explicit CREATE DATABASE collation with MySQL 8's session default causes
+# "Illegal mix of collations" errors partway through Wagtail's migrations.
 
 python manage.py migrate
 python manage.py createsuperuser
@@ -78,7 +93,7 @@ See `.env.example` for the full list. Notable ones:
 | `DJANGO_SECRET_KEY` | Required, no default — generate a real one per environment |
 | `DJANGO_DEBUG` | `True` locally, `False` in production |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated; must list the real prod hostname |
-| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Postgres connection |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | MySQL connection (`DB_PORT` defaults to `3306`) |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated; the Next.js origin(s) only — never `*` |
 | `WAGTAILADMIN_BASE_URL` | Used to build absolute image URLs returned by the API |
 | `STRIPE_SECRET_KEY` | Empty locally; never reaches the frontend |
@@ -276,9 +291,12 @@ To deploy:
   this as an explicit open risk — it still is)
 - `index.fcgi` against TechNE's actual Apache + mod_fastcgi/mod_fcgid,
   as opposed to a local protocol-level simulation of the same bridge
-- Whether SSH/Shell access and PostgreSQL Databases are actually
-  available on this specific TechNE account (TechNE support could
-  describe the platform in general but not this account's specifics)
+- ~~Whether SSH/Shell access and PostgreSQL Databases are actually
+  available on this specific TechNE account~~ — resolved during real
+  deployment: SSH access exists, but the account's managed PostgreSQL
+  pool is version 9.3 (incompatible with Django 5.2's PostgreSQL 14+
+  minimum), so the backend moved to MySQL — see the database swap note
+  near the top of this file.
 
 ## What's not built yet (later phases)
 
