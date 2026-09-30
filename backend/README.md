@@ -30,8 +30,8 @@ Framework, backing the Next.js frontend in the repo root.
   read-only via `wagtail.api.v2`
 - **Django REST Framework** — read-only endpoints for `Category`, `Event`,
   `MagazineIssue` (custom apps, not Wagtail pages)
-- **PostgreSQL 16** — local dev and production both run Postgres (no SQLite
-  fallback, to keep dev/prod parity)
+- **MySQL 8** — the production database on TechNE, using InnoDB, strict mode
+  and `utf8mb4`; PostgreSQL remains supported for existing local setups
 - **python-decouple** — all config via environment variables / `.env`
 
 ## Local setup
@@ -44,10 +44,9 @@ pip install -r requirements.txt
 
 cp .env.example .env   # then fill in real local values — never commit .env
 
-# Postgres: create a local database + role matching your .env, e.g.
-#   sudo -u postgres psql -c "CREATE DATABASE glitz_dev;"
-#   sudo -u postgres psql -c "CREATE USER glitz WITH PASSWORD '...';"
-#   sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE glitz_dev TO glitz;"
+# MySQL 8: create a local database + user matching your .env, e.g.
+#   mysql -u root -p -e "CREATE DATABASE glitz_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+#   mysql -u root -p -e "CREATE USER 'glitz'@'localhost' IDENTIFIED BY '...'; GRANT ALL ON glitz_dev.* TO 'glitz'@'localhost';"
 
 python manage.py migrate
 python manage.py createsuperuser
@@ -206,7 +205,8 @@ See `.env.example` for the full list. Notable ones:
 | `DJANGO_SECRET_KEY` | Required, no default — generate a real one per environment |
 | `DJANGO_DEBUG` | `True` locally, `False` in production |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated; must list the real prod hostname |
-| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Postgres connection |
+| `DB_ENGINE` | `mysql` in production; `postgresql` remains available for local development |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Database connection (`localhost:3306` on TechNE MySQL) |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated; the Next.js origin(s) only — never `*` |
 | `WAGTAILADMIN_BASE_URL` | Used to build absolute image URLs returned by the API |
 | `STRIPE_SECRET_KEY` | Empty locally; never reaches the frontend |

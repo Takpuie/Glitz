@@ -87,19 +87,38 @@ TEMPLATES = [
 WSGI_APPLICATION = "glitz_backend.wsgi.application"
 
 
-# Database — PostgreSQL, credentials from environment variables only.
+# Database — MySQL 8 in production; PostgreSQL remains available for local
+# development. Credentials always come from environment variables.
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+DB_PORT = config("DB_PORT", default="3306")
+DB_ENGINE = config(
+    "DB_ENGINE",
+    default="postgresql" if DB_PORT == "5432" else "mysql",
+).lower()
+DB_ENGINES = {
+    "mysql": "django.db.backends.mysql",
+    "postgresql": "django.db.backends.postgresql",
+    "postgres": "django.db.backends.postgresql",
+}
+if DB_ENGINE not in DB_ENGINES:
+    raise ValueError("DB_ENGINE must be 'mysql' or 'postgresql'.")
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": DB_ENGINES[DB_ENGINE],
         "NAME": config("DB_NAME"),
         "USER": config("DB_USER"),
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+        "PORT": DB_PORT,
     }
 }
+if DB_ENGINE == "mysql":
+    DATABASES["default"]["OPTIONS"] = {
+        "charset": "utf8mb4",
+        "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+    }
 
 
 # Password validation
