@@ -15,6 +15,7 @@ const EXPLORE: { label: string; href: string }[] = [
 
 const COMPANY: { label: string; href: string }[] = [
   { label: "About Glitz Africa", href: "/about" },
+  { label: "Contact", href: "/contact" },
   { label: "Advertise & Partner", href: "/partners" },
   { label: "Care Foundation", href: "/foundation" },
   { label: "Awards & Nominations", href: "/nominate" },

@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { gafwGallery, gafwProgramme, getEvent } from "@/data/events";
-import { getBackendEvent } from "@/lib/backend";
+import { getBackendEvent, type BackendEvent } from "@/lib/backend";
 import TicketSelector from "./TicketSelector";
+import EnquiryForm from "@/components/EnquiryForm";
 
 const sponsors = ["MTN", "Kempinski", "Vodafone", "Absa", "Fidelity Bank", "Delta Air Lines"];
 
@@ -31,11 +31,22 @@ function daysUntil(dateStr: string) {
 }
 
 export default async function GafwPage() {
-  const event = await getBackendEvent("gafw");
-  if (!event) return notFound();
-
-  // Placeholder fallback (editorial copy not yet in the backend for these).
   const staticFallback = getEvent("gafw")!;
+  let event: BackendEvent | undefined;
+  try { event = await getBackendEvent("gafw"); } catch { /* Use the local GAFW details below. */ }
+  event ??= {
+    id: -1,
+    name: staticFallback.name,
+    slug: staticFallback.slug,
+    tagline: staticFallback.tagline,
+    description: staticFallback.description,
+    venue: staticFallback.venue,
+    start_date: "2026-11-06",
+    end_date: "2026-11-09",
+    status: "save_the_date",
+    cover_image: { url: staticFallback.image, full_url: staticFallback.image, width: 1600, height: 1000 },
+    ticket_types: [],
+  };
 
   return (
     <div>
@@ -171,6 +182,13 @@ export default async function GafwPage() {
       </section>
 
       {/* Sponsors */}
+      <section id="register-interest" className="hairline scroll-mt-40">
+        <div className="container-editorial max-w-2xl py-16">
+          <h2 className="mb-8 font-display text-3xl">Register your interest</h2>
+          <EnquiryForm kind="event" event={{ slug: "gafw", name: "Glitz Africa Fashion Week" }} />
+        </div>
+      </section>
+
       <section className="hairline">
         <div className="container-editorial py-14 md:py-16">
           <p className="eyebrow mb-8 text-center">2026 Partners</p>

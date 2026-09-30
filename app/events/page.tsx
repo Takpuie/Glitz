@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { events } from "@/data/events";
-import { getBackendEvents } from "@/lib/backend";
+import { getBackendEvents, type BackendEvent } from "@/lib/backend";
+import { editorialImage } from "@/lib/img";
 
 const STATUS_LABELS: Record<string, string> = {
   on_sale: "On sale",
@@ -18,18 +19,18 @@ function formatDate(start: string, end: string | null) {
 }
 
 export default async function EventsPage() {
-  const backendEvents = await getBackendEvents(events.map((event) => event.slug));
-  const eventList = events.map((fallback) => {
-    const backend = backendEvents.find((event) => event.slug === fallback.slug);
-    if (!backend) return { ...fallback, statusLabel: fallback.status };
+  let backendEvents: BackendEvent[] = [];
+  try { backendEvents = await getBackendEvents(); } catch { /* Use the local event catalogue below. */ }
+  const eventList = backendEvents.length ? backendEvents.map((backend) => {
+    const fallback = events.find((event) => event.slug === backend.slug);
     return {
       ...fallback,
       ...backend,
       dates: formatDate(backend.start_date, backend.end_date),
       statusLabel: STATUS_LABELS[backend.status] ?? backend.status,
-      image: backend.cover_image?.full_url ?? fallback.image,
+      image: backend.cover_image?.full_url ?? fallback?.image ?? editorialImage(backend.slug, 1600, 1000),
     };
-  });
+  }) : events.map((event) => ({ ...event, statusLabel: event.status, image: event.image }));
 
   return (
     <div>
@@ -37,9 +38,8 @@ export default async function EventsPage() {
         <p className="eyebrow mb-3">The Calendar</p>
         <h1 className="font-display text-5xl sm:text-6xl">Events</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
-          Five properties, one stage — GAFW, Ghana Women of the Year, the Female
-          CEO Summit, SheBoss Global and the Glitz Style Awards. Every edition
-          becomes a permanent page once it passes.
+          Explore Glitz events, from upcoming gatherings to past editions
+          celebrating fashion, culture, business and achievement.
         </p>
       </header>
 

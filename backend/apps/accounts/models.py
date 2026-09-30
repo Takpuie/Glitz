@@ -18,3 +18,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_full_name() or self.username
+
+
+from .reader_models import AccountToken, CommentReport, ReaderAccount, ReaderComment, SavedArticle  # noqa: E402,F401

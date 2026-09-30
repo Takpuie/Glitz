@@ -6,6 +6,56 @@ import { editorialImage } from "@/lib/img";
 
 const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
+export type HomepageSlide = {
+  id: number; title: string; eyebrow: string; description: string;
+  poster: { full_url: string }; video_url: string | null;
+  button_label: string; button_path: string;
+};
+export type PartnerLogo = { id: number; name: string; logo: { full_url: string }; website: string };
+export async function getHomepageSlides(): Promise<HomepageSlide[]> { return wagtailFetch("/api/homepage-slides/"); }
+export async function getPartnerLogos(): Promise<PartnerLogo[]> { return wagtailFetch("/api/partner-logos/"); }
+
+export type MediaVideo = {
+  id: number;
+  title: string;
+  thumbnail: { full_url: string } | null;
+  embed_url: string | null;
+  file_url: string | null;
+  duration: string;
+  event: { name: string; slug: string } | null;
+};
+
+export type MediaPhoto = {
+  id: number;
+  title: string;
+  image: { full_url: string; width: number; height: number };
+  full_image: { full_url: string; width: number; height: number };
+  alt_text: string;
+  caption: string;
+  credit: string;
+  event: { name: string; slug: string } | null;
+};
+
+export async function getMediaPhotos(): Promise<MediaPhoto[]> {
+  return wagtailFetch("/api/photos/");
+}
+
+export type PressCoverage = {
+  id: number;
+  headline: string;
+  publication: string;
+  article_url: string;
+  published_date: string;
+};
+
+export async function getMediaVideos(): Promise<MediaVideo[]> {
+  return wagtailFetch("/api/videos/");
+}
+
+export async function getPressCoverage(): Promise<PressCoverage[]> {
+  return wagtailFetch("/api/press-coverage/");
+}
+
 const POST_FIELDS =
   "title,dek,author_name,category(name,slug),published_date,read_time_minutes,cover_image,body";
 
@@ -34,6 +84,7 @@ async function wagtailFetch(path: string) {
     // Editorial content changes rarely; a short revalidate window keeps
     // pages fast without going fully static against a live CMS.
     next: { revalidate: 60 },
+    signal: AbortSignal.timeout(4000),
   });
   if (!res.ok) {
     throw new Error(`Backend request failed: ${path} (${res.status})`);
@@ -91,9 +142,12 @@ export async function getArticles(): Promise<Article[]> {
 }
 
 export async function getArticle(slug: string): Promise<Article | undefined> {
-  const data = await wagtailFetch(
-    `/api/v2/pages/?type=content.Post&fields=${POST_FIELDS}&slug=${encodeURIComponent(slug)}`
-  );
+  const query = new URLSearchParams({
+    type: "content.Post",
+    fields: POST_FIELDS,
+    slug,
+  });
+  const data = await wagtailFetch(`/api/v2/pages/?${query.toString()}`);
   const items = data.items as WagtailPost[];
   if (items.length === 0) return undefined;
   return toArticle(items[0]);
@@ -130,15 +184,20 @@ export type BackendEvent = {
 export async function getBackendEvent(slug: string): Promise<BackendEvent | undefined> {
   const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/`, {
     next: { revalidate: 30 },
+    signal: AbortSignal.timeout(4000),
   });
   if (res.status === 404) return undefined;
   if (!res.ok) throw new Error(`Backend request failed: /api/events/${slug}/ (${res.status})`);
   return res.json();
 }
 
-export async function getBackendEvents(slugs: string[]): Promise<BackendEvent[]> {
-  const results = await Promise.all(slugs.map((slug) => getBackendEvent(slug)));
-  return results.filter((event): event is BackendEvent => Boolean(event));
+export async function getBackendEvents(): Promise<BackendEvent[]> {
+  const res = await fetch(`${BACKEND_URL}/api/events/`, {
+    next: { revalidate: 30 },
+    signal: AbortSignal.timeout(4000),
+  });
+  if (!res.ok) throw new Error(`Backend request failed: /api/events/ (${res.status})`);
+  return res.json();
 }
 
 export type BackendMagazineIssue = {
@@ -158,7 +217,7 @@ export type BackendMagazineIssue = {
 };
 
 export async function getMagazineIssues(): Promise<BackendMagazineIssue[]> {
-  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/`, { next: { revalidate: 60 } });
+  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(4000) });
   if (!res.ok) throw new Error(`Backend request failed: /api/magazine-issues/ (${res.status})`);
   return res.json();
 }

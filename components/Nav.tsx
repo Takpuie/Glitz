@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { AccountLink } from "@/components/AccountModal";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import EventsDropdown, { type EventLink } from "@/components/EventsDropdown";
+import { visitorRequest, type Reader, type VisitorSession } from "@/lib/visitor";
 
 const PRIMARY_LINKS = [
   { label: "Home", href: "/" },
@@ -16,13 +20,48 @@ const PRIMARY_LINKS = [
   { label: "Media", href: "/media" },
 ];
 
-export default function Nav() {
+export default function Nav({ events }: { events: EventLink[] }) {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
+  const [reader, setReader] = useState<Reader | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
+    let active = true;
+    let version = 0;
+    async function refreshReader() {
+      const requestVersion = ++version;
+      try {
+        const session = await visitorRequest<VisitorSession>("session");
+        if (active && requestVersion === version) setReader(session.reader);
+      } catch { /* Keep the last known state during a temporary connection failure. */ }
+    }
+    function updateReader(event: Event) {
+      version++;
+      setReader((event as CustomEvent<Reader | null>).detail);
+    }
+    refreshReader();
+    window.addEventListener("focus", refreshReader);
+    window.addEventListener("glitz:reader-updated", updateReader);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", refreshReader);
+      window.removeEventListener("glitz:reader-updated", updateReader);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = previousOverflow; };
   }, [open]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => { if (desktop.matches) setOpen(false); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-paper">
@@ -37,10 +76,12 @@ export default function Nav() {
 
       {/* main bar */}
       <div className="border-b border-ink/12">
-        <div className="container-editorial grid h-16 grid-cols-3 items-center md:h-[72px]">
+        <div className="container-editorial grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:h-[72px] md:grid-cols-3">
           <div className="flex items-center">
             <button
               aria-label="Toggle menu"
+              aria-expanded={open}
+              aria-controls="mobile-navigation"
               onClick={() => setOpen((v) => !v)}
               className="group flex h-9 w-9 flex-col items-start justify-center gap-[5px] lg:hidden"
             >
@@ -59,7 +100,16 @@ export default function Nav() {
             </span>
           </Link>
 
-          <div className="flex items-center justify-end gap-5">
+          <div className="flex items-center justify-end gap-2 sm:gap-5">
+            {reader ? <Link href="/account" aria-label={`Your account: ${reader.display_name}`} title={reader.display_name} className="flex min-w-0 items-center gap-1.5 rounded-full hover:bg-ink/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ink/40">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                <circle cx="12" cy="8" r="3.25" />
+                <path d="M5.5 20v-1.5a6.5 6.5 0 0 1 13 0V20" strokeLinecap="round" />
+              </svg>
+              </span>
+              <span className="max-w-[56px] truncate font-nav text-xs sm:max-w-[120px]">{reader.display_name}</span>
+            </Link> : <AccountLink className="flex h-8 shrink-0 items-center rounded-full border border-ink/40 px-3 font-nav text-[11px] hover:bg-ink/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">Sign in</AccountLink>}
             <button aria-label="Search" className="flex h-[18px] w-[18px] items-center justify-center">
               <SearchIcon />
             </button>
@@ -76,6 +126,7 @@ export default function Nav() {
 
         <nav className="hidden justify-center gap-6 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 lg:flex xl:gap-9">
           {PRIMARY_LINKS.map((l) => (
+            l.href === "/events" ? <EventsDropdown key={l.label} events={events} /> :
             <Link key={l.label} href={l.href} className="link-underline hover:text-ink">
               {l.label}
             </Link>
@@ -85,12 +136,14 @@ export default function Nav() {
 
       {/* mobile drawer */}
       <div
-        className={`fixed inset-0 top-16 z-40 bg-paper transition-transform duration-300 lg:hidden ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+        id="mobile-navigation"
+        hidden={!open}
+        onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
+        className="fixed inset-0 top-24 z-40 overflow-y-auto bg-paper md:top-[104px] lg:hidden"
       >
         <nav className="container-editorial flex flex-col divide-y divide-ink/10 pt-2">
           {PRIMARY_LINKS.map((l) => (
+            l.href === "/events" ? <EventsDropdown key={l.label} events={events} mobile onNavigate={() => setOpen(false)} /> :
             <Link
               key={l.label}
               href={l.href}
@@ -100,9 +153,7 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/account" onClick={() => setOpen(false)} className="py-4 font-nav text-[11px] uppercase tracking-widest2 text-gray-600">
-            Account
-          </Link>
+          {reader ? <Link href="/account" onClick={() => setOpen(false)} className="break-words py-4 font-nav text-sm text-gray-600">{reader.display_name}</Link> : <AccountLink onClick={() => setOpen(false)} className="py-4 font-nav text-[11px] uppercase tracking-widest2 text-gray-600">Sign in</AccountLink>}
         </nav>
       </div>
     </header>

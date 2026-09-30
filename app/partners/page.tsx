@@ -1,3 +1,6 @@
+import EnquiryForm from "@/components/EnquiryForm";
+import { getBackendEvents, type BackendEvent } from "@/lib/backend";
+
 const packages = [
   { tier: "Media Partner", detail: "Print + digital placements across issues, editorial integrations, newsletter sponsorship." },
   { tier: "Event Sponsor", detail: "Branding across a chosen event edition — logo placement, stage presence, delegate bags." },
@@ -10,7 +13,9 @@ const stats = [
   { value: "27", label: "Years of Glitz Africa" },
 ];
 
-export default function PartnersPage() {
+export default async function PartnersPage() {
+  let events: BackendEvent[] = [];
+  try { events = await getBackendEvents(); } catch { /* The form still supports a general partnership enquiry. */ }
   return (
     <div>
       <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
@@ -41,6 +46,13 @@ export default function PartnersPage() {
               <p className="max-w-md text-sm text-gray-600">{p.detail}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section id="enquire" className="hairline">
+        <div className="container-editorial max-w-2xl py-16">
+          <h2 className="mb-8 font-display text-4xl">Partner with Glitz Africa</h2>
+          <EnquiryForm kind="sponsorship" events={events.map(({ slug, name }) => ({ slug, name }))} />
         </div>
       </section>
 

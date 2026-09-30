@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
-import { getArticles, CATEGORIES } from "@/data/articles";
+import { getArticles, CATEGORIES } from "@/lib/backend";
 
 export default async function ArticlesPage({
   searchParams,

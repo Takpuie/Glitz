@@ -2,14 +2,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
-import { getArticles, getArticle, relatedArticles } from "@/data/articles";
+import ReaderComments from "@/components/ReaderComments";
+import {
+  getArticles,
+  getArticle,
+  relatedArticles,
+} from "@/lib/backend";
 
 export async function generateStaticParams() {
   const articles = await getArticles();
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const article = await getArticle(params.slug);
   if (!article) return notFound();
   const related = await relatedArticles(article.slug);
@@ -69,6 +78,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
         </aside>
       </div>
+
+      <ReaderComments slug={article.slug} />
 
       <section className="hairline">
         <div className="container-editorial py-14 md:py-16">

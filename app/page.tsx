@@ -2,58 +2,42 @@ import Image from "next/image";
 import Link from "next/link";
 import ArticleCard from "@/components/ArticleCard";
 import SectionHeading from "@/components/SectionHeading";
+import HomeHero from "@/components/HomeHero";
+import HomeVideos from "@/components/HomeVideos";
+import PartnerMarquee from "@/components/PartnerMarquee";
 import { getArticles } from "@/data/articles";
 import { events } from "@/data/events";
-import { getBackendEvent, getMagazineIssues } from "@/lib/backend";
+import { getBackendEvent, getMagazineIssues, getHomepageSlides, getMediaVideos, getPartnerLogos, type HomepageSlide } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 
 export default async function Home() {
   const articles = await getArticles();
-  const [cover, ...allRest] = articles;
-  const rest = allRest.slice(0, 7);
+  const rest = articles.slice(0, 7);
   const gafw = events[0];
-  const [backendGafw, magazineIssues] = await Promise.all([
+  const [backendGafwResult, magazineResult, slidesResult, videosResult, partnersResult] = await Promise.allSettled([
     getBackendEvent("gafw"),
     getMagazineIssues(),
+    getHomepageSlides(),
+    getMediaVideos(),
+    getPartnerLogos(),
   ]);
+  const backendGafw = backendGafwResult.status === "fulfilled" ? backendGafwResult.value : undefined;
+  const magazineIssues = magazineResult.status === "fulfilled" ? magazineResult.value : [];
+  const homepageSlides = slidesResult.status === "fulfilled" ? slidesResult.value : [];
+  const videos = videosResult.status === "fulfilled" ? videosResult.value : [];
+  const partners = partnersResult.status === "fulfilled" ? partnersResult.value : [];
   const currentIssue = magazineIssues.find((issue) => issue.is_current_issue) ?? magazineIssues[0];
+
+  const fallbackSlides: HomepageSlide[] = [
+    { id: -1, title: "The culture of now.", eyebrow: "Glitz Africa", description: "Your front-row seat to fashion, beauty, entertainment and the people shaping Africa.", poster: { full_url: "/images/gafw/hero-designer-and-model.jpg" }, video_url: null, button_label: "Explore the stories", button_path: "/articles" },
+    { id: -2, title: "Where fashion comes alive.", eyebrow: "Glitz Africa Fashion Week", description: "The designers, the details, the moments. Experience the runway with Glitz.", poster: { full_url: "/images/gafw/group-finale-walk.jpg" }, video_url: null, button_label: "Discover our events", button_path: "/events" },
+    { id: -3, title: "Women shaping what comes next.", eyebrow: "The Female CEO Summit", description: "Ideas, conversations and connections with the women leading change.", poster: { full_url: "/images/female-ceo-summit/panel-trade-opportunities.jpg" }, video_url: null, button_label: "Step inside", button_path: "/events/female-ceo-summit" },
+  ];
 
   return (
     <>
-      {/* Hero */}
-      <section className="container-editorial grid grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
-        <div>
-          <p className="eyebrow mb-4">The Latest From Glitz Africa</p>
-          <h1 className="font-display text-5xl leading-[1.05] sm:text-6xl md:text-7xl">
-            The culture of
-            <br />
-            <span className="italic">now.</span>
-          </h1>
-          <p className="mt-6 max-w-md text-base text-gray-600 md:text-lg">
-            Your front-row seat to fashion, beauty, entertainment, lifestyle
-            and the people shaping Africa.
-          </p>
-          <Link href={`/articles/${cover.slug}`} className="btn-primary mt-8 inline-flex">
-            Read the Feature
-          </Link>
-        </div>
-        <Link href={`/articles/${cover.slug}`} className="group photo-card relative block aspect-[4/5] w-full">
-          <Image
-            unoptimized
-            src={cover.image}
-            alt={cover.title}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-5 py-4">
-            <p className="font-nav text-[10px] uppercase tracking-widest2 text-paper">Featured Story</p>
-            <p className="font-nav text-[10px] uppercase tracking-widest2 text-gray-200">{cover.author}</p>
-          </div>
-        </Link>
-      </section>
+      <HomeHero slides={homepageSlides.length ? homepageSlides : fallbackSlides} />
+      <PartnerMarquee partners={partners} />
 
       {/* Latest from GLITZ */}
       <section className="hairline">
@@ -68,6 +52,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <HomeVideos videos={videos} />
 
       {/* Read something glitzy */}
       <section className="hairline bg-smoke">

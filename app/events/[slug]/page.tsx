@@ -1,28 +1,55 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getBackendEvent, type BackendEvent } from "@/lib/backend";
 import { events, getEvent } from "@/data/events";
+import { editorialImage } from "@/lib/img";
+import EnquiryForm from "@/components/EnquiryForm";
 
-export function generateStaticParams() {
+const STATUS_LABELS: Record<string, string> = {
+  on_sale: "On sale",
+  applications_open: "Applications open",
+  save_the_date: "Save the date",
+  archived: "Archived",
+};
+
+export async function generateStaticParams() {
   return events.filter((e) => e.slug !== "gafw").map((e) => ({ slug: e.slug }));
 }
 
-export default function EventEditionPage({ params }: { params: { slug: string } }) {
-  const event = getEvent(params.slug);
+export default async function EventEditionPage({ params }: { params: { slug: string } }) {
+  let backendEvent: BackendEvent | undefined;
+  try { backendEvent = await getBackendEvent(params.slug); } catch { /* Render the matching local event below. */ }
+  const fallbackEvent = getEvent(params.slug);
+  const event = backendEvent ? {
+    name: backendEvent.name,
+    shortName: fallbackEvent?.shortName ?? backendEvent.name,
+    tagline: backendEvent.tagline,
+    description: backendEvent.description,
+    venue: backendEvent.venue,
+    status: STATUS_LABELS[backendEvent.status] ?? backendEvent.status,
+    dates: `${backendEvent.start_date}${backendEvent.end_date ? ` - ${backendEvent.end_date}` : ""}`,
+    image: backendEvent.cover_image?.full_url ?? fallbackEvent?.image ?? editorialImage(backendEvent.slug, 1600, 1000),
+    gallery: fallbackEvent?.gallery,
+  } : fallbackEvent;
   if (!event) return notFound();
+
+  const statusLabel = event.status;
+  const eventDate = event.dates;
+  const eventImage = event.image;
 
   return (
     <div>
       <section className="container-editorial grid grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
         <div>
           <p className="eyebrow mb-4">
-            {event.status} &middot; {event.dates} &middot; {event.venue}
+            {statusLabel} &middot; {eventDate} &middot; {backendEvent?.venue ?? event.venue}
           </p>
-          <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{event.name}</h1>
-          <p className="mt-5 max-w-md text-base text-gray-600">{event.tagline}</p>
+          <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{backendEvent?.name ?? event.name}</h1>
+          <p className="mt-5 max-w-md text-base text-gray-600">{backendEvent?.tagline ?? event.tagline}</p>
         </div>
         <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
-          <Image unoptimized src={event.image} alt={event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          <Image unoptimized src={eventImage} alt={backendEvent?.name ?? event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
         </div>
       </section>
 
@@ -37,9 +64,9 @@ export default function EventEditionPage({ params }: { params: { slug: string } 
               {event.status === "Applications open" ? (
                 <Link href="/nominate" className="btn-primary">Apply / Nominate</Link>
               ) : (
-                <button className="btn-primary">Register Interest</button>
+                <a href="#register-interest" className="btn-primary">Register Interest</a>
               )}
-              <Link href="/partners" className="btn-outline">Become a Sponsor</Link>
+              <Link href="/partners#enquire" className="btn-outline">Become a Sponsor</Link>
             </div>
           </div>
 
@@ -62,6 +89,13 @@ export default function EventEditionPage({ params }: { params: { slug: string } 
               </Link>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section id="register-interest" className="hairline scroll-mt-40">
+        <div className="container-editorial max-w-2xl py-16">
+          <h2 className="mb-8 font-display text-3xl">Register your interest</h2>
+          {backendEvent ? <EnquiryForm kind="event" event={{ slug: params.slug, name: event.name }} /> : <Link href="/contact" className="btn-outline">Contact us about this event</Link>}
         </div>
       </section>
 

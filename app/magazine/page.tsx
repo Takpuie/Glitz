@@ -1,12 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
-import { subscriptionPlans } from "@/data/issues";
-import { getMagazineIssues } from "@/lib/backend";
+import { subscriptionPlans, currentIssue as localCurrentIssue, backIssues as localBackIssues } from "@/data/issues";
+import { getMagazineIssues, type BackendMagazineIssue } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 import MagazineCheckout from "./MagazineCheckout";
 
 export default async function MagazinePage() {
-  const issues = await getMagazineIssues();
+  let cmsAvailable = true;
+  let issues: BackendMagazineIssue[];
+  try {
+    issues = await getMagazineIssues();
+  } catch {
+    cmsAvailable = false;
+    issues = [localCurrentIssue, ...localBackIssues].map((issue, index) => ({
+      id: -(index + 1), slug: issue.slug, title: issue.title,
+      issue_number: issue.issueNumber, season: issue.season,
+      description: "A collectible edition of Glitz Africa celebrating fashion, culture and leadership.",
+      cover_image: { url: issue.image, full_url: issue.image, width: 1000, height: 1300 },
+      price: issue.price.replace(/^GHS\s*/, ""), is_digital_available: false,
+      is_print_available: false, print_sold_out: Boolean(issue.soldOut), publish_date: "", is_current_issue: index === 0,
+    }));
+  }
   const currentIssue = issues.find((i) => i.is_current_issue) ?? issues[0];
   const backIssues = issues.filter((i) => i.slug !== currentIssue?.slug);
 
@@ -41,7 +55,7 @@ export default async function MagazinePage() {
             <p className="mt-5 max-w-md text-sm leading-relaxed text-gray-600 md:text-base">
               {currentIssue.description}
             </p>
-            <MagazineCheckout issue={currentIssue} />
+            {cmsAvailable ? <MagazineCheckout issue={currentIssue} /> : <p className="mt-8 border-t border-ink/15 pt-5 text-sm text-gray-600">Purchasing is temporarily unavailable while the store reconnects.</p>}
           </div>
         </section>
       )}

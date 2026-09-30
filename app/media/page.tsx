@@ -1,68 +1,92 @@
+﻿import MediaVideoCard from "@/components/MediaVideoCard";
 import Image from "next/image";
-import { editorialImage } from "@/lib/img";
+import Link from "next/link";
+import { getMediaPhotos, getMediaVideos, getPressCoverage } from "@/lib/backend";
 
-const videos = [
-  { title: "GAFW 2025 — Mainstage Runway Recap", length: "6:42", img: editorialImage("media-gafw-recap", 900, 1100) },
-  { title: "Backstage at the Young Designers Showcase", length: "3:18", img: editorialImage("media-backstage", 900, 1100) },
-  { title: "Claudia Lumor: The Full Interview", length: "18:05", img: editorialImage("media-claudia-interview", 900, 1100) },
-  { title: "Ghana Women of the Year 2025 — Highlights", length: "5:27", img: editorialImage("media-gwoty-highlights", 900, 1100) },
-  { title: "Inside the Glitz Africa Studio", length: "4:10", img: editorialImage("media-studio", 900, 1100) },
-  { title: "SheBoss Global 2024 — Founder Stories", length: "9:53", img: editorialImage("media-sheboss-stories", 900, 1100) },
-];
+export default async function MediaPage() {
+  const [videosResult, pressResult, photosResult] = await Promise.allSettled([
+    getMediaVideos(),
+    getPressCoverage(),
+    getMediaPhotos(),
+  ]);
+  const videos = videosResult.status === "fulfilled" ? videosResult.value : [];
+  const press = pressResult.status === "fulfilled" ? pressResult.value : [];
+  const photos = photosResult.status === "fulfilled" ? photosResult.value : [];
+  if (photosResult.status === "rejected") console.error("Unable to load media photos", photosResult.reason);
+  if (videosResult.status === "rejected") console.error("Unable to load media videos", videosResult.reason);
+  if (pressResult.status === "rejected") console.error("Unable to load press coverage", pressResult.reason);
 
-const press = [
-  { outlet: "Forbes Africa", title: "How Glitz Africa Became a Media House You Can't Ignore" },
-  { outlet: "OkayAfrica", title: "GAFW Is Quietly Becoming the Continent's Most Important Fashion Week" },
-  { outlet: "Business Insider Africa", title: "Inside Kollage Media's Playbook for Building Five Events a Year" },
-];
-
-export default function MediaPage() {
   return (
     <div>
       <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
         <p className="eyebrow mb-3">Watch &amp; Read</p>
         <h1 className="font-display text-5xl sm:text-6xl">Media</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
-          Runway film, interviews and behind-the-scenes video, plus where else
+          Photography, runway film, interviews and behind-the-scenes video, plus where else
           Glitz Africa is making news.
         </p>
       </header>
 
-      <section className="container-editorial py-16 md:py-20">
-        <p className="eyebrow mb-8">Video</p>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {videos.map((v) => (
-            <div key={v.title} className="group cursor-pointer">
-              <div className="photo-card relative aspect-[4/5] w-full bg-gray-200">
-                <Image unoptimized src={v.img} alt={v.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full border border-paper text-paper">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="ml-1 h-5 w-5">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </span>
-                </div>
-                <span className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-nav text-[10px] text-paper">
-                  {v.length}
-                </span>
-              </div>
-              <p className="mt-4 font-display text-lg leading-snug group-hover:underline underline-offset-4">{v.title}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="hairline bg-smoke">
-        <div className="container-editorial py-16 md:py-20">
-          <p className="eyebrow mb-8">In the Press</p>
-          <div className="divide-y divide-ink/15 border-y border-ink/15">
-            {press.map((p) => (
-              <div key={p.title} className="flex flex-col gap-1 py-6 sm:flex-row sm:items-center sm:justify-between">
-                <p className="font-display text-xl">{p.title}</p>
-                <p className="font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">{p.outlet}</p>
-              </div>
+      <section className="container-editorial py-16 md:py-20" aria-labelledby="photos-heading">
+        <h2 id="photos-heading" className="eyebrow mb-8">Photos</h2>
+        {photos.length ? (
+          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.map((photo) => (
+              <figure key={photo.id}>
+                <a href={photo.full_image.full_url} target="_blank" rel="noopener noreferrer" className="photo-card group relative block aspect-[4/3] w-full bg-gray-200" aria-label={`View ${photo.title} in full size (opens in a new tab)`}>
+                  <Image unoptimized src={photo.image.full_url} alt={photo.alt_text} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                </a>
+                <figcaption className="mt-4">
+                  <h3 className="font-display text-lg leading-snug">{photo.title}</h3>
+                  {photo.caption && <p className="mt-2 whitespace-pre-line text-sm text-gray-600">{photo.caption}</p>}
+                  {photo.credit && <p className="mt-2 text-xs text-gray-500">Photo: {photo.credit}</p>}
+                  {photo.event && <Link href={`/events/${encodeURIComponent(photo.event.slug)}`} className="mt-2 inline-block text-sm text-gray-600 underline underline-offset-4">{photo.event.name}</Link>}
+                </figcaption>
+              </figure>
             ))}
           </div>
+        ) : (
+          <p className="text-sm text-gray-600">
+            {photosResult.status === "rejected" ? "Photos are temporarily unavailable. Please try again shortly." : "New photos are coming soon."}
+          </p>
+        )}
+      </section>
+
+      <section className="container-editorial border-t border-ink/12 py-16 md:py-20" aria-labelledby="videos-heading">
+        <h2 id="videos-heading" className="eyebrow mb-8">Video</h2>
+        {videos.length ? (
+          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {videos.map((video) => <MediaVideoCard key={video.id} video={video} />)}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600">
+            {videosResult.status === "rejected" ? "Videos are temporarily unavailable. Please try again shortly." : "New films and interviews are coming soon."}
+          </p>
+        )}
+      </section>
+
+      <section className="hairline bg-smoke" aria-labelledby="press-heading">
+        <div className="container-editorial py-16 md:py-20">
+          <h2 id="press-heading" className="eyebrow mb-8">In the Press</h2>
+          {press.length ? (
+            <div className="divide-y divide-ink/15 border-y border-ink/15">
+              {press.map((article) => (
+                <a key={article.id} href={article.article_url} target="_blank" rel="noopener noreferrer" className="group flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="font-display text-xl group-hover:underline underline-offset-4">{article.headline}<span className="sr-only"> (opens in a new tab)</span></h3>
+                  <div className="shrink-0 font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500 sm:text-right">
+                    <p>{article.publication}</p>
+                    <time dateTime={article.published_date} className="mt-2 block">
+                      {new Date(`${article.published_date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}
+                    </time>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">
+              {pressResult.status === "rejected" ? "Press coverage is temporarily unavailable. Please try again shortly." : "Check back soon for Glitz Africa in the press."}
+            </p>
+          )}
         </div>
       </section>
     </div>

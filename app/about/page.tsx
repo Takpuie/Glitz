@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { editorialImage } from "@/lib/img";
 
 const brands = [
@@ -65,6 +66,7 @@ export default function AboutPage() {
                 hello@glitzafrica.com<br />
                 +233 (0)30 000 0000
               </address>
+              <Link href="/contact" className="btn-outline mt-6">Send an enquiry</Link>
             </div>
           </div>
         </div>

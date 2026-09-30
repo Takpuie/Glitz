@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes hero-reveal { from { opacity: 0; } to { opacity: 1; } }
+.hero-reveal { animation: hero-reveal 700ms ease-out; }
+@keyframes partner-scroll { to { transform: translateX(-50%); } }
+.partner-group { min-width: 100vw; justify-content: space-around; }
+.partner-track { animation: partner-scroll 35s linear infinite; }
+.partner-marquee:hover .partner-track,
+.partner-marquee:focus-within .partner-track,
+.partner-marquee.is-paused .partner-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  .hero-reveal, .partner-track { animation: none; }
+  .partner-track, .partner-group { width: 100%; min-width: 0; flex-wrap: wrap; gap: 2rem 0; }
+  .partner-copy, .partner-motion-toggle { display: none; }
+}
+
 @layer base {
   * {
     @apply border-line/10;

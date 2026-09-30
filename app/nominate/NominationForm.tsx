@@ -1,84 +1,28 @@
-"use client";
+﻿import SubmissionForm from "@/components/SubmissionForm";
 
-import { useState } from "react";
-
-const CALLS = [
-  "GAFW Young Designers Showcase",
-  "Ghana Women of the Year — Nominate an Honouree",
-  "Glitz Style Awards — Reader Nomination",
-];
+const inputClass = "mt-2 block w-full border-b border-ink bg-transparent py-3 text-sm";
 
 export default function NominationForm() {
-  const [submitted, setSubmitted] = useState(false);
-
-  if (submitted) {
-    return (
-      <div className="border border-ink/15 p-10 text-center">
-        <p className="eyebrow mb-3">Received</p>
-        <h3 className="font-display text-2xl">Thank you — your submission is in.</h3>
-        <p className="mt-3 text-sm text-gray-600">
-          The review panel will be in touch by email with your status: received,
-          shortlisted, or selected.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-8"
-    >
-      <div>
-        <label className="eyebrow mb-2 block">Which open call?</label>
-        <select required className="w-full border-b border-ink bg-transparent py-3 font-body text-sm focus:outline-none">
+    <SubmissionForm kind="nominations" buttonLabel="Submit application" successMessage="Thank you. Your application has been saved for review. Keep your reference number for any follow-up.">
+      <label className="block text-sm">Which open call?
+        <select name="open_call" required defaultValue="" className={inputClass}>
           <option value="">Select an open call</option>
-          {CALLS.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
+          <option value="designers">GAFW Young Designers Showcase</option>
+          <option value="honours">Ghana Women of the Year — Nominate an Honouree</option>
+          <option value="style">Glitz Style Awards — Reader Nomination</option>
         </select>
+      </label>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <label className="block text-sm">Full name<input name="full_name" required maxLength={150} autoComplete="name" className={inputClass} /></label>
+        <label className="block text-sm">Email<input name="email" type="email" required maxLength={254} autoComplete="email" className={inputClass} /></label>
       </div>
-
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-        <div>
-          <label className="eyebrow mb-2 block">Full name</label>
-          <input required type="text" className="w-full border-b border-ink bg-transparent py-3 font-body text-sm focus:outline-none" />
-        </div>
-        <div>
-          <label className="eyebrow mb-2 block">Email</label>
-          <input required type="email" className="w-full border-b border-ink bg-transparent py-3 font-body text-sm focus:outline-none" />
-        </div>
-      </div>
-
-      <div>
-        <label className="eyebrow mb-2 block">Portfolio / press link</label>
-        <input type="url" placeholder="https://" className="w-full border-b border-ink bg-transparent py-3 font-body text-sm placeholder:text-gray-400 focus:outline-none" />
-      </div>
-
-      <div>
-        <label className="eyebrow mb-2 block">Portfolio upload</label>
-        <div className="border border-dashed border-ink/30 px-6 py-10 text-center text-sm text-gray-500">
-          Drag files here or click to upload (PDF, JPG — max 20MB)
-        </div>
-      </div>
-
-      <div>
-        <label className="eyebrow mb-2 block">Written statement</label>
-        <textarea
-          required
-          rows={5}
-          placeholder="Tell us about your work and why this opportunity matters to you."
-          className="w-full border-b border-ink bg-transparent py-3 font-body text-sm placeholder:text-gray-400 focus:outline-none"
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4">
-        <button type="submit" className="btn-primary">Submit Application</button>
-        <button type="button" className="btn-outline">Save Draft</button>
-      </div>
-    </form>
+      <label className="block text-sm">Portfolio / press link (optional)<input name="portfolio_link" type="url" maxLength={200} placeholder="https://" className={inputClass} /></label>
+      <label className="block text-sm">Portfolio upload (optional)
+        <input name="portfolio_file" type="file" accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg" className="mt-3 block w-full text-sm" />
+        <span className="mt-2 block text-xs text-gray-600">One PDF or JPG, up to 20 MB. Accessible only to authorised staff.</span>
+      </label>
+      <label className="block text-sm">Written statement<textarea name="statement" required maxLength={10000} rows={5} placeholder="Tell us about your work and why this opportunity matters to you." className={inputClass} /></label>
+    </SubmissionForm>
   );
 }

@@ -58,6 +58,134 @@ python manage.py runserver 0.0.0.0:8000
 Wagtail admin: `http://localhost:8000/admin/`
 Django admin: `http://localhost:8000/django-admin/`
 
+### Post previews
+
+Open a post in Wagtail and use **Preview** to see current unsaved edits,
+or **View draft** to see the latest saved revision. Previews render inside
+the backend using `templates/content/post_preview.html`, including rich
+text, cover/body images, pull quotes, and gallery items. They use a dedicated
+responsive article layout; they are not an exact rendering of the Next.js
+page. The frontend server does not need to be running for previews.
+
+Wagtail's existing permissions protect draft previews. Previewing does not
+publish the post or expose drafts through the public articles API.
+
+### Events navigation
+
+The **Glitz Events** dropdown (desktop and mobile) and the Events page read
+the full CMS event list. Add or rename an event under **Snippets → Events**
+to update its menu entry; no frontend code change is needed. Archived events
+remain listed. Event data has a 30-second revalidation interval; refresh the
+website after the cache refreshes to see changes in an already open menu.
+
+### Website submissions
+
+### Visitor accounts and reader comments
+
+`/account` supports email/password registration and login, Google sign-in,
+logout, email verification, password reset, display-name editing, and password
+changes. Guest checkout remains available. Verified visitors can see up to 100
+recent orders, tickets, and applications associated with their verified email,
+plus saved articles. Records explicitly owned by another user are excluded.
+Paid digital downloads use an authenticated account endpoint that rechecks
+ownership and current payment status. Application staff notes are never returned.
+Email changes are not offered in this version; display names can be changed.
+
+Visitor sessions use separate HttpOnly cookies (`glitz_visitor_session` and
+`glitz_visitor_csrf`) through the same-origin Next.js `/api/visitor/` proxy.
+Wagtail's staff cookies are not forwarded. Unsafe requests require a matching
+Origin and Django CSRF token. Serve the public frontend over HTTPS in production;
+the proxy marks visitor cookies Secure in production. Configure the same
+`FRONTEND_BASE_URL` on Django and Next.js, and set `BACKEND_API_URL` for Next.js.
+The proxy currently maps Django's default `sessionid` and `csrftoken` cookie names.
+
+To activate email, set the SMTP variables in `.env.example`, set a verified
+`DEFAULT_FROM_EMAIL`, set `EMAIL_BACKEND` to Django's SMTP backend, and enable
+`AUTH_EMAIL_ENABLED`. In local development, enabling that flag with the default
+console backend prints links instead of sending mail. Verification links expire
+after 24 hours and password-reset links after one hour; tokens are stored hashed
+and consumed once. Password resets invalidate prior sessions. Missing email
+configuration is reported in the UI, never treated as delivered mail.
+
+To activate Google sign-in, create a Web OAuth client in the Google Cloud project,
+configure the consent screen, set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`,
+and register `<FRONTEND_BASE_URL>/api/visitor/google/callback` as the redirect URI.
+The callback validates signed ID tokens, audience, expiry, state, nonce and PKCE.
+Existing email/password accounts must first sign in and explicitly connect
+Google from their profile. No automatic email-based account linking occurs.
+Non-Gmail/non-Workspace Google identities still require Glitz email verification
+before accessing email-associated purchases. Secrets stay on Django.
+
+Published public posts support plain-text reader comments. Verified readers can
+post, edit/delete their own comments, report comments, and save articles. Comments
+appear immediately. In Wagtail **Snippets**, use **Reader comments** to hide or
+delete comments, **Comment reports** to review/resolve reports, and **Reader
+accounts** to suspend commenting. Editing a hidden comment never unhides it.
+Suspended readers may still delete their own comments. Comments load 50 at a time.
+Give moderators view/change/delete permissions on these three models as needed.
+Auth and comment rate limits use Django's cache; use a shared cache across workers
+in production. No automated content-classification service is connected.
+
+This release does not send submission status notifications or newsletter
+campaigns. It adds only account verification and recovery emails when enabled.
+
+### Website form records
+
+Website forms save directly to Wagtail **Snippets**:
+
+- **Newsletter subscribers**: footer signups, consent time, and active status.
+- **Nominations**: application details, portfolio attachment/link, review status,
+  and private staff notes. Review statuses are Received, Shortlisted, Selected,
+  and Not selected.
+- **Enquiries**: contact messages (`/contact`), event interest (event pages), and
+  sponsorship requests (`/partners#enquire`). Filter by enquiry type, event,
+  or status (New, In progress, Resolved).
+
+Give the relevant staff groups view/change permissions for these records.
+Public endpoints at `POST /api/submissions/{newsletter,nominations,enquiries}/`
+accept submissions but do not expose lists or private records. The frontend
+proxies these requests, displays errors, and only confirms successful saves.
+Retries of an application/enquiry use a unique submission ID to avoid duplicate
+records. Newsletter emails are normalised and deduplicated; public signups do
+not reactivate records staff have disabled. Forms require explicit consent and
+include a honeypot plus a limit of 10 attempts per email address per hour.
+The limiter uses Django's cache; configure a shared cache for consistent limits
+across multiple server processes.
+
+Portfolios accept one PDF/JPG up to 20 MB. They live in `backend/private_uploads/`,
+outside public media. Never configure the web server to expose this directory;
+include it in private backups. Downloads require the nomination view permission.
+Staff can download attachments from a nomination's edit screen.
+
+This phase stores submissions only: no confirmation emails, staff notifications,
+status emails, or newsletter campaigns are sent. Status changes and notes stay
+inside Wagtail. The old nonfunctional Save Draft button has been removed.
+Run `python manage.py migrate` when deploying.
+
+### Media content management
+
+Manage **Media Gallery**, **Videos**, and **Press coverage** under Wagtail's **Snippets** menu.
+Media Gallery entries use Wagtail's image library: upload or choose an image, add a title
+and accessibility description, then optional caption, photographer credit,
+and event association. Set display order and enable **Is visible** to show
+it in the Media page gallery. Clicking a photo opens an uncropped rendition
+in a new tab. `/api/photos/` only lists visible entries. Hiding a photo
+removes its listing but does not revoke previously shared image URLs.
+Videos accept an HTTPS YouTube/public Vimeo video link or an MP4/WebM upload
+(exactly one source), an optional thumbnail, duration, and event association.
+Press coverage contains a headline, publication, article URL, and date.
+For all media entries, lower **Display order** numbers come first. Enable **Is visible**
+when an entry is ready to appear publicly; new entries start hidden.
+
+The Media page fetches `/api/videos/` and `/api/press-coverage/`, which only
+return visible entries and are read-only. Content refreshes through the
+frontend's 60-second cache. Video players load after a visitor clicks Play;
+external hosts must permit embedding. Hiding an uploaded video removes its
+listing but does not revoke access to a previously shared file URL.
+No placeholder videos or press claims are imported: the page starts empty
+until real entries are added. Deployments must run `python manage.py migrate`
+to create the media tables.
+
 All content — articles, events, magazine issues, and now orders/tickets —
 is manageable from the Wagtail admin's **Snippets** menu, so day-to-day
 staff work never needs the Django admin. `Order` (Snippets → Orders) and
@@ -300,3 +428,10 @@ To deploy:
 - GAFW's day-by-day programme and the runway gallery are still static
   frontend content, not modeled in the backend (not part of any phase's
   explicit data-model scope so far)
+# Homepage video and partner sections
+
+In Wagtail **Snippets → Videos**, upload an MP4/WebM, add a thumbnail, and enable visibility. Visible videos also appear in the homepage's swipeable film carousel. Uploaded files have muted previews; YouTube/Vimeo links play after a visitor clicks.
+
+In **Snippets → Homepage slides**, add a headline, poster, optional uploaded video, button text and local destination (for example `/events/gafw`). Enable visibility and use display order to arrange slides. Without published slides, the hero uses existing Glitz event photos. A hidden or removed video falls back to its slide's poster.
+
+In **Snippets → Partner logos**, upload each partner's logo, name and optional website, then enable visibility. Logos scroll continuously and pause on hover, keyboard focus or the Pause button. With no visible partners, the strip is hidden. Both animated sections respect reduced-motion preferences. Allow up to 60 seconds for published content to refresh on the frontend.
