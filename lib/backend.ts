@@ -5,6 +5,9 @@
 import { editorialImage } from "@/lib/img";
 
 const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
+// Shared-hosted Wagtail responses can take several seconds while Apache
+// starts the application or builds a large page listing during deployment.
+const BACKEND_TIMEOUT_MS = 30_000;
 
 export type HomepageSlide = {
   id: number; title: string; eyebrow: string; description: string;
@@ -84,7 +87,7 @@ async function wagtailFetch(path: string) {
     // Editorial content changes rarely; a short revalidate window keeps
     // pages fast without going fully static against a live CMS.
     next: { revalidate: 60 },
-    signal: AbortSignal.timeout(4000),
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`Backend request failed: ${path} (${res.status})`);
@@ -184,7 +187,7 @@ export type BackendEvent = {
 export async function getBackendEvent(slug: string): Promise<BackendEvent | undefined> {
   const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/`, {
     next: { revalidate: 30 },
-    signal: AbortSignal.timeout(4000),
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   });
   if (res.status === 404) return undefined;
   if (!res.ok) throw new Error(`Backend request failed: /api/events/${slug}/ (${res.status})`);
@@ -194,7 +197,7 @@ export async function getBackendEvent(slug: string): Promise<BackendEvent | unde
 export async function getBackendEvents(): Promise<BackendEvent[]> {
   const res = await fetch(`${BACKEND_URL}/api/events/`, {
     next: { revalidate: 30 },
-    signal: AbortSignal.timeout(4000),
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Backend request failed: /api/events/ (${res.status})`);
   return res.json();
@@ -217,7 +220,7 @@ export type BackendMagazineIssue = {
 };
 
 export async function getMagazineIssues(): Promise<BackendMagazineIssue[]> {
-  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(4000) });
+  const res = await fetch(`${BACKEND_URL}/api/magazine-issues/`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS) });
   if (!res.ok) throw new Error(`Backend request failed: /api/magazine-issues/ (${res.status})`);
   return res.json();
 }
