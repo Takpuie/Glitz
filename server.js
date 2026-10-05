@@ -6,14 +6,14 @@
 const { loadEnvConfig } = require("@next/env");
 const { startServer } = require("next/dist/server/lib/start-server");
 
-loadEnvConfig(process.cwd());
+loadEnvConfig(__dirname);
 
 const dev = process.env.NODE_ENV === "development";
 const port = Number(process.env.PORT || 3000);
 const host = process.env.BIND_HOST || "127.0.0.1";
 
 startServer({
-  dir: process.cwd(),
+  dir: __dirname,
   isDev: dev,
   hostname: host,
   port,
