@@ -16,5 +16,5 @@ class TicketAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("status", "event")
-    search_fields = ("check_in_code", "buyer_name", "buyer_email", "stripe_session_id")
-    readonly_fields = ("check_in_code", "stripe_session_id", "created_at")
+    search_fields = ("check_in_code", "buyer_name", "buyer_email", "stripe_session_id", "paystack_reference")
+    readonly_fields = ("check_in_code", "stripe_session_id", "paystack_reference", "payment_provider", "created_at")

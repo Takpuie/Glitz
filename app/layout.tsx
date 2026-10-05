@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -8,25 +8,21 @@ import { CartProvider } from "@/lib/cart-context";
 import { getBackendEvents } from "@/lib/backend";
 import { events } from "@/data/events";
 
-const display = Bodoni_Moda({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
+const display = localFont({
+  src: [
+    { path: "./fonts/BodoniModa-Variable.ttf", weight: "400 900", style: "normal" },
+    { path: "./fonts/BodoniModa-Italic-Variable.ttf", weight: "400 900", style: "italic" },
+  ],
   variable: "--font-display",
   display: "swap",
 });
 
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+const body = localFont({
+  src: [
+    { path: "./fonts/Inter-Variable.ttf", weight: "100 900", style: "normal" },
+    { path: "./fonts/Inter-Italic-Variable.ttf", weight: "100 900", style: "italic" },
+  ],
   variable: "--font-body",
-  display: "swap",
-});
-
-const nav = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-nav",
   display: "swap",
 });
 
@@ -50,7 +46,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${nav.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <CartProvider>
           <AccountModalProvider>

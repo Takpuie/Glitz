@@ -12,7 +12,10 @@ function formatPrice(n: number) {
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, clearCart } = useCart();
   const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  const [shipping, setShipping] = useState({
+    shipping_name: "", shipping_phone: "", shipping_address_line1: "", shipping_address_line2: "",
+    shipping_city: "", shipping_region: "", shipping_postal_code: "", shipping_country: "GH",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ export default function CartPage() {
         body: JSON.stringify({
           items: items.map((i) => ({ slug: i.slug, format: i.format, quantity: i.quantity })),
           buyer_email: email,
-          shipping_address: hasPrint ? address : undefined,
+          ...(hasPrint ? shipping : {}),
         }),
       });
       const data = await res.json();
@@ -144,20 +147,33 @@ export default function CartPage() {
               />
             </div>
             {hasPrint && (
-              <div>
-                <label className="eyebrow mb-2 block">Shipping address</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full border-b border-ink bg-transparent py-2 font-body text-sm focus:outline-none"
-                />
-              </div>
+              <fieldset className="space-y-4 border-t border-ink/15 pt-5">
+                <legend className="eyebrow mb-1">Shipping address</legend>
+                {[
+                  ["shipping_name", "Full name", "text", true, "name"],
+                  ["shipping_phone", "Phone number", "tel", true, "tel"],
+                  ["shipping_address_line1", "Address line 1", "text", true, "street-address"],
+                  ["shipping_address_line2", "Address line 2 (optional)", "text", false, "address-line2"],
+                  ["shipping_city", "City / town", "text", true, "address-level2"],
+                  ["shipping_region", "Region / state", "text", true, "address-level1"],
+                  ["shipping_postal_code", "Postal code (optional)", "text", false, "postal-code"],
+                ].map(([name, label, type, required, autoComplete]) => (
+                  <div key={String(name)}>
+                    <label htmlFor={String(name)} className="mb-1 block text-xs text-gray-600">{label}</label>
+                    <input id={String(name)} name={String(name)} type={String(type)} required={Boolean(required)} autoComplete={String(autoComplete)} value={shipping[name as keyof typeof shipping]} onChange={(e) => setShipping((current) => ({ ...current, [String(name)]: e.target.value }))} className="w-full border-b border-ink bg-transparent py-2 font-body text-sm focus:border-gray-500 focus:outline-none" />
+                  </div>
+                ))}
+                <div>
+                  <label htmlFor="shipping_country" className="mb-1 block text-xs text-gray-600">Country</label>
+                  <select id="shipping_country" required value={shipping.shipping_country} onChange={(e) => setShipping((current) => ({ ...current, shipping_country: e.target.value }))} className="w-full border-b border-ink bg-transparent py-2 font-body text-sm focus:outline-none">
+                    <option value="GH">Ghana</option><option value="NG">Nigeria</option><option value="GB">United Kingdom</option><option value="US">United States</option><option value="CA">Canada</option><option value="ZA">South Africa</option><option value="KE">Kenya</option>
+                  </select>
+                </div>
+              </fieldset>
             )}
             {error && <p className="text-sm text-red-700">{error}</p>}
             <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
-              {loading ? "Redirecting…" : `Checkout — ${formatPrice(subtotal)}`}
+              {loading ? "Opening Paystack…" : `Pay with Paystack — ${formatPrice(subtotal)}`}
             </button>
           </form>
 

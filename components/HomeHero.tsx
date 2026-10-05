@@ -45,21 +45,29 @@ export default function HomeHero({ slides }: { slides: HomepageSlide[] }) {
     }}>
     <div key={slide.id} className="hero-reveal absolute inset-0 -z-20">
       <Image unoptimized src={slide.poster.full_url} alt="" fill priority={active === 0} sizes="100vw" className="object-cover" />
-      {slide.video_url && !reduced && <video ref={video} src={slide.video_url} poster={slide.poster.full_url} muted loop playsInline preload="metadata" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />}
+      {slide.video_url && !reduced && <video ref={video} src={slide.video_url} poster={slide.poster.full_url} autoPlay={moving} muted loop playsInline preload="metadata" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />}
     </div>
     <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/35 to-black/15" />
     <div className="container-editorial pb-8 pt-32 md:pb-12">
-      <div className="max-w-3xl pb-14 md:pb-20" aria-live={moving ? "off" : "polite"}>
-        <p className="mb-5 font-nav text-[11px] uppercase tracking-[0.3em] text-white/80">{slide.eyebrow || "Glitz Africa"}</p>
+      <div className="hero-gold-stroke max-w-3xl pb-14 md:pb-20" aria-live={moving ? "off" : "polite"}>
+        <p className="mb-5 font-nav text-[11px] uppercase tracking-[0.3em] text-white">{slide.eyebrow || "Glitz Africa"}</p>
         <h1 className="max-w-3xl font-display text-5xl leading-[1.02] sm:text-7xl lg:text-8xl">{slide.title}</h1>
-        {slide.description && <p className="mt-6 max-w-lg text-base leading-relaxed text-white/80 md:text-lg">{slide.description}</p>}
-        <Link href={slide.button_path} className="mt-8 inline-flex items-center gap-8 border-b border-white/70 pb-3 font-nav text-xs uppercase tracking-widest">{slide.button_label}<span aria-hidden="true">↗</span></Link>
+        {slide.description && <p className="mt-6 max-w-lg text-base leading-relaxed text-white md:text-lg">{slide.description}</p>}
+        <Link href={slide.button_path} className="mt-8 inline-flex items-center gap-8 border-b border-[#d4af37]/70 pb-3 font-nav text-xs uppercase tracking-widest">{slide.button_label}<span aria-hidden="true">↗</span></Link>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-5 border-t border-white/30 pt-5">
-        <div className="flex items-center gap-3" aria-label="Choose a highlight">{slides.map((item, index) => <button key={item.id} onClick={() => setActive(index)} aria-label={`Show ${item.title}`} aria-current={index === active ? "true" : undefined} className={`h-8 w-10 border-b-2 font-nav text-xs ${index === active ? "border-white text-white" : "border-white/25 text-white/60"}`}>{String(index + 1).padStart(2, "0")}</button>)}</div>
-        <div className="flex items-center gap-3">
-          {!reduced && <button onClick={() => setPaused(value => !value)} className="mr-3 text-xs uppercase tracking-widest" aria-label={paused ? "Play hero motion" : "Pause hero motion"}>{paused ? "Play" : "Pause"}</button>}
-          {slides.length > 1 && <><button aria-label="Previous highlight" onClick={() => advance(-1)} className="h-10 w-10 rounded-full border border-white/40">←</button><button aria-label="Next highlight" onClick={() => advance(1)} className="h-10 w-10 rounded-full border border-white/40">→</button></>}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/30 p-2 shadow-2xl shadow-black/40 backdrop-blur-md">
+          {slides.length > 1 && <button aria-label="Previous highlight" onClick={() => advance(-1)} className="group grid h-11 w-11 place-items-center rounded-full text-white/90 transition-all duration-300 hover:bg-white/10 hover:text-[#d4af37]">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.5"><path d="m14.5 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>}
+          {!reduced && <button onClick={() => setPaused(value => !value)} className="group grid h-14 w-14 place-items-center rounded-full border border-[#d4af37]/80 bg-[#d4af37] text-ink shadow-[0_0_28px_rgba(212,175,55,0.28)] transition-all duration-300 hover:scale-105 hover:bg-[#e5c65b]" aria-label={paused ? "Play hero motion" : "Pause hero motion"}>
+            {paused
+              ? <svg aria-hidden="true" viewBox="0 0 24 24" className="ml-0.5 h-5 w-5 fill-current"><path d="M8.4 5.7a1 1 0 0 1 1.52-.85l9.2 6.3a1 1 0 0 1 0 1.7l-9.2 6.3a1 1 0 0 1-1.52-.85V5.7Z" /></svg>
+              : <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-current"><rect x="7" y="5" width="3.5" height="14" rx="1" /><rect x="13.5" y="5" width="3.5" height="14" rx="1" /></svg>}
+          </button>}
+          {slides.length > 1 && <button aria-label="Next highlight" onClick={() => advance(1)} className="group grid h-11 w-11 place-items-center rounded-full text-white/90 transition-all duration-300 hover:bg-white/10 hover:text-[#d4af37]">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.5"><path d="m9.5 5 7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>}
         </div>
       </div>
     </div>

@@ -35,9 +35,30 @@ export default function Footer() {
             and lifestyle.
           </p>
           <div className="mt-6 flex gap-4 font-nav text-[11px] uppercase tracking-widest2">
-            <a href="#" className="link-underline text-gray-300 hover:text-paper">Instagram</a>
-            <a href="#" className="link-underline text-gray-300 hover:text-paper">TikTok</a>
-            <a href="#" className="link-underline text-gray-300 hover:text-paper">X</a>
+            <a
+              href="https://www.instagram.com/glitzafrica_hq/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-underline text-gray-300 hover:text-paper"
+            >
+              Instagram
+            </a>
+            <a
+              href="https://www.tiktok.com/@glitz.africa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-underline text-gray-300 hover:text-paper"
+            >
+              TikTok
+            </a>
+            <a
+              href="https://x.com/glitzafrica"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-underline text-gray-300 hover:text-paper"
+            >
+              X
+            </a>
           </div>
         </div>
 

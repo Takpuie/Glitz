@@ -1,26 +1,52 @@
-"use client";
-
-import { useRef, useState } from "react";
 import Link from "next/link";
 import MediaVideoCard from "@/components/MediaVideoCard";
 import type { MediaVideo } from "@/lib/backend";
 
-export default function HomeVideos({ videos }: { videos: MediaVideo[] }) {
-  const track = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
-  if (!videos.length) return null;
-  function move(direction: number) {
-    track.current?.scrollBy({ left: direction * track.current.clientWidth * 0.85, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-  }
-  return <section className="bg-ink py-16 text-paper md:py-20" aria-labelledby="home-videos-title">
-    <div className="container-editorial">
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-        <div><p className="mb-3 font-nav text-xs uppercase tracking-widest text-white/60">On film</p><h2 id="home-videos-title" className="font-display text-4xl sm:text-5xl">Inside the world of Glitz.</h2></div>
-        <div className="flex flex-wrap items-center gap-3"><button className="text-xs underline underline-offset-8" onClick={() => setPaused(value => !value)}>{paused ? "Play previews" : "Pause previews"}</button><Link href="/media" className="mx-4 text-xs uppercase tracking-widest underline underline-offset-8">All films</Link><button onClick={() => move(-1)} aria-label="Previous videos" aria-controls="home-video-track" className="h-10 w-10 rounded-full border border-white/40">←</button><button onClick={() => move(1)} aria-label="Next videos" aria-controls="home-video-track" className="h-10 w-10 rounded-full border border-white/40">→</button></div>
-      </div>
-      <div id="home-video-track" ref={track} tabIndex={0} aria-label="Glitz videos; scroll to explore" className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6">
-        {videos.map(video => <div key={video.id} className="w-[82%] shrink-0 snap-start sm:w-[46%] lg:w-[31%]"><MediaVideoCard video={video} preview paused={paused} /></div>)}
-      </div>
+function FilmGroup({ videos, duplicate = false }: { videos: MediaVideo[]; duplicate?: boolean }) {
+  return (
+    <div className={`film-group flex shrink-0 items-start gap-5 pr-5 md:gap-7 md:pr-7 ${duplicate ? "pointer-events-none select-none" : ""}`} aria-hidden={duplicate || undefined}>
+      {videos.map((video, index) => (
+        <div
+          key={video.id}
+          className={`shrink-0 ${index % 3 === 1 ? "w-[72vw] sm:w-[42vw] lg:w-[30vw]" : "w-[64vw] sm:w-[36vw] lg:w-[24vw]"}`}
+        >
+          <MediaVideoCard video={video} preview />
+        </div>
+      ))}
     </div>
-  </section>;
+  );
+}
+
+export default function HomeVideos({ videos }: { videos: MediaVideo[] }) {
+  if (!videos.length) return null;
+  const featured = videos.slice(0, 6);
+
+  return (
+    <section className="overflow-hidden bg-ink py-16 text-paper md:py-24" aria-labelledby="home-videos-title">
+      <div className="container-editorial mb-10 flex items-end justify-between gap-8 md:mb-14">
+        <div>
+          <p className="mb-3 font-nav text-xs uppercase tracking-widest text-white/60">Glitz in motion</p>
+          <h2 id="home-videos-title" className="max-w-3xl font-display text-4xl leading-[1.02] sm:text-6xl">
+            Stories that move culture.
+          </h2>
+        </div>
+        <Link href="/media" className="hidden shrink-0 border-b border-white/60 pb-2 font-nav text-xs uppercase tracking-widest transition-colors hover:border-white sm:block">
+          Explore all films
+        </Link>
+      </div>
+
+      <div className="film-reel relative overflow-hidden" aria-label="Featured Glitz films">
+        <div className="film-track flex w-max">
+          <FilmGroup videos={featured} />
+          <FilmGroup videos={featured} duplicate />
+        </div>
+      </div>
+
+      <div className="container-editorial mt-10 sm:hidden">
+        <Link href="/media" className="border-b border-white/60 pb-2 font-nav text-xs uppercase tracking-widest">
+          Explore all films
+        </Link>
+      </div>
+    </section>
+  );
 }

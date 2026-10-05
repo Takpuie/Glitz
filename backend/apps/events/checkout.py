@@ -5,13 +5,14 @@ verify call (belt-and-braces, idempotent).
 """
 
 from django.conf import settings
-from django.db import transaction
+from django.db import models, transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from glitz_backend.stripe_client import StripeError, create_checkout_session, retrieve_checkout_session
+from glitz_backend.paystack_client import PaystackError, initialize_transaction, verify_transaction
 from .models import Event, Ticket, TicketType
 
 
@@ -23,6 +24,8 @@ class TicketStatusSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = [
             "stripe_session_id",
+            "paystack_reference",
+            "payment_provider",
             "status",
             "check_in_code",
             "buyer_name",
@@ -36,6 +39,7 @@ class TicketCheckoutSerializer(serializers.Serializer):
     ticket_type_id = serializers.IntegerField()
     buyer_name = serializers.CharField(max_length=150)
     buyer_email = serializers.EmailField()
+    payment_provider = serializers.ChoiceField(choices=("stripe", "paystack"), default="paystack")
 
 
 def mark_ticket_paid(session_id):
@@ -43,7 +47,7 @@ def mark_ticket_paid(session_id):
     path. Returns True if this session id belongs to a Ticket at all (paid
     or not), so the shared webhook knows not to also check Order — a
     duplicate webhook delivery must not be mistaken for "not mine"."""
-    ticket = Ticket.objects.filter(stripe_session_id=session_id).first()
+    ticket = Ticket.objects.filter(models.Q(stripe_session_id=session_id) | models.Q(paystack_reference=session_id)).first()
     if not ticket:
         return False
     if ticket.status == Ticket.Status.PENDING:
@@ -78,9 +82,26 @@ class TicketCheckoutView(APIView):
                 buyer_name=data["buyer_name"],
                 buyer_email=data["buyer_email"],
                 status=Ticket.Status.PENDING,
+                payment_provider=data["payment_provider"],
             )
 
         callback_url = f"{settings.FRONTEND_BASE_URL}/events/{event.slug}/checkout/callback"
+        if data["payment_provider"] == "paystack":
+            reference = f"glitz-ticket-{ticket.id}"
+            try:
+                payment = initialize_transaction(
+                    email=data["buyer_email"], amount=int(ticket_type.price * 100), reference=reference,
+                    callback_url=callback_url,
+                    metadata={"ticket_id": ticket.id, "event_slug": event.slug, "cancel_action": f"{settings.FRONTEND_BASE_URL}/events/{event.slug}"},
+                )
+            except PaystackError as exc:
+                ticket.status = Ticket.Status.CANCELLED
+                ticket.save(update_fields=["status"])
+                return Response({"detail": str(exc)}, status=502)
+            ticket.paystack_reference = payment["reference"]
+            ticket.save(update_fields=["paystack_reference"])
+            return Response({"reference": payment["reference"], "checkout_url": payment["authorization_url"]}, status=201)
+
         try:
             session = create_checkout_session(
                 email=data["buyer_email"],
@@ -116,13 +137,22 @@ class TicketVerifyView(APIView):
     authentication_classes = []
 
     def get(self, request, reference):
-        ticket = get_object_or_404(Ticket, stripe_session_id=reference)
+        ticket = get_object_or_404(Ticket, models.Q(stripe_session_id=reference) | models.Q(paystack_reference=reference))
         if ticket.status == Ticket.Status.PENDING:
-            try:
-                session = retrieve_checkout_session(reference)
-            except StripeError:
-                session = None
-            if session and session.payment_status == "paid":
+            paid = False
+            if ticket.payment_provider == "paystack":
+                try:
+                    payment = verify_transaction(reference)
+                except PaystackError:
+                    payment = None
+                paid = bool(payment and payment.get("status") == "success" and payment.get("currency") == "GHS" and payment.get("amount") == int(ticket.ticket_type.price * 100))
+            else:
+                try:
+                    session = retrieve_checkout_session(reference)
+                except StripeError:
+                    session = None
+                paid = bool(session and session.payment_status == "paid")
+            if paid:
                 mark_ticket_paid(reference)
                 ticket.refresh_from_db()
         return Response(TicketStatusSerializer(ticket).data)

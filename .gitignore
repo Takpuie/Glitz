@@ -3,6 +3,7 @@ node_modules
 out
 .env
 .env.local
+data/wordpress-image-recovery.csv
 .DS_Store
 *.log
 

@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
-  const { slug, ticket_type_id, buyer_name, buyer_email } = body ?? {};
+  const { slug, ticket_type_id, buyer_name, buyer_email, payment_provider } = body ?? {};
 
   if (!slug || !ticket_type_id || !buyer_name || !buyer_email) {
     return NextResponse.json({ detail: "Missing required fields." }, { status: 400 });
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/checkout/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ticket_type_id, buyer_name, buyer_email }),
+    body: JSON.stringify({ ticket_type_id, buyer_name, buyer_email, payment_provider }),
     cache: "no-store",
   });
   const data = await res.json();

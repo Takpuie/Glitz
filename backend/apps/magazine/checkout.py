@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from glitz_backend.stripe_client import StripeError, create_checkout_session, retrieve_checkout_session
+from glitz_backend.paystack_client import PaystackError, initialize_transaction, verify_transaction
 from .models import MagazineIssue, Order, OrderItem
 
 
@@ -41,7 +41,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             and obj.format == OrderItem.Format.DIGITAL
             and obj.issue.digital_file
         ):
-            return _download_url(order.stripe_session_id, order.email, obj.issue.slug)
+            return _download_url(order.payment_reference, order.email, obj.issue.slug)
         return None
 
 
@@ -50,7 +50,7 @@ class OrderStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["stripe_session_id", "status", "email", "amount", "items"]
+        fields = ["payment_reference", "status", "email", "amount", "items"]
 
 
 class CartItemSerializer(serializers.Serializer):
@@ -62,7 +62,14 @@ class CartItemSerializer(serializers.Serializer):
 class CartCheckoutSerializer(serializers.Serializer):
     items = CartItemSerializer(many=True)
     buyer_email = serializers.EmailField()
-    shipping_address = serializers.CharField(required=False, allow_blank=True)
+    shipping_name = serializers.CharField(required=False, allow_blank=True, max_length=120)
+    shipping_phone = serializers.CharField(required=False, allow_blank=True, max_length=30)
+    shipping_address_line1 = serializers.CharField(required=False, allow_blank=True, max_length=200)
+    shipping_address_line2 = serializers.CharField(required=False, allow_blank=True, max_length=200)
+    shipping_city = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    shipping_region = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    shipping_postal_code = serializers.CharField(required=False, allow_blank=True, max_length=30)
+    shipping_country = serializers.RegexField(r"^[A-Z]{2}$", required=False, default="GH")
 
     def validate_items(self, value):
         if not value:
@@ -71,10 +78,11 @@ class CartCheckoutSerializer(serializers.Serializer):
 
     def validate(self, data):
         has_print = any(item["format"] == OrderItem.Format.PRINT for item in data["items"])
-        if has_print and not data.get("shipping_address", "").strip():
-            raise serializers.ValidationError(
-                {"shipping_address": "Required when your bag includes a print item."}
-            )
+        if has_print:
+            required = ("shipping_name", "shipping_phone", "shipping_address_line1", "shipping_city", "shipping_region", "shipping_country")
+            missing = [field for field in required if not data.get(field, "").strip()]
+            if missing:
+                raise serializers.ValidationError({field: "Required for print delivery." for field in missing})
         return data
 
 
@@ -82,7 +90,7 @@ def mark_order_paid(session_id):
     """Idempotent — used by both the webhook and the verify-on-callback
     path. Returns True if this session id belongs to an Order at all (paid
     or not), so the shared webhook knows not to also check Ticket."""
-    order = Order.objects.filter(stripe_session_id=session_id).first()
+    order = Order.objects.filter(payment_reference=session_id).first()
     if not order:
         return False
     if order.status == Order.Status.PENDING:
@@ -111,7 +119,11 @@ class MagazineCheckoutView(APIView):
                 email=data["buyer_email"],
                 amount=0,
                 status=Order.Status.PENDING,
-                shipping_address=data.get("shipping_address", ""),
+                shipping_address="\n".join(filter(None, [data.get("shipping_address_line1"), data.get("shipping_address_line2"), data.get("shipping_city"), data.get("shipping_region"), data.get("shipping_postal_code"), data.get("shipping_country")])),
+                shipping_name=data.get("shipping_name", ""), shipping_phone=data.get("shipping_phone", ""),
+                shipping_address_line1=data.get("shipping_address_line1", ""), shipping_address_line2=data.get("shipping_address_line2", ""),
+                shipping_city=data.get("shipping_city", ""), shipping_region=data.get("shipping_region", ""),
+                shipping_postal_code=data.get("shipping_postal_code", ""), shipping_country=data.get("shipping_country", "GH"),
             )
             for cart_item in data["items"]:
                 issue = get_object_or_404(MagazineIssue, slug=cart_item["slug"])
@@ -142,24 +154,22 @@ class MagazineCheckoutView(APIView):
             order.save(update_fields=["amount"])
 
         callback_url = f"{settings.FRONTEND_BASE_URL}/magazine/checkout/callback"
+        reference = f"glitz-order-{order.id}"
         try:
-            session = create_checkout_session(
-                email=data["buyer_email"],
-                currency="ghs",
-                line_items=line_items,
-                success_url=f"{callback_url}?reference={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{settings.FRONTEND_BASE_URL}/cart",
-                metadata={"order_id": order.id},
+            transaction_data = initialize_transaction(
+                email=data["buyer_email"], amount=int(total * 100), reference=reference,
+                callback_url=callback_url,
+                metadata={"order_id": order.id, "cancel_action": f"{settings.FRONTEND_BASE_URL}/cart", "items": line_items},
             )
-        except StripeError as exc:
+        except PaystackError as exc:
             order.status = Order.Status.FAILED
             order.save(update_fields=["status"])
             return Response({"detail": str(exc)}, status=502)
 
-        order.stripe_session_id = session.id
-        order.save(update_fields=["stripe_session_id"])
+        order.payment_reference = transaction_data["reference"]
+        order.save(update_fields=["payment_reference"])
 
-        return Response({"reference": session.id, "checkout_url": session.url}, status=201)
+        return Response({"reference": transaction_data["reference"], "checkout_url": transaction_data["authorization_url"]}, status=201)
 
 
 class OrderVerifyView(APIView):
@@ -170,13 +180,13 @@ class OrderVerifyView(APIView):
     authentication_classes = []
 
     def get(self, request, reference):
-        order = get_object_or_404(Order, stripe_session_id=reference)
+        order = get_object_or_404(Order, payment_reference=reference)
         if order.status == Order.Status.PENDING:
             try:
-                session = retrieve_checkout_session(reference)
-            except StripeError:
-                session = None
-            if session and session.payment_status == "paid":
+                payment = verify_transaction(reference)
+            except PaystackError:
+                payment = None
+            if payment and payment.get("status") == "success" and payment.get("currency") == "GHS" and payment.get("amount") == int(order.amount * 100):
                 mark_order_paid(reference)
                 order.refresh_from_db()
         return Response(OrderStatusSerializer(order).data)
@@ -194,7 +204,7 @@ class DigitalDownloadView(APIView):
     def get(self, request, reference):
         from django.http import HttpResponseRedirect
 
-        order = get_object_or_404(Order, stripe_session_id=reference)
+        order = get_object_or_404(Order, payment_reference=reference)
         email = request.query_params.get("email", "")
         issue_slug = request.query_params.get("issue", "")
         if order.status != Order.Status.PAID:

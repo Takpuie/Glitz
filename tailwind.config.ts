@@ -25,7 +25,7 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
         body: ["var(--font-body)", "Helvetica Neue", "Arial", "sans-serif"],
-        nav: ["var(--font-nav)", "Helvetica Neue", "Arial", "sans-serif"],
+        nav: ["var(--font-body)", "Helvetica Neue", "Arial", "sans-serif"],
       },
       letterSpacing: {
         widest2: "0.28em",

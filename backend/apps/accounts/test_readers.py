@@ -161,12 +161,13 @@ class ReaderTests(TestCase):
         self.sign_in(self.other)
         self.assertEqual(self.api("dashboard").json()["saved"], [])
 
-    def test_comments_publish_immediately_without_exposing_email(self):
+    def test_comments_wait_for_moderation_without_exposing_email(self):
         self.sign_in()
         self.assertEqual(self.api("comments/public-article", {"body": "An interesting story."}).status_code, 200)
+        self.assertTrue(ReaderComment.objects.get().hidden)
         self.client.logout()
         response = self.api("comments/public-article")
-        self.assertEqual(response.json()["comments"][0]["body"], "An interesting story.")
+        self.assertEqual(response.json()["comments"], [])
         self.assertNotContains(response, self.reader.email)
         self.assertNotContains(response, "google_subject")
 

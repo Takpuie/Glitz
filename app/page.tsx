@@ -7,25 +7,24 @@ import HomeVideos from "@/components/HomeVideos";
 import PartnerMarquee from "@/components/PartnerMarquee";
 import { getArticles } from "@/data/articles";
 import { events } from "@/data/events";
-import { getBackendEvent, getMagazineIssues, getHomepageSlides, getMediaVideos, getPartnerLogos, type HomepageSlide } from "@/lib/backend";
+import { partners } from "@/data/partners";
+import { getBackendEvent, getMagazineIssues, getHomepageSlides, getMediaVideos, type HomepageSlide, type MediaVideo } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 
 export default async function Home() {
   const articles = await getArticles();
   const rest = articles.slice(0, 7);
   const gafw = events[0];
-  const [backendGafwResult, magazineResult, slidesResult, videosResult, partnersResult] = await Promise.allSettled([
+  const [backendGafwResult, magazineResult, slidesResult, videosResult] = await Promise.allSettled([
     getBackendEvent("gafw"),
     getMagazineIssues(),
     getHomepageSlides(),
     getMediaVideos(),
-    getPartnerLogos(),
   ]);
   const backendGafw = backendGafwResult.status === "fulfilled" ? backendGafwResult.value : undefined;
   const magazineIssues = magazineResult.status === "fulfilled" ? magazineResult.value : [];
   const homepageSlides = slidesResult.status === "fulfilled" ? slidesResult.value : [];
   const videos = videosResult.status === "fulfilled" ? videosResult.value : [];
-  const partners = partnersResult.status === "fulfilled" ? partnersResult.value : [];
   const currentIssue = magazineIssues.find((issue) => issue.is_current_issue) ?? magazineIssues[0];
 
   const fallbackSlides: HomepageSlide[] = [
@@ -33,10 +32,23 @@ export default async function Home() {
     { id: -2, title: "Where fashion comes alive.", eyebrow: "Glitz Africa Fashion Week", description: "The designers, the details, the moments. Experience the runway with Glitz.", poster: { full_url: "/images/gafw/group-finale-walk.jpg" }, video_url: null, button_label: "Discover our events", button_path: "/events" },
     { id: -3, title: "Women shaping what comes next.", eyebrow: "The Female CEO Summit", description: "Ideas, conversations and connections with the women leading change.", poster: { full_url: "/images/female-ceo-summit/panel-trade-opportunities.jpg" }, video_url: null, button_label: "Step inside", button_path: "/events/female-ceo-summit" },
   ];
+  const fallbackVideos: MediaVideo[] = [
+    { id: -1, title: "Backstage at Glitz Africa Fashion Week", thumbnail: { full_url: "/images/gafw/hero-designer-and-model.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Glitz Africa Fashion Week", slug: "gafw" } },
+    { id: -2, title: "The runway, in motion", thumbnail: { full_url: "/images/gafw/look-yellow-fringe.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Glitz Africa Fashion Week", slug: "gafw" } },
+    { id: -3, title: "Women shaping what comes next", thumbnail: { full_url: "/images/female-ceo-summit/podium-red-dress.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Female CEO Summit", slug: "female-ceo-summit" } },
+    { id: -4, title: "Details from the runway", thumbnail: { full_url: "/images/gafw/accessory-beaded-backpack.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Glitz Africa Fashion Week", slug: "gafw" } },
+    { id: -5, title: "Ideas, leadership and impact", thumbnail: { full_url: "/images/female-ceo-summit/panel-trade-opportunities.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Female CEO Summit", slug: "female-ceo-summit" } },
+  ];
+  const baseHeroSlides = homepageSlides.length ? homepageSlides : fallbackSlides;
+  const uploadedHeroVideos = videos.filter((video) => Boolean(video.file_url));
+  const heroSlides = baseHeroSlides.map((slide, index) => ({
+    ...slide,
+    video_url: slide.video_url ?? uploadedHeroVideos[index % uploadedHeroVideos.length]?.file_url ?? null,
+  }));
 
   return (
     <>
-      <HomeHero slides={homepageSlides.length ? homepageSlides : fallbackSlides} />
+      <HomeHero slides={heroSlides} />
       <PartnerMarquee partners={partners} />
 
       {/* Latest from GLITZ */}
@@ -53,7 +65,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <HomeVideos videos={videos} />
+      <HomeVideos videos={videos.length ? videos : fallbackVideos} />
 
       {/* Read something glitzy */}
       <section className="hairline bg-smoke">

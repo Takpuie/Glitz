@@ -19,7 +19,7 @@ from apps.accounts.reader_api import reader_api
 from search import views as search_views
 
 from .api import api_router
-from .webhooks import StripeWebhookView
+from .webhooks import PaystackWebhookView, StripeWebhookView
 
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL", default="http://localhost:3000")
 
@@ -107,6 +107,7 @@ urlpatterns = [
         name="order-download",
     ),
     path("api/webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("api/webhooks/paystack/", PaystackWebhookView.as_view(), name="paystack-webhook"),
     path("api/", include(drf_router.urls)),
 ]
 

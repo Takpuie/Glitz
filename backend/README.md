@@ -125,6 +125,11 @@ Give moderators view/change/delete permissions on these three models as needed.
 Auth and comment rate limits use Django's cache; use a shared cache across workers
 in production. No automated content-classification service is connected.
 
+Wagtail sends its built-in workflow task, approval, and rejection notifications
+through the configured SMTP backend. Each staff user must have an email address
+and enable the relevant options under Account settings → Notifications. Set
+`WAGTAILADMIN_NOTIFICATION_FROM_EMAIL` to the sender shown on those messages.
+
 This release does not send submission status notifications or newsletter
 campaigns. It adds only account verification and recovery emails when enabled.
 
@@ -156,9 +161,9 @@ outside public media. Never configure the web server to expose this directory;
 include it in private backups. Downloads require the nomination view permission.
 Staff can download attachments from a nomination's edit screen.
 
-This phase stores submissions only: no confirmation emails, staff notifications,
-status emails, or newsletter campaigns are sent. Status changes and notes stay
-inside Wagtail. The old nonfunctional Save Draft button has been removed.
+No confirmation emails, staff notification emails, status emails, or newsletter
+campaigns are sent. Status changes and notes stay inside Wagtail. The old
+nonfunctional Save Draft button has been removed.
 Run `python manage.py migrate` when deploying.
 
 ### Media content management
@@ -209,7 +214,9 @@ See `.env.example` for the full list. Notable ones:
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Database connection (`localhost:3306` on TechNE MySQL) |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated; the Next.js origin(s) only — never `*` |
 | `WAGTAILADMIN_BASE_URL` | Used to build absolute image URLs returned by the API |
-| `STRIPE_SECRET_KEY` | Empty locally; never reaches the frontend |
+| `PAYSTACK_SECRET_KEY` | Paystack server key; never reaches the frontend |
+| `PAYSTACK_PUBLIC_KEY` | Reserved for a future inline checkout; hosted checkout does not require it |
+| `STRIPE_SECRET_KEY` | Still used by the existing event-ticket checkout |
 | `STRIPE_PUBLISHABLE_KEY` | Not currently used (Stripe Checkout is a hosted page) — reserved for a future Elements-based flow |
 | `STRIPE_WEBHOOK_SECRET` | Signing secret for `/api/webhooks/stripe/`, from the Stripe Dashboard or `stripe listen` in development |
 | `FRONTEND_BASE_URL` | The Next.js origin — used to build Stripe Checkout's `success_url`/`cancel_url` |
@@ -321,6 +328,24 @@ system yet, so the cart is guest-only and doesn't survive a device
 switch. `/cart` posts the whole cart in one call to
 `POST /api/magazine/checkout/` and is cleared once the post-payment
 callback page confirms the order is paid.
+
+## Required WordPress archive import
+
+The production database must include the legacy Glitz Africa article archive. After deploying code and running migrations, upload `glitzafrica_published_posts.csv` to a private server location outside the public web root, then run:
+
+```bash
+cd /home/www/glitz_backend/backend
+source /home/venv/bin/activate
+python manage.py import_wordpress_posts /home/glitzafrica_published_posts.csv --commit --report /home/wordpress-image-recovery.csv
+```
+
+The importer is restart-safe and skips slugs already present in Wagtail. Do not use `glitzafrica_posts.csv`; it also contains trashed, draft, and auto-draft records. Confirm the result with:
+
+```bash
+python manage.py shell -c "from apps.content.models import Post; print(Post.objects.live().filter(category__slug='archive').count())"
+```
+
+The expected archive count is **2,670**. Keep the source CSV and image-recovery report outside the public website directory.
 
 ## Deployment (TechNE)
 

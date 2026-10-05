@@ -2,19 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+.hero-gold-stroke {
+  -webkit-text-stroke: 0.35px #d4af37;
+  paint-order: stroke fill;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 45%);
+}
+
 @keyframes hero-reveal { from { opacity: 0; } to { opacity: 1; } }
 .hero-reveal { animation: hero-reveal 700ms ease-out; }
-@keyframes partner-scroll { to { transform: translateX(-50%); } }
+@keyframes partner-scroll { to { transform: translate3d(-50%, 0, 0); } }
+@keyframes film-scroll { to { transform: translate3d(-50%, 0, 0); } }
 .partner-group { min-width: 100vw; justify-content: space-around; }
-.partner-track { animation: partner-scroll 35s linear infinite; }
+.partner-track { animation: partner-scroll 32s linear infinite; will-change: transform; }
+.partner-marquee::before,
+.partner-marquee::after { content: ""; position: absolute; inset-block: 0; z-index: 2; width: clamp(2rem, 9vw, 9rem); pointer-events: none; }
+.partner-marquee::before { left: 0; background: linear-gradient(90deg, #fff, transparent); }
+.partner-marquee::after { right: 0; background: linear-gradient(-90deg, #fff, transparent); }
 .partner-marquee:hover .partner-track,
-.partner-marquee:focus-within .partner-track,
-.partner-marquee.is-paused .partner-track { animation-play-state: paused; }
+.partner-marquee:focus-within .partner-track { animation-play-state: paused; }
+.film-track { animation: film-scroll 48s linear infinite; will-change: transform; }
+.film-reel:hover .film-track,
+.film-reel:focus-within .film-track { animation-play-state: paused; }
+.film-reel::before,
+.film-reel::after { content: ""; position: absolute; inset-block: 0; z-index: 3; width: clamp(1rem, 5vw, 5rem); pointer-events: none; }
+.film-reel::before { left: 0; background: linear-gradient(90deg, #000, transparent); }
+.film-reel::after { right: 0; background: linear-gradient(-90deg, #000, transparent); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
-  .hero-reveal, .partner-track { animation: none; }
+  .hero-reveal, .partner-track, .film-track { animation: none; }
   .partner-track, .partner-group { width: 100%; min-width: 0; flex-wrap: wrap; gap: 2rem 0; }
-  .partner-copy, .partner-motion-toggle { display: none; }
+  .partner-copy { display: none; }
+  .film-track { width: 100%; overflow-x: auto; padding-inline: 1.25rem; }
+  .film-group { min-width: max-content; }
+  .film-group[aria-hidden="true"] { display: none; }
 }
 
 @layer base {

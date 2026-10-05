@@ -42,10 +42,10 @@ export default function ReaderComments({ slug }: { slug: string }) {
           <h2 id="comments-heading" className="font-display text-3xl">Reader comments</h2>
           {reader ? <button disabled={busy} className="btn-outline" onClick={() => act(() => visitorRequest(`saved/${encodeURIComponent(slug)}`, { saved: !page.saved }))}>{page.saved ? "Remove from saved" : "Save article"}</button> : <AccountLink className="text-sm underline">Sign in to save or comment</AccountLink>}
         </div>
-        <p className="mb-6 text-sm text-gray-600">Keep the conversation respectful. Comments appear immediately and may be moderated.</p>
+        <p className="mb-6 text-sm text-gray-600">Keep the conversation respectful. New comments appear after moderation.</p>
         {reader && !reader.verified && <p className="mb-6 text-sm">Please <Link href="/account" className="underline">verify your email</Link> before commenting.</p>}
         {reader?.commenting_suspended && <p className="mb-6 text-sm">Your commenting privileges are suspended.</p>}
-        {reader?.verified && !reader.commenting_suspended && <form className="mb-8 space-y-3" onSubmit={(event) => { event.preventDefault(); act(async () => { await visitorRequest(path, { body }); setBody(""); }); }}>
+        {reader?.verified && !reader.commenting_suspended && <form className="mb-8 space-y-3" onSubmit={(event) => { event.preventDefault(); act(async () => { await visitorRequest(path, { body }); setBody(""); setNotice("Your comment was submitted for moderation."); }); }}>
           <label className="block text-sm">Your comment<textarea required maxLength={2000} rows={4} value={body} onChange={(event) => setBody(event.target.value)} className="mt-2 block w-full border border-ink/20 p-3" /></label>
           <button disabled={busy} className="btn-primary">{busy ? "Please wait…" : "Post comment"}</button>
         </form>}

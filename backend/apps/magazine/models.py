@@ -83,9 +83,17 @@ class Order(ClusterableModel):
     )
     email = models.EmailField(help_text="Captured even for guest checkout.")
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total, in GHS.")
-    stripe_session_id = models.CharField(max_length=120, unique=True, null=True, blank=True)
+    payment_reference = models.CharField(max_length=120, unique=True, null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     shipping_address = models.TextField(blank=True, help_text="Required only for print items.")
+    shipping_name = models.CharField(max_length=120, blank=True)
+    shipping_phone = models.CharField(max_length=30, blank=True)
+    shipping_address_line1 = models.CharField(max_length=200, blank=True)
+    shipping_address_line2 = models.CharField(max_length=200, blank=True)
+    shipping_city = models.CharField(max_length=100, blank=True)
+    shipping_region = models.CharField(max_length=100, blank=True)
+    shipping_postal_code = models.CharField(max_length=30, blank=True)
+    shipping_country = models.CharField(max_length=2, blank=True, default="GH")
     created_at = models.DateTimeField(auto_now_add=True)
 
     panels = [
@@ -93,7 +101,11 @@ class Order(ClusterableModel):
         FieldPanel("amount"),
         FieldPanel("status"),
         FieldPanel("shipping_address"),
-        FieldPanel("stripe_session_id", read_only=True),
+        FieldPanel("shipping_name"), FieldPanel("shipping_phone"),
+        FieldPanel("shipping_address_line1"), FieldPanel("shipping_address_line2"),
+        FieldPanel("shipping_city"), FieldPanel("shipping_region"),
+        FieldPanel("shipping_postal_code"), FieldPanel("shipping_country"),
+        FieldPanel("payment_reference", read_only=True),
         FieldPanel("created_at", read_only=True),
         InlinePanel("items", label="Order items"),
     ]
@@ -110,9 +122,9 @@ class OrderViewSet(SnippetViewSet):
     icon = "doc-full"
     menu_label = "Orders"
     menu_order = 300
-    list_display = ["id", "email", "amount", "status", "stripe_session_id", "created_at"]
+    list_display = ["id", "email", "amount", "status", "payment_reference", "created_at"]
     list_filter = ["status"]
-    search_fields = ["email", "stripe_session_id"]
+    search_fields = ["email", "payment_reference"]
     ordering = ["-created_at"]
 
 

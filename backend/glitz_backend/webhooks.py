@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from glitz_backend.stripe_client import verify_webhook_event
+from glitz_backend.paystack_client import valid_webhook_signature
 
 
 class StripeWebhookView(APIView):
@@ -44,4 +45,32 @@ class StripeWebhookView(APIView):
 
         if not mark_ticket_paid(session_id):
             mark_order_paid(session_id)
+        return Response(status=200)
+
+
+class PaystackWebhookView(APIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def post(self, request):
+        if not valid_webhook_signature(request.body, request.headers.get("X-Paystack-Signature", "")):
+            return Response(status=401)
+        event = request.data
+        if event.get("event") != "charge.success":
+            return Response(status=200)
+        data = event.get("data", {})
+        reference = data.get("reference")
+        if not reference:
+            return Response(status=200)
+        from apps.events.models import Ticket
+        from apps.events.checkout import mark_ticket_paid
+        from apps.magazine.models import Order
+        from apps.magazine.checkout import mark_order_paid
+        ticket = Ticket.objects.select_related("ticket_type").filter(paystack_reference=reference).first()
+        if ticket and data.get("currency") == "GHS" and data.get("amount") == int(ticket.ticket_type.price * 100):
+            mark_ticket_paid(reference)
+            return Response(status=200)
+        order = Order.objects.filter(payment_reference=reference).first()
+        if order and data.get("currency") == "GHS" and data.get("amount") == int(order.amount * 100):
+            mark_order_paid(reference)
         return Response(status=200)

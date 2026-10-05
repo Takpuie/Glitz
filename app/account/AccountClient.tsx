@@ -12,6 +12,10 @@ type Dashboard = {
 };
 const inputClass = "mt-2 block w-full border-b border-ink bg-transparent py-3 text-sm";
 
+function initials(name: string) {
+  return name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "G";
+}
+
 function Fields({ mode }: { mode: "login" | "register" | "forgot" }) {
   return <>
     {mode === "register" && <label className="block text-sm">Display name<input name="display_name" required maxLength={80} autoComplete="nickname" className={inputClass} /><span className="mt-1 block text-xs text-gray-500">This name appears beside your comments.</span></label>}
@@ -65,10 +69,11 @@ export default function AccountClient({ action, token, initialError, modal = fal
 
   return (
     <div className={modal ? "pt-6" : "container-editorial py-12 md:py-16"}>
-      <header className="mb-10 border-b border-ink/15 pb-8">
-        <p className="eyebrow mb-3">My account</p>
-        <h1 className={modal ? "font-display text-3xl" : "font-display text-4xl sm:text-5xl"}>{reader ? `Welcome, ${reader.display_name}` : "Join the Glitz community"}</h1>
-        {reader && <button disabled={busy} className="mt-5 text-sm underline" onClick={() => run(() => submit("logout", {}))}>Sign out</button>}
+      <header className={reader && !modal ? "mb-8 overflow-hidden rounded-2xl bg-ink px-6 py-8 text-white md:px-10 md:py-10" : "mb-10 border-b border-ink/15 pb-8"}>
+        {reader && !modal ? <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-5"><div className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-[#d4af37]/60 bg-white/5 font-display text-2xl text-[#d4af37]">{initials(reader.display_name)}</div><div><p className="font-nav text-[10px] uppercase tracking-[0.28em] text-[#d4af37]">Reader dashboard</p><h1 className="mt-2 font-display text-3xl sm:text-4xl">Welcome, {reader.display_name}</h1><p className="mt-1 text-sm text-white/60">{reader.email}</p></div></div>
+          <div className="flex items-center gap-3"><span className={`rounded-full px-3 py-1.5 font-nav text-[10px] uppercase tracking-widest ${reader.verified ? "bg-emerald-400/15 text-emerald-200" : "bg-amber-400/15 text-amber-200"}`}>{reader.verified ? "Verified member" : "Verification needed"}</span><button disabled={busy} className="rounded-full border border-white/25 px-4 py-2 font-nav text-[10px] uppercase tracking-widest hover:border-white" onClick={() => run(() => submit("logout", {}))}>Sign out</button></div>
+        </div> : <><p className="eyebrow mb-3">My account</p><h1 className={modal ? "font-display text-3xl" : "font-display text-4xl sm:text-5xl"}>{reader ? `Welcome, ${reader.display_name}` : "Join the Glitz community"}</h1></>}
       </header>
       {error && <p role="alert" className="mb-6 border border-ink/20 p-4 text-sm">{error}</p>}
       {message && <p role="status" className="mb-6 border border-ink/20 p-4 text-sm">{message}</p>}
@@ -119,9 +124,12 @@ export default function AccountClient({ action, token, initialError, modal = fal
           <p className="mt-3 text-sm">Verify {reader.email} to view purchases, tickets and applications, and to comment on articles.</p>
           <button disabled={busy} onClick={() => run(() => submit("verification/resend", {}))} className="btn-outline mt-5">Resend verification email</button>
         </section>}
-        <div className="grid gap-12 lg:grid-cols-[320px_1fr]">
-          <aside className="space-y-10">
-            <section>
+        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[["Saved stories", dashboard?.saved.length ?? 0], ["Orders", dashboard?.orders.length ?? 0], ["Tickets", dashboard?.tickets.length ?? 0], ["Applications", dashboard?.applications.length ?? 0]].map(([label, count]) => <div key={String(label)} className="rounded-xl border border-ink/10 bg-smoke/60 p-5"><p className="font-display text-3xl">{count}</p><p className="mt-1 font-nav text-[10px] uppercase tracking-widest text-gray-500">{label}</p></div>)}
+        </div>
+        <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
+          <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+            <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm">
               <h2 className="mb-5 font-display text-2xl">Profile</h2>
               <p className="mb-4 break-words text-sm text-gray-600">{reader.email}</p>
               <form onSubmit={(event) => { event.preventDefault(); const data = formValues(event.currentTarget); run(() => submit("profile", data)); }}><fieldset disabled={busy} className="space-y-5">
@@ -130,7 +138,7 @@ export default function AccountClient({ action, token, initialError, modal = fal
               </fieldset></form>
               {reader.google_connected ? <p className="mt-5 text-sm">Google account connected.</p> : session.google_enabled && reader.verified && <button disabled={busy} onClick={() => run(() => google(true))} className="btn-outline mt-5">Connect Google</button>}
             </section>
-            {reader.verified && <details><summary className="cursor-pointer text-sm underline">Change password</summary>
+            {reader.verified && <details className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm"><summary className="cursor-pointer font-display text-xl">Security &amp; password</summary>
               <form className="mt-5" onSubmit={(event) => { event.preventDefault(); const data = formValues(event.currentTarget); run(() => submit("password/change", data)); }}><fieldset disabled={busy} className="space-y-5">
                 <label className="block text-sm">Current password<input name="current_password" type="password" autoComplete="current-password" required maxLength={128} className={inputClass} /></label>
                 <label className="block text-sm">New password<input name="password" type="password" autoComplete="new-password" required minLength={8} maxLength={128} className={inputClass} /></label>
@@ -139,21 +147,21 @@ export default function AccountClient({ action, token, initialError, modal = fal
               </fieldset></form>
             </details>}
           </aside>
-          <div className="space-y-12">
-            <section><h2 className="mb-5 font-display text-3xl">Saved articles</h2>
+          <div className="space-y-6">
+            <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm md:p-8"><div className="mb-5 flex items-end justify-between"><div><p className="eyebrow mb-2">Your library</p><h2 className="font-display text-3xl">Saved articles</h2></div><Link href="/articles" className="hidden text-xs underline sm:block">Browse stories</Link></div>
               {!dashboard?.saved.length && <p className="text-sm text-gray-600">Save articles while reading to find them here.</p>}
               <ul className="divide-y divide-ink/15">{dashboard?.saved.map((article) => <li key={article.id} className="flex items-center justify-between gap-5 py-4"><Link className="font-display text-xl hover:underline" href={`/articles/${article.slug}`}>{article.title}</Link><button disabled={busy} className="text-xs underline" onClick={() => run(() => visitorRequest(`saved/${article.slug}`, { saved: false }))}>Remove</button></li>)}</ul>
             </section>
             {reader.verified && <>
-              <section><h2 className="mb-5 font-display text-3xl">Recent orders &amp; downloads</h2>
+              <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm md:p-8"><p className="eyebrow mb-2">Glitz shop</p><h2 className="mb-5 font-display text-3xl">Orders &amp; downloads</h2>
                 {!dashboard?.orders.length && <p className="text-sm text-gray-600">No orders for this email address yet. <Link href="/magazine" className="underline">Browse magazines</Link>.</p>}
                 {dashboard?.orders.map((order) => <article key={order.id} className="border-t border-ink/15 py-5"><p className="text-sm">Order #{order.id} · {order.status} · GHS {order.amount}</p><p className="mt-1 text-xs text-gray-500">{new Date(order.date).toLocaleDateString()}</p><ul className="mt-3 space-y-3">{order.items.map((item, index) => <li key={index} className="text-sm">{item.title} × {item.quantity} ({item.format}){item.download && <a className="ml-4 underline" href={item.download}>Download PDF</a>}</li>)}</ul></article>)}
               </section>
-              <section><h2 className="mb-5 font-display text-3xl">Event tickets</h2>
+              <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm md:p-8"><p className="eyebrow mb-2">Your access</p><h2 className="mb-5 font-display text-3xl">Event tickets</h2>
                 {!dashboard?.tickets.length && <p className="text-sm text-gray-600">No tickets for this email address yet.</p>}
                 {dashboard?.tickets.map((ticket) => <article key={ticket.id} className="border-t border-ink/15 py-5"><h3 className="font-display text-xl">{ticket.event}</h3><p className="mt-2 text-sm">{ticket.tier} · {ticket.date} · {ticket.status}</p>{ticket.code && <p className="mt-3 text-sm">Check-in code: <strong className="font-mono">{ticket.code}</strong></p>}</article>)}
               </section>
-              <section><h2 className="mb-5 font-display text-3xl">Applications</h2>
+              <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm md:p-8"><p className="eyebrow mb-2">Submissions</p><h2 className="mb-5 font-display text-3xl">Applications</h2>
                 {!dashboard?.applications.length && <p className="text-sm text-gray-600">No applications for this email address yet.</p>}
                 {dashboard?.applications.map((application) => <article key={application.reference} className="border-t border-ink/15 py-5"><h3 className="font-display text-xl">{application.call}</h3><p className="mt-2 text-sm">{application.status}</p><p className="mt-2 break-all text-xs text-gray-500">Reference: {application.reference}</p></article>)}
               </section>

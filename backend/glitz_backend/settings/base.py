@@ -255,6 +255,8 @@ STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
 # Dashboard or `stripe listen` in development) — distinct from the API
 # secret key, used only to verify webhook payloads are really from Stripe.
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="")
+PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="")
 
 # Where Stripe redirects the browser after checkout, and where webhook
 # fulfillment sends the buyer — the Next.js origin.
@@ -272,3 +274,6 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
 EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
+WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = config(
+    "WAGTAILADMIN_NOTIFICATION_FROM_EMAIL", default=DEFAULT_FROM_EMAIL
+)

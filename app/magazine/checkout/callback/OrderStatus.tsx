@@ -13,7 +13,7 @@ type OrderItem = {
 };
 
 type OrderStatus = {
-  stripe_session_id: string;
+  payment_reference: string;
   status: "pending" | "paid" | "failed" | "refunded";
   email: string;
   amount: string;

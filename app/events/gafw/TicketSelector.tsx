@@ -17,6 +17,7 @@ export default function TicketSelector({
   const [selected, setSelected] = useState<TicketTier | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [paymentProvider, setPaymentProvider] = useState<"paystack" | "stripe">("paystack");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +35,7 @@ export default function TicketSelector({
           ticket_type_id: selected.id,
           buyer_name: name,
           buyer_email: email,
+          payment_provider: paymentProvider,
         }),
       });
       const data = await res.json();
@@ -113,6 +115,17 @@ export default function TicketSelector({
                 className="w-full border-b border-ink bg-transparent py-3 font-body text-sm focus:outline-none"
               />
             </div>
+            <fieldset>
+              <legend className="eyebrow mb-3">Payment method</legend>
+              <div className="grid grid-cols-2 gap-3">
+                {(["paystack", "stripe"] as const).map((provider) => (
+                  <label key={provider} className={`cursor-pointer border px-4 py-3 text-center font-nav text-xs uppercase tracking-widest transition-colors ${paymentProvider === provider ? "border-ink bg-ink text-white" : "border-ink/20"}`}>
+                    <input type="radio" name="payment_provider" value={provider} checked={paymentProvider === provider} onChange={() => setPaymentProvider(provider)} className="sr-only" />
+                    {provider === "paystack" ? "Paystack" : "Card via Stripe"}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             {error && <p className="text-sm text-red-700">{error}</p>}
             <div className="flex flex-wrap items-center gap-4">
               <button type="submit" disabled={loading} className="btn-primary disabled:opacity-50">

@@ -10,6 +10,7 @@ import VideoPreview from "@/components/VideoPreview";
 export default function MediaVideoCard({ video, preview = false, paused = false }: { video: MediaVideo; preview?: boolean; paused?: boolean }) {
   const [playing, setPlaying] = useState(false);
   const poster = video.thumbnail?.full_url ?? editorialImage(`video-${video.id}`, 900, 1100);
+  const playable = Boolean(video.file_url || video.embed_url);
 
   return (
     <article>
@@ -30,14 +31,14 @@ export default function MediaVideoCard({ video, preview = false, paused = false 
           <button type="button" onClick={() => setPlaying(false)} className="mt-2 text-sm underline underline-offset-4">Close video</button>
         </div>
       ) : (
-        <button type="button" onClick={() => setPlaying(true)} aria-label={`Play ${video.title}`} className="photo-card group relative block aspect-[4/5] w-full bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+        <button type="button" onClick={() => playable && setPlaying(true)} aria-label={playable ? `Play ${video.title}` : undefined} className={`photo-card group relative block aspect-[4/5] w-full bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 ${playable ? "cursor-pointer" : "cursor-default"}`}>
           <Image unoptimized src={poster} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
           {preview && video.file_url && <VideoPreview src={video.file_url} paused={paused} />}
-          <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+          {playable && <span className="absolute inset-0 flex items-center justify-center bg-black/20">
             <span className="flex h-14 w-14 items-center justify-center rounded-full border border-paper bg-black/30 text-paper">
               <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="ml-1 h-5 w-5"><path d="M8 5v14l11-7z" /></svg>
             </span>
-          </span>
+          </span>}
           {video.duration && <span className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-nav text-[10px] text-paper">{video.duration}</span>}
         </button>
       )}

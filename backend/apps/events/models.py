@@ -129,6 +129,8 @@ class Ticket(models.Model):
     buyer_name = models.CharField(max_length=150, blank=True)
     buyer_email = models.EmailField()
     stripe_session_id = models.CharField(max_length=120, unique=True, null=True, blank=True)
+    paystack_reference = models.CharField(max_length=120, unique=True, null=True, blank=True)
+    payment_provider = models.CharField(max_length=10, choices=(("stripe", "Stripe"), ("paystack", "Paystack")), default="stripe")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     check_in_code = models.CharField(
         max_length=16, unique=True, default=generate_check_in_code, editable=False
@@ -145,6 +147,8 @@ class Ticket(models.Model):
         FieldPanel("checked_in_at"),
         FieldPanel("check_in_code", read_only=True),
         FieldPanel("stripe_session_id", read_only=True),
+        FieldPanel("paystack_reference", read_only=True),
+        FieldPanel("payment_provider", read_only=True),
         FieldPanel("created_at", read_only=True),
     ]
 
@@ -162,7 +166,7 @@ class TicketViewSet(SnippetViewSet):
     menu_order = 301
     list_display = ["check_in_code", "event", "ticket_type", "buyer_name", "buyer_email", "status", "created_at"]
     list_filter = ["status", "event"]
-    search_fields = ["check_in_code", "buyer_name", "buyer_email", "stripe_session_id"]
+    search_fields = ["check_in_code", "buyer_name", "buyer_email", "stripe_session_id", "paystack_reference"]
     ordering = ["-created_at"]
 
 

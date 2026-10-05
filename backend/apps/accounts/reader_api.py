@@ -197,8 +197,8 @@ def handle(request, route, data):
         if len(parts) == 2:
             if reader.commenting_suspended:
                 raise ReaderError("Your commenting privileges are suspended.", 403)
-            comment = ReaderComment.objects.create(reader=reader, post=post, body=field(data, "body", 2000))
-            return {"id": comment.pk}
+            comment = ReaderComment.objects.create(reader=reader, post=post, body=field(data, "body", 2000), hidden=True)
+            return {"id": comment.pk, "detail": "Your comment was submitted for moderation."}
         comment = get_object_or_404(ReaderComment, pk=parts[2], post=post)
         action = data.get("action")
         if action == "report":
