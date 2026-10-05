@@ -9,8 +9,10 @@ const { startServer } = require("next/dist/server/lib/start-server");
 loadEnvConfig(__dirname);
 
 const dev = process.env.NODE_ENV === "development";
-const port = Number(process.env.PORT || 3000);
-const host = process.env.BIND_HOST || "127.0.0.1";
+// TechNE assigns each Node instance a private listener port. Its public
+// IP/domain mapping forwards traffic to this port.
+const port = Number(process.env.NODE_PORT || 25973);
+const host = process.env.NODE_HOST || "0.0.0.0";
 
 startServer({
   dir: __dirname,
