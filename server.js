@@ -3,22 +3,21 @@
 // process.env.PORT — `next start` alone doesn't fit that contract, since
 // Passenger never invokes it and needs a plain http.Server to hand
 // requests to.
-const { createServer } = require("http");
-const next = require("next");
 const { loadEnvConfig } = require("@next/env");
+const { startServer } = require("next/dist/server/lib/start-server");
 
 loadEnvConfig(process.cwd());
 
 const dev = process.env.NODE_ENV === "development";
-const app = next({ dev });
-const handle = app.getRequestHandler();
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT || 3000);
 const host = process.env.BIND_HOST || "127.0.0.1";
 
-app.prepare().then(() => {
-  createServer((req, res) => handle(req, res)).listen(port, host, () => {
-    console.log(`Glitz Africa frontend ready at ${host}:${port} (${dev ? "development" : "production"})`);
-  });
+startServer({
+  dir: process.cwd(),
+  isDev: dev,
+  hostname: host,
+  port,
+  allowRetry: false,
 }).catch((error) => {
   console.error("Glitz Africa frontend failed to start", error);
   process.exit(1);
