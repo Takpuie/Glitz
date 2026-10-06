@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import ReaderComments from "@/components/ReaderComments";
+import ArticleShare from "@/components/ArticleShare";
 import {
   getArticles,
   getArticle,
@@ -52,12 +53,7 @@ export default async function ArticlePage({
             ))}
           </div>
 
-          <div className="mt-10 flex gap-5 border-y border-ink/15 py-5 font-nav text-[11px] uppercase tracking-widest2">
-            <span className="text-gray-500">Share</span>
-            <a href="#" className="link-underline">X</a>
-            <a href="#" className="link-underline">Facebook</a>
-            <a href="#" className="link-underline">WhatsApp</a>
-          </div>
+          <ArticleShare title={article.title} />
         </div>
 
         <aside className="space-y-8 md:border-l md:border-ink/15 md:pl-10">
