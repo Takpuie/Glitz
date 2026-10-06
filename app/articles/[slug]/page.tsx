@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 import ArticleCard from "@/components/ArticleCard";
 import ReaderComments from "@/components/ReaderComments";
 import ArticleShare from "@/components/ArticleShare";
@@ -9,6 +10,28 @@ import {
   getArticle,
   relatedArticles,
 } from "@/lib/backend";
+
+function sanitizeArticleHtml(value: string) {
+  return sanitizeHtml(value, {
+    allowedTags: [
+      "p", "br", "strong", "em", "b", "i", "u", "s", "h2", "h3", "h4",
+      "ul", "ol", "li", "blockquote", "a", "figure", "figcaption", "img", "hr", "span",
+    ],
+    allowedAttributes: {
+      "*": ["class"],
+      a: ["href", "title"],
+      img: ["src", "alt", "width", "height", "loading"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    allowProtocolRelative: false,
+    transformTags: {
+      a: (_tagName, attributes) => ({
+        tagName: "a",
+        attribs: { ...attributes, rel: "noopener noreferrer" },
+      }),
+    },
+  });
+}
 
 export async function generateStaticParams() {
   const articles = await getArticles();
@@ -24,6 +47,7 @@ export default async function ArticlePage({
   if (!article) return notFound();
   const related = await relatedArticles(article.slug);
   const body = article.body;
+  const safeBody = body.map(sanitizeArticleHtml);
 
   return (
     <article>
@@ -47,9 +71,9 @@ export default async function ArticlePage({
             </div>
           </div>
 
-          <div className="mt-10 space-y-6 text-[17px] leading-relaxed text-gray-800">
-            {body.map((p, i) => (
-              <p key={i}>{p}</p>
+          <div className="article-body mt-10">
+            {safeBody.map((html, i) => (
+              <div key={i} className="article-body-block" dangerouslySetInnerHTML={{ __html: html }} />
             ))}
           </div>
 

@@ -85,6 +85,49 @@
   .photo-card {
     @apply overflow-hidden rounded-md shadow-[0_18px_40px_-20px_rgba(0,0,0,0.35)];
   }
+
+  .article-body {
+    @apply text-[17px] leading-[1.8] text-gray-800;
+  }
+
+  .article-body-block + .article-body-block,
+  .article-body-block > * + * {
+    @apply mt-6;
+  }
+
+  .article-body h2 {
+    @apply mt-12 font-display text-3xl leading-tight text-ink;
+  }
+
+  .article-body h3 {
+    @apply mt-10 font-display text-2xl leading-tight text-ink;
+  }
+
+  .article-body ul {
+    @apply list-disc space-y-2 pl-6;
+  }
+
+  .article-body ol {
+    @apply list-decimal space-y-2 pl-6;
+  }
+
+  .article-body blockquote {
+    @apply my-10 border-l-2 border-[#d4af37] pl-6 font-display text-2xl italic leading-snug text-ink;
+  }
+
+  .article-body a {
+    @apply underline decoration-ink/35 underline-offset-4 transition-colors hover:text-[#a88418];
+  }
+
+  .article-body img {
+    @apply my-8 h-auto w-full rounded-md;
+  }
+
+  .article-body p:empty,
+  .article-body figure:empty,
+  .article-body figure:not(:has(img)) {
+    display: none;
+  }
 }
 
 @layer utilities {
