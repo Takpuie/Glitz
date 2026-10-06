@@ -52,29 +52,22 @@ export default function AboutPage() {
         </ul>
       </section>
 
-      <section id="careers" className="hairline bg-smoke">
+      <section id="contact" className="hairline bg-smoke">
         <div className="container-editorial py-16 md:py-20">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-            <div>
-              <p className="eyebrow mb-3">Careers</p>
-              <h2 className="font-display text-3xl sm:text-4xl">Join Kollage Media</h2>
-              <p className="mt-4 max-w-sm text-sm text-gray-600">
-                We&rsquo;re always looking for editors, producers and
-                commercial talent who want to build the Pan-African media
-                house of record.
-              </p>
-              <button className="btn-outline mt-8">View Open Roles</button>
-            </div>
-            <div>
-              <p className="eyebrow mb-3">Contact</p>
-              <address className="not-italic text-sm leading-relaxed text-gray-700">
-                Kollage Media<br />
-                Accra, Ghana<br />
-                hello@glitzafrica.com<br />
-                +233 (0)30 000 0000
-              </address>
-              <Link href="/contact" className="btn-outline mt-6">Send an enquiry</Link>
-            </div>
+          <div className="max-w-xl">
+            <p className="eyebrow mb-3">Contact</p>
+            <h2 className="font-display text-3xl sm:text-4xl">Get in touch with Glitz Africa</h2>
+            <address className="mt-5 not-italic text-sm leading-7 text-gray-700">
+              Glitz Africa<br />
+              Accra, Ghana<br />
+              <a className="transition-colors hover:text-gold" href="mailto:info@glitzafrica.com">
+                info@glitzafrica.com
+              </a><br />
+              <a className="transition-colors hover:text-gold" href="tel:+233509388934">
+                0509388934
+              </a>
+            </address>
+            <Link href="/contact" className="btn-outline mt-7">Send an enquiry</Link>
           </div>
         </div>
       </section>
