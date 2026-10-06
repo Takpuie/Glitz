@@ -84,10 +84,10 @@ class Command(BaseCommand):
                         title=title, slug=slug, dek=summary(row["post_excerpt"], body_html),
                         author_name="Glitz Africa", category=category, published_date=published,
                         read_time_minutes=max(1, round(words / 220)) if words else 1,
-                        body=[("paragraph", body_html)] if body_html else [],
+                        body=[("paragraph", body_html)] if body_html else [], live=True,
+                        has_unpublished_changes=False,
                     )
                     parent.add_child(instance=post)
-                    post.save_revision().publish()
                     existing.add(slug)
                 imported += 1
 
