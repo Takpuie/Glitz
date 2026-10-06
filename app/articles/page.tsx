@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import ArticleCard from "@/components/ArticleCard";
 import { getArticles, CATEGORIES } from "@/lib/backend";
+
+export const metadata: Metadata = {
+  title: "Stories",
+  description: "Fashion, beauty, entertainment, lifestyle and culture stories from Glitz Africa.",
+  alternates: { canonical: "/articles" },
+};
 
 export default async function ArticlesPage({
   searchParams,

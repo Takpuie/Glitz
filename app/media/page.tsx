@@ -1,7 +1,14 @@
 ﻿import MediaVideoCard from "@/components/MediaVideoCard";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getMediaPhotos, getMediaVideos, getPressCoverage } from "@/lib/backend";
+
+export const metadata: Metadata = {
+  title: "Media Gallery",
+  description: "Watch videos, browse photography and explore press coverage from Glitz Africa.",
+  alternates: { canonical: "/media" },
+};
 
 export default async function MediaPage() {
   const [videosResult, pressResult, photosResult] = await Promise.allSettled([

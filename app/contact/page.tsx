@@ -1,4 +1,11 @@
 import EnquiryForm from "@/components/EnquiryForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Contact the Glitz Africa team about editorial, events, partnerships and general enquiries.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   return (

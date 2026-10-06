@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getBackendEvent, type BackendEvent } from "@/lib/backend";
 import { events, getEvent } from "@/data/events";
@@ -15,6 +16,25 @@ const STATUS_LABELS: Record<string, string> = {
 
 export async function generateStaticParams() {
   return events.filter((e) => e.slug !== "gafw").map((e) => ({ slug: e.slug }));
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  let backendEvent: BackendEvent | undefined;
+  try { backendEvent = await getBackendEvent(params.slug); } catch { /* Use local event metadata. */ }
+  const fallback = getEvent(params.slug);
+  const event = backendEvent ?? fallback;
+  if (!event) return { title: "Event not found", robots: { index: false, follow: false } };
+  const title = "name" in event ? event.name : params.slug;
+  const description = event.tagline || event.description;
+  const image = backendEvent?.cover_image?.full_url ?? fallback?.image;
+  const canonical = `/events/${params.slug}`;
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { type: "website", url: canonical, title, description, images: image ? [{ url: image, alt: title }] : undefined },
+    twitter: { card: "summary_large_image", title, description, images: image ? [image] : undefined },
+  };
 }
 
 export default async function EventEditionPage({ params }: { params: { slug: string } }) {

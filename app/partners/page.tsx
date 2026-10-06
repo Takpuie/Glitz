@@ -1,5 +1,12 @@
 import EnquiryForm from "@/components/EnquiryForm";
+import type { Metadata } from "next";
 import { getBackendEvents, type BackendEvent } from "@/lib/backend";
+
+export const metadata: Metadata = {
+  title: "Partners",
+  description: "Partner with Glitz Africa across media, events and programmes reaching influential African audiences.",
+  alternates: { canonical: "/partners" },
+};
 
 const packages = [
   { tier: "Media Partner", detail: "Print + digital placements across issues, editorial integrations, newsletter sponsorship." },

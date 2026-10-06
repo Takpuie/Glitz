@@ -1,8 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { events } from "@/data/events";
 import { getBackendEvents, type BackendEvent } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
+
+export const metadata: Metadata = {
+  title: "Events",
+  description: "Discover Glitz Africa events celebrating fashion, culture, business and achievement.",
+  alternates: { canonical: "/events" },
+};
 
 const STATUS_LABELS: Record<string, string> = {
   on_sale: "On sale",

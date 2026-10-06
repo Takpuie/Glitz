@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import ArticleCard from "@/components/ArticleCard";
 import SectionHeading from "@/components/SectionHeading";
 import HomeHero from "@/components/HomeHero";
@@ -10,6 +11,8 @@ import { events } from "@/data/events";
 import { partners } from "@/data/partners";
 import { getBackendEvent, getMagazineIssues, getHomepageSlides, getMediaVideos, type HomepageSlide, type MediaVideo } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const articles = await getArticles();

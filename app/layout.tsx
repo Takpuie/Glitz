@@ -27,9 +27,27 @@ const body = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Glitz Africa — Fashion. Power. Culture.",
+  metadataBase: new URL(process.env.FRONTEND_BASE_URL ?? "https://glitzafrica.com"),
+  title: {
+    default: "Glitz Africa — Fashion. Power. Culture.",
+    template: "%s | Glitz Africa",
+  },
   description:
-    "Glitz Africa is the Pan-African home for fashion, culture and business — the magazine, the shop, and the stage for GAFW, Ghana Women of the Year, the Female CEO Summit, SheBoss Global and the Glitz Style Awards.",
+    "Glitz Africa is the Pan-African home for fashion, culture and business — the magazine and the stage for GAFW, Ghana Women of the Year, the Female CEO Summit, SheBoss Global and the Glitz Style Awards.",
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "Glitz Africa",
+    title: "Glitz Africa — Fashion. Power. Culture.",
+    description: "The Pan-African home for fashion, culture, business and the people shaping what comes next.",
+    images: [{ url: "/images/gafw/hero-designer-and-model.jpg", width: 1600, height: 1000, alt: "Glitz Africa" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Glitz Africa — Fashion. Power. Culture.",
+    description: "The Pan-African home for fashion, culture, business and the people shaping what comes next.",
+    images: ["/images/gafw/hero-designer-and-model.jpg"],
+  },
 };
 
 export default async function RootLayout({

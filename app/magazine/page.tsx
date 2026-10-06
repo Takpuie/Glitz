@@ -1,9 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { subscriptionPlans, currentIssue as localCurrentIssue, backIssues as localBackIssues } from "@/data/issues";
 import { getMagazineIssues, type BackendMagazineIssue } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 import MagazineCheckout from "./MagazineCheckout";
+
+export const metadata: Metadata = {
+  title: "Magazine",
+  description: "Explore and purchase Glitz Africa magazine issues in print and digital editions.",
+  alternates: { canonical: "/magazine" },
+};
 
 export default async function MagazinePage() {
   let cmsAvailable = true;

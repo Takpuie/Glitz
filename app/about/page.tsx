@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { editorialImage } from "@/lib/img";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "Learn about Glitz Africa and its platforms for African fashion, culture, business and leadership.",
+  alternates: { canonical: "/about" },
+};
 
 const brands = [
   "Glitz Africa Magazine",

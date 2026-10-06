@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Foundation",
+  description: "Discover Glitz Africa Foundation programmes supporting emerging talent, girls in business and education.",
+  alternates: { canonical: "/foundation" },
+};
+
 const programmes = [
   { title: "Designer Mentorship", copy: "Pairing emerging talent from the Young Designers Showcase with established mentors for a full year." },
   { title: "Girls in Business", copy: "Workshops and micro-grants for young women launching their first ventures across Ghana." },

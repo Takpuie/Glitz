@@ -9,7 +9,7 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from apps.content.api import CategoryViewSet, PhotoViewSet, PressCoverageViewSet, VideoViewSet, HomepageSlideViewSet, PartnerLogoViewSet
+from apps.content.api import CategoryViewSet, PhotoViewSet, PressCoverageViewSet, VideoViewSet, HomepageSlideViewSet, PartnerLogoViewSet, sitemap_content
 from apps.events.api import EventViewSet
 from apps.events.checkout import TicketCheckoutView, TicketVerifyView
 from apps.magazine.api import MagazineIssueViewSet
@@ -55,6 +55,7 @@ def frontend_slug_redirect(path_template: str):
 
 
 urlpatterns = [
+    path("api/sitemap-content/", sitemap_content, name="sitemap-content"),
     path("api/visitor/<path:route>/", reader_api, name="visitor-api"),
     path("api/submissions/<str:kind>/", SubmissionView.as_view(), name="submission-create"),
     path("staff/nominations/<int:pk>/portfolio/", nomination_portfolio, name="nomination-portfolio"),

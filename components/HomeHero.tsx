@@ -19,11 +19,12 @@ export default function HomeHero({ slides }: { slides: HomepageSlide[] }) {
 
   useEffect(() => {
     const preference = matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(preference.matches);
-    update(); preference.addEventListener("change", update);
+    const desktop = matchMedia("(min-width: 768px)");
+    const update = () => setReduced(preference.matches || !desktop.matches);
+    update(); preference.addEventListener("change", update); desktop.addEventListener("change", update);
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
     if (section.current) observer.observe(section.current);
-    return () => { preference.removeEventListener("change", update); observer.disconnect(); };
+    return () => { preference.removeEventListener("change", update); desktop.removeEventListener("change", update); observer.disconnect(); };
   }, []);
   useEffect(() => {
     if (!moving || slides.length < 2) return;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 import ArticleCard from "@/components/ArticleCard";
@@ -38,6 +39,33 @@ export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const article = await getArticle(params.slug);
+  if (!article) return { title: "Story not found", robots: { index: false, follow: false } };
+  const canonical = `/articles/${article.slug}`;
+  return {
+    title: article.title,
+    description: article.dek || `Read ${article.title} on Glitz Africa.`,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      siteName: "Glitz Africa",
+      title: article.title,
+      description: article.dek,
+      publishedTime: article.publishedDate ?? undefined,
+      authors: article.author ? [article.author] : undefined,
+      images: [{ url: article.image, alt: article.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.dek,
+      images: [article.image],
+    },
+  };
+}
+
 export default async function ArticlePage({
   params,
 }: {
@@ -48,9 +76,21 @@ export default async function ArticlePage({
   const related = await relatedArticles(article.slug);
   const body = article.body;
   const safeBody = body.map(sanitizeArticleHtml);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.dek,
+    image: [article.image],
+    datePublished: article.publishedDate,
+    author: { "@type": "Person", name: article.author || "Glitz Africa" },
+    publisher: { "@type": "Organization", name: "Glitz Africa", url: "https://glitzafrica.com" },
+    mainEntityOfPage: `https://glitzafrica.com/articles/${article.slug}`,
+  };
 
   return (
     <article>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
       <header className="container-editorial border-b border-ink/12 py-12 md:py-16">
         <p className="eyebrow mb-3">{article.category}</p>
         <h1 className="max-w-3xl font-display text-4xl leading-[1.05] sm:text-5xl md:text-6xl">

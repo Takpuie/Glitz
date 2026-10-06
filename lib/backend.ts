@@ -18,6 +18,12 @@ export type PartnerLogo = { id: number; name: string; logo: { full_url: string }
 export async function getHomepageSlides(): Promise<HomepageSlide[]> { return wagtailFetch("/api/homepage-slides/"); }
 export async function getPartnerLogos(): Promise<PartnerLogo[]> { return wagtailFetch("/api/partner-logos/"); }
 
+export type SitemapPost = { slug: string; last_modified: string | null };
+export async function getSitemapPosts(): Promise<SitemapPost[]> {
+  const data = await wagtailFetch("/api/sitemap-content/");
+  return data.posts as SitemapPost[];
+}
+
 export type MediaVideo = {
   id: number;
   title: string;
@@ -113,6 +119,7 @@ function toArticle(post: WagtailPost): Article {
     dek: post.dek,
     author: post.author_name,
     date: formatDate(post.published_date),
+    publishedDate: post.published_date,
     readTime: post.read_time_minutes ? `${post.read_time_minutes} min read` : "",
     image: post.cover_image?.full_url ?? editorialImage(post.meta.slug, 1200, 1500),
     body: post.body.filter((b) => b.type === "paragraph").map((b) => b.value),
@@ -129,6 +136,7 @@ export type Article = {
   dek: string;
   author: string;
   date: string;
+  publishedDate: string | null;
   readTime: string;
   image: string;
   body: string[];

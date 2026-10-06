@@ -2,8 +2,10 @@ from rest_framework import serializers, viewsets
 
 from urllib.parse import urljoin
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
-from .models import Category, Photo, PressCoverage, Video, HomepageSlide, PartnerLogo
+from .models import Category, Photo, PressCoverage, Video, HomepageSlide, PartnerLogo, Post
 from .image_utils import rendition_dict
 from .media import video_embed_url
 
@@ -116,6 +118,20 @@ class HomepageSlideViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = HomepageSlideSerializer
     permission_classes = []
     pagination_class = None
+
+
+@require_GET
+def sitemap_content(request):
+    posts = Post.objects.live().values("slug", "published_date", "last_published_at")
+    return JsonResponse({
+        "posts": [
+            {
+                "slug": post["slug"],
+                "last_modified": post["last_published_at"] or post["published_date"],
+            }
+            for post in posts
+        ]
+    })
 
 
 class PartnerLogoSerializer(serializers.ModelSerializer):

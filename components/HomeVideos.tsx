@@ -4,7 +4,7 @@ import type { MediaVideo } from "@/lib/backend";
 
 function FilmGroup({ videos, duplicate = false }: { videos: MediaVideo[]; duplicate?: boolean }) {
   return (
-    <div className={`film-group flex shrink-0 items-start gap-5 pr-5 md:gap-7 md:pr-7 ${duplicate ? "pointer-events-none select-none" : ""}`} aria-hidden={duplicate || undefined}>
+    <div className={`film-group flex shrink-0 items-start gap-5 pr-5 md:gap-7 md:pr-7 ${duplicate ? "pointer-events-none select-none" : ""}`} aria-hidden={duplicate || undefined} inert={duplicate || undefined}>
       {videos.map((video, index) => (
         <div
           key={video.id}
