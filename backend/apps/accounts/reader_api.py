@@ -17,6 +17,7 @@ from apps.events.models import Ticket
 from apps.magazine.models import Order, OrderItem
 from apps.submissions.models import Nomination
 from .google_login import google_start, google_callback
+from .emails import notify_comment_moderators, notify_comment_report
 from .models import AccountToken, CommentReport, ReaderAccount, ReaderComment, SavedArticle
 from .reader_services import ReaderError, create_reader, email_field, field, get_action_token, rate_limit, reader_for, reader_json, send_account_email
 
@@ -198,13 +199,16 @@ def handle(request, route, data):
             if reader.commenting_suspended:
                 raise ReaderError("Your commenting privileges are suspended.", 403)
             comment = ReaderComment.objects.create(reader=reader, post=post, body=field(data, "body", 2000), hidden=True)
+            transaction.on_commit(lambda comment_id=comment.pk: notify_comment_moderators(comment_id))
             return {"id": comment.pk, "detail": "Your comment was submitted for moderation."}
         comment = get_object_or_404(ReaderComment, pk=parts[2], post=post)
         action = data.get("action")
         if action == "report":
             if comment.hidden:
                 raise Http404
-            CommentReport.objects.get_or_create(reader=reader, comment=comment, defaults={"reason": field(data, "reason", 500)})
+            report, created = CommentReport.objects.get_or_create(reader=reader, comment=comment, defaults={"reason": field(data, "reason", 500)})
+            if created:
+                transaction.on_commit(lambda report_id=report.pk: notify_comment_report(report_id))
             return {"detail": "Report received."}
         if comment.reader_id != reader.pk:
             raise ReaderError("You can only change your own comments.", 403)

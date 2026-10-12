@@ -121,12 +121,15 @@ def mark_order_paid(session_id):
     """Idempotent — used by both the webhook and the verify-on-callback
     path. Returns True if this session id belongs to an Order at all (paid
     or not), so the shared webhook knows not to also check Ticket."""
-    order = Order.objects.filter(payment_reference=session_id).first()
-    if not order:
-        return False
-    if order.status == Order.Status.PENDING:
-        order.status = Order.Status.PAID
-        order.save(update_fields=["status"])
+    with transaction.atomic():
+        order = Order.objects.select_for_update().filter(payment_reference=session_id).first()
+        if not order:
+            return False
+        if order.status == Order.Status.PENDING:
+            order.status = Order.Status.PAID
+            order.save(update_fields=["status"])
+            from .emails import send_order_confirmation
+            transaction.on_commit(lambda order_id=order.pk: send_order_confirmation(order_id))
     return True
 
 

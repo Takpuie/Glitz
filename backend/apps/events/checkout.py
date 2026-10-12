@@ -74,12 +74,15 @@ def mark_ticket_paid(session_id):
     path. Returns True if this session id belongs to a Ticket at all (paid
     or not), so the shared webhook knows not to also check Order — a
     duplicate webhook delivery must not be mistaken for "not mine"."""
-    ticket = Ticket.objects.filter(models.Q(stripe_session_id=session_id) | models.Q(paystack_reference=session_id)).first()
-    if not ticket:
-        return False
-    if ticket.status == Ticket.Status.PENDING:
-        ticket.status = Ticket.Status.PAID
-        ticket.save(update_fields=["status"])
+    with transaction.atomic():
+        ticket = Ticket.objects.select_for_update().filter(models.Q(stripe_session_id=session_id) | models.Q(paystack_reference=session_id)).first()
+        if not ticket:
+            return False
+        if ticket.status == Ticket.Status.PENDING:
+            ticket.status = Ticket.Status.PAID
+            ticket.save(update_fields=["status"])
+            from .emails import send_ticket_confirmation
+            transaction.on_commit(lambda ticket_id=ticket.pk: send_ticket_confirmation(ticket_id))
     return True
 
 

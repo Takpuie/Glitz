@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 from apps.events.models import Event
 from glitz_backend.request_security import require_frontend_origin
 from .models import Enquiry, NewsletterSubscriber, Nomination
+from .emails import send_newsletter_confirmation, send_submission_confirmation
 
 
 class SubmissionSerializer(serializers.Serializer):
@@ -107,6 +108,8 @@ class SubmissionView(APIView):
         data.pop("consent")
         if kind == "newsletter":
             subscriber, created = NewsletterSubscriber.objects.get_or_create(email=data["email"])
+            if created:
+                send_newsletter_confirmation(subscriber.email)
             # Repeated public requests never reactivate a staff-disabled record.
             return Response({"detail": "Your signup has been recorded."}, status=201 if created else 200)
         model = Nomination if kind == "nominations" else Enquiry
@@ -114,6 +117,8 @@ class SubmissionView(APIView):
         record, created = model.objects.get_or_create(submission_id=submission_id, defaults=data)
         if record.email != data["email"]:
             return Response({"detail": "Please refresh the page and submit again."}, status=409)
+        if created:
+            send_submission_confirmation(record)
         return Response({"detail": "Your submission has been received.", "reference": str(record.reference)}, status=201 if created else 200)
 
 

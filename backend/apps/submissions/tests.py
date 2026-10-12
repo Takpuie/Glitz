@@ -1,5 +1,6 @@
 import tempfile
 import uuid
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -56,6 +57,13 @@ class SubmissionTests(TestCase):
         record = Nomination.objects.get()
         self.assertEqual(record.status, "received")
         self.assertEqual(record.notes, "")
+
+    @patch("apps.submissions.api.send_submission_confirmation")
+    def test_submission_email_is_not_duplicated_on_retry(self, send_confirmation):
+        data = self.nomination()
+        self.client.post("/api/submissions/nominations/", data)
+        self.client.post("/api/submissions/nominations/", data)
+        send_confirmation.assert_called_once_with(Nomination.objects.get())
 
     def test_nomination_validation(self):
         for changes in ({"open_call": "unknown"}, {"statement": ""}, {"portfolio_link": "not-url"}):

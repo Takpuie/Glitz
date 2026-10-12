@@ -1,6 +1,9 @@
-from django.test import SimpleTestCase
+from unittest.mock import patch
 
-from .checkout import TicketCheckoutSerializer
+from django.test import SimpleTestCase, TestCase
+
+from .checkout import TicketCheckoutSerializer, mark_ticket_paid
+from .models import Event, Ticket, TicketType
 
 
 class TicketPaymentProviderTests(SimpleTestCase):
@@ -27,3 +30,16 @@ class TicketPaymentProviderTests(SimpleTestCase):
         self.assertEqual(serializer.validated_data["buyer_email"], "ama@example.com")
         invalid = TicketCheckoutSerializer(data=self.payload(buyer_name="Ama\nInjected"))
         self.assertFalse(invalid.is_valid())
+
+
+class TicketEmailTests(TestCase):
+    @patch("apps.events.emails.send_ticket_confirmation")
+    def test_paid_transition_schedules_one_confirmation(self, send_confirmation):
+        event = Event.objects.create(name="Test event", slug="test-event", start_date="2026-11-01")
+        tier = TicketType.objects.create(event=event, name="Standard", price="100.00", capacity=10)
+        ticket = Ticket.objects.create(event=event, ticket_type=tier, buyer_email="reader@example.com", paystack_reference="paid-ticket")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertTrue(mark_ticket_paid("paid-ticket"))
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertTrue(mark_ticket_paid("paid-ticket"))
+        send_confirmation.assert_called_once_with(ticket.pk)

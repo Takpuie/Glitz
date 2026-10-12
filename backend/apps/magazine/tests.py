@@ -1,10 +1,13 @@
 import hashlib
 import hmac
 
-from django.test import SimpleTestCase, override_settings
+from unittest.mock import patch
+
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from glitz_backend.paystack_client import valid_webhook_signature
-from .checkout import CartCheckoutSerializer
+from .checkout import CartCheckoutSerializer, mark_order_paid
+from .models import Order
 
 
 class ShippingCheckoutTests(SimpleTestCase):
@@ -56,3 +59,14 @@ class PaystackSignatureTests(SimpleTestCase):
         signature = hmac.new(b"secret", body, hashlib.sha512).hexdigest()
         self.assertTrue(valid_webhook_signature(body, signature))
         self.assertFalse(valid_webhook_signature(body, "wrong"))
+
+
+class OrderEmailTests(TestCase):
+    @patch("apps.magazine.emails.send_order_confirmation")
+    def test_paid_transition_schedules_one_confirmation(self, send_confirmation):
+        order = Order.objects.create(email="reader@example.com", amount="10.00", payment_reference="paid-order")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertTrue(mark_order_paid("paid-order"))
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertTrue(mark_order_paid("paid-order"))
+        send_confirmation.assert_called_once_with(order.pk)

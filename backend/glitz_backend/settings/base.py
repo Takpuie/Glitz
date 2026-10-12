@@ -278,3 +278,4 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 WAGTAILADMIN_NOTIFICATION_FROM_EMAIL = config(
     "WAGTAILADMIN_NOTIFICATION_FROM_EMAIL", default=DEFAULT_FROM_EMAIL
 )
+OPERATIONS_EMAILS = config("OPERATIONS_EMAILS", default="info@glitzafrica.com", cast=Csv())
