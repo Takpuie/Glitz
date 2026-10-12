@@ -2,11 +2,17 @@
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from wagtail.models import Page
+from wagtail.models import PageSubscription
 
 from apps.content.models import MediaAsset, Post, PostIndexPage
 
 
 class PostPreviewTests(SimpleTestCase):
+    def test_mysql_noop_updates_use_row_existence_check(self):
+        self.assertTrue(PageSubscription._meta.select_on_save)
+        self.assertTrue(Post._meta.select_on_save)
+        self.assertTrue(PostIndexPage._meta.select_on_save)
+
     def test_new_inline_gallery_asset_validates_before_parent_is_assigned(self):
         asset = MediaAsset(kind=MediaAsset.Kind.IMAGE, caption="New gallery image")
         asset.clean()
