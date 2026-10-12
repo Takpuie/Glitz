@@ -350,7 +350,11 @@ class MediaAsset(models.Model):
         return self.caption or f"{self.kind} #{self.pk}"
 
     def clean(self):
-        from django.core.exceptions import ValidationError
-
-        if not self.post_id and not self.event_id:
-            raise ValidationError("A media asset must belong to a Post or an Event.")
+        # Inline child forms are validated before Wagtail assigns their
+        # ParentalKey to the page being edited. Requiring post_id/event_id at
+        # this point rejects every newly-added gallery item and also makes the
+        # live preview invalid. The parent inline supplies one relationship
+        # when the revision is saved; only the genuinely ambiguous case can
+        # be rejected during model validation.
+        if self.post_id and self.event_id:
+            raise ValidationError("A media asset cannot belong to both a Post and an Event.")

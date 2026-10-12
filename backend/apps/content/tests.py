@@ -3,10 +3,14 @@ from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from wagtail.models import Page
 
-from apps.content.models import Post, PostIndexPage
+from apps.content.models import MediaAsset, Post, PostIndexPage
 
 
 class PostPreviewTests(SimpleTestCase):
+    def test_new_inline_gallery_asset_validates_before_parent_is_assigned(self):
+        asset = MediaAsset(kind=MediaAsset.Kind.IMAGE, caption="New gallery image")
+        asset.clean()
+
     def test_unsaved_post_renders_current_content(self):
         page = Post(
             title="Unsaved preview title",
