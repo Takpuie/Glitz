@@ -21,5 +21,5 @@ export default function VideoPreview({ src, paused }: { src: string; paused: boo
     document.addEventListener("visibilitychange", update);
     return () => { observer.disconnect(); preference.removeEventListener("change", update); document.removeEventListener("visibilitychange", update); element.pause(); };
   }, [src, paused]);
-  return <video ref={ref} muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />;
+  return <video ref={ref} muted loop playsInline preload="metadata" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />;
 }
