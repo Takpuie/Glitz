@@ -1,5 +1,36 @@
 from .base import *  # noqa: F401,F403
 
+# TechNE's FastCGI process does not consistently forward application stderr
+# into the domain error logs. Keep a small local error log so production 500s
+# can be diagnosed without enabling DEBUG or exposing tracebacks to visitors.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "production_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "django-errors.log",  # noqa: F405
+            "maxBytes": 2 * 1024 * 1024,
+            "backupCount": 2,
+            "formatter": "verbose",
+            "level": "ERROR",
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["production_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
+
 # ManifestStaticFilesStorage is recommended in production, to prevent
 # outdated JavaScript / CSS assets being served from cache
 # (e.g. after a Wagtail upgrade).
