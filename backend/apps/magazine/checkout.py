@@ -5,23 +5,30 @@ download link per digital item, nothing automated for print (the plan
 leaves print fulfillment as a manual, address-in-hand process for now).
 """
 
-from urllib.parse import quote
+import hashlib
+import secrets
 
 from django.conf import settings
+from django.core import signing
+from django.core.cache import cache
+from django.http import FileResponse, Http404
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from glitz_backend.paystack_client import PaystackError, initialize_transaction, verify_transaction
+from glitz_backend.request_security import require_frontend_origin
 from .models import MagazineIssue, Order, OrderItem
 
 
-def _download_url(session_id, email, issue_slug):
+def _download_url(session_id, issue_slug):
+    token = signing.dumps({"reference": session_id, "issue": issue_slug}, salt="magazine-download")
     return (
         f"{settings.WAGTAILADMIN_BASE_URL}/api/orders/{session_id}/download/"
-        f"?email={quote(email)}&issue={quote(issue_slug)}"
+        f"?token={token}"
     )
 
 
@@ -41,7 +48,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             and obj.format == OrderItem.Format.DIGITAL
             and obj.issue.digital_file
         ):
-            return _download_url(order.payment_reference, order.email, obj.issue.slug)
+            return _download_url(order.payment_reference, obj.issue.slug)
         return None
 
 
@@ -60,7 +67,7 @@ class CartItemSerializer(serializers.Serializer):
 
 
 class CartCheckoutSerializer(serializers.Serializer):
-    items = CartItemSerializer(many=True)
+    items = CartItemSerializer(many=True, max_length=20)
     buyer_email = serializers.EmailField()
     shipping_name = serializers.CharField(required=False, allow_blank=True, max_length=120)
     shipping_phone = serializers.CharField(required=False, allow_blank=True, max_length=30)
@@ -74,6 +81,18 @@ class CartCheckoutSerializer(serializers.Serializer):
     def validate_items(self, value):
         if not value:
             raise serializers.ValidationError("Your bag is empty.")
+        keys = [(item["slug"], item["format"]) for item in value]
+        if len(keys) != len(set(keys)):
+            raise serializers.ValidationError("Each magazine and format may only appear once.")
+        return value
+
+    def validate_buyer_email(self, value):
+        return value.strip().lower()
+
+    def validate_shipping_phone(self, value):
+        value = value.strip()
+        if value and (not all(char.isdigit() or char in "+ -()" for char in value) or sum(char.isdigit() for char in value) < 7):
+            raise serializers.ValidationError("Enter a valid phone number.")
         return value
 
     def validate(self, data):
@@ -84,6 +103,18 @@ class CartCheckoutSerializer(serializers.Serializer):
             if missing:
                 raise serializers.ValidationError({field: "Required for print delivery." for field in missing})
         return data
+
+
+def _throttle_checkout(email):
+    key = "checkout:magazine:" + hashlib.sha256(email.encode()).hexdigest()
+    cache.add(key, 0, 3600)
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, 3600)
+        count = 1
+    if count > 10:
+        raise Throttled(wait=3600)
 
 
 def mark_order_paid(session_id):
@@ -108,9 +139,11 @@ class MagazineCheckoutView(APIView):
     authentication_classes = []
 
     def post(self, request):
+        require_frontend_origin(request)
         serializer = CartCheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        _throttle_checkout(data["buyer_email"])
 
         line_items = []
         total = 0
@@ -154,7 +187,7 @@ class MagazineCheckoutView(APIView):
             order.save(update_fields=["amount"])
 
         callback_url = f"{settings.FRONTEND_BASE_URL}/magazine/checkout/callback"
-        reference = f"glitz-order-{order.id}"
+        reference = "glitz-order-" + secrets.token_urlsafe(24)
         try:
             transaction_data = initialize_transaction(
                 email=data["buyer_email"], amount=int(total * 100), reference=reference,
@@ -202,18 +235,27 @@ class DigitalDownloadView(APIView):
     authentication_classes = []
 
     def get(self, request, reference):
-        from django.http import HttpResponseRedirect
-
         order = get_object_or_404(Order, payment_reference=reference)
-        email = request.query_params.get("email", "")
-        issue_slug = request.query_params.get("issue", "")
+        try:
+            payload = signing.loads(
+                request.query_params.get("token", ""), salt="magazine-download", max_age=60 * 60 * 24 * 7
+            )
+        except signing.BadSignature:
+            return Response({"detail": "This download link is invalid or has expired."}, status=403)
+        if payload.get("reference") != reference:
+            return Response({"detail": "This download link is invalid."}, status=403)
+        issue_slug = payload.get("issue", "")
         if order.status != Order.Status.PAID:
             return Response({"detail": "This order hasn't been paid yet."}, status=403)
-        if email.strip().lower() != order.email.strip().lower():
-            return Response({"detail": "Email does not match this order."}, status=403)
 
         item = order.items.filter(format=OrderItem.Format.DIGITAL, issue__slug=issue_slug).first()
         if not item or not item.issue.digital_file:
             return Response({"detail": "The digital file for this issue isn't available yet."}, status=404)
 
-        return HttpResponseRedirect(item.issue.digital_file.url)
+        try:
+            response = FileResponse(item.issue.digital_file.open("rb"), as_attachment=True, filename=f"{item.issue.slug}.pdf")
+        except FileNotFoundError:
+            raise Http404
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response

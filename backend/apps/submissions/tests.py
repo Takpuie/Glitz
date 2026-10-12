@@ -2,9 +2,10 @@ import tempfile
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.events.models import Event
@@ -14,6 +15,7 @@ from .models import Enquiry, NewsletterSubscriber, Nomination
 class SubmissionTests(TestCase):
     def setUp(self):
         cache.clear()
+        self.client.defaults["HTTP_ORIGIN"] = settings.FRONTEND_BASE_URL
         self.event = Event.objects.create(name="Test event", slug="test-event", start_date="2026-11-01")
 
     def nomination(self, **changes):
@@ -75,6 +77,14 @@ class SubmissionTests(TestCase):
     def test_submissions_cannot_be_listed_publicly(self):
         for kind in ["newsletter", "nominations", "enquiries"]:
             self.assertEqual(self.client.get(f"/api/submissions/{kind}/").status_code, 405)
+
+    @override_settings(DEBUG=False, FRONTEND_BASE_URL="https://glitzafrica.com", CORS_ALLOWED_ORIGINS=["https://glitzafrica.com"])
+    def test_production_submissions_require_the_frontend_origin(self):
+        payload = {"email": "reader@example.com", "consent": "true"}
+        self.assertEqual(self.client.post("/api/submissions/newsletter/", payload, HTTP_ORIGIN="").status_code, 403)
+        self.assertIn(self.client.post(
+            "/api/submissions/newsletter/", payload, HTTP_ORIGIN="https://glitzafrica.com"
+        ).status_code, (200, 201))
 
     def test_rate_limit(self):
         for _ in range(10):

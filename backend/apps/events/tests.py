@@ -20,3 +20,10 @@ class TicketPaymentProviderTests(SimpleTestCase):
     def test_unknown_provider_is_rejected(self):
         serializer = TicketCheckoutSerializer(data=self.payload(payment_provider="other"))
         self.assertFalse(serializer.is_valid())
+
+    def test_email_is_normalized_and_control_characters_in_name_are_rejected(self):
+        serializer = TicketCheckoutSerializer(data=self.payload(buyer_email=" AMA@Example.com "))
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(serializer.validated_data["buyer_email"], "ama@example.com")
+        invalid = TicketCheckoutSerializer(data=self.payload(buyer_name="Ama\nInjected"))
+        self.assertFalse(invalid.is_valid())

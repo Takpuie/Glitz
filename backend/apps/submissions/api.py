@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.events.models import Event
+from glitz_backend.request_security import require_frontend_origin
 from .models import Enquiry, NewsletterSubscriber, Nomination
 
 
@@ -89,6 +90,7 @@ class SubmissionView(APIView):
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def post(self, request, kind):
+        require_frontend_origin(request)
         serializer_class = {"newsletter": SubmissionSerializer, "nominations": NominationSerializer, "enquiries": EnquirySerializer}.get(kind)
         if not serializer_class:
             raise Http404

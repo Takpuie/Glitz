@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
 
 // Proxies ticket checkout to Django server-side, per the build plan's
 // pattern for anything that shouldn't call the backend directly from the
@@ -6,6 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
 export async function POST(request: NextRequest) {
+  const rejected = rejectUnsafeRequest(request, 32 * 1024);
+  if (rejected) return rejected;
   const body = await request.json().catch(() => null);
   const { slug, ticket_type_id, buyer_name, buyer_email, payment_provider } = body ?? {};
 
@@ -13,12 +16,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ detail: "Missing required fields." }, { status: 400 });
   }
 
-  const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/checkout/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ticket_type_id, buyer_name, buyer_email, payment_provider }),
-    cache: "no-store",
-  });
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/checkout/`, {
+      method: "POST", headers: { "Content-Type": "application/json", Origin: request.nextUrl.origin },
+      body: JSON.stringify({ ticket_type_id, buyer_name, buyer_email, payment_provider }),
+      cache: "no-store", signal: AbortSignal.timeout(20000),
+    });
+    return noStoreJson(await res.json(), res.status);
+  } catch {
+    return noStoreJson({ detail: "Checkout is temporarily unavailable. Please try again." }, 503);
+  }
 }

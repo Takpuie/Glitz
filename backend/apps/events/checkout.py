@@ -4,15 +4,21 @@ of truth, see glitz_backend/webhooks.py) and the frontend's post-redirect
 verify call (belt-and-braces, idempotent).
 """
 
+import hashlib
+import secrets
+
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models, transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from glitz_backend.stripe_client import StripeError, create_checkout_session, retrieve_checkout_session
 from glitz_backend.paystack_client import PaystackError, initialize_transaction, verify_transaction
+from glitz_backend.request_security import require_frontend_origin
 from .models import Event, Ticket, TicketType
 
 
@@ -41,6 +47,27 @@ class TicketCheckoutSerializer(serializers.Serializer):
     buyer_email = serializers.EmailField()
     payment_provider = serializers.ChoiceField(choices=("stripe", "paystack"), default="paystack")
 
+    def validate_buyer_email(self, value):
+        return value.strip().lower()
+
+    def validate_buyer_name(self, value):
+        value = value.strip()
+        if any(ord(char) < 32 for char in value):
+            raise serializers.ValidationError("Enter a valid name.")
+        return value
+
+
+def _throttle_checkout(email):
+    key = "checkout:ticket:" + hashlib.sha256(email.encode()).hexdigest()
+    cache.add(key, 0, 3600)
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, 3600)
+        count = 1
+    if count > 10:
+        raise Throttled(wait=3600)
+
 
 def mark_ticket_paid(session_id):
     """Idempotent — used by both the webhook and the verify-on-callback
@@ -64,10 +91,12 @@ class TicketCheckoutView(APIView):
     authentication_classes = []
 
     def post(self, request, slug):
+        require_frontend_origin(request)
         event = get_object_or_404(Event, slug=slug)
         serializer = TicketCheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        _throttle_checkout(data["buyer_email"])
 
         with transaction.atomic():
             ticket_type = get_object_or_404(
@@ -87,7 +116,7 @@ class TicketCheckoutView(APIView):
 
         callback_url = f"{settings.FRONTEND_BASE_URL}/events/{event.slug}/checkout/callback"
         if data["payment_provider"] == "paystack":
-            reference = f"glitz-ticket-{ticket.id}"
+            reference = "glitz-ticket-" + secrets.token_urlsafe(24)
             try:
                 payment = initialize_transaction(
                     email=data["buyer_email"], amount=int(ticket_type.price * 100), reference=reference,

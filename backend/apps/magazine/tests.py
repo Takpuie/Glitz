@@ -24,6 +24,30 @@ class ShippingCheckoutTests(SimpleTestCase):
         })
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
+    def test_checkout_rejects_duplicate_and_oversized_carts(self):
+        item = {"slug": "issue-1", "format": "digital", "quantity": 1}
+        duplicate = CartCheckoutSerializer(data={"buyer_email": "reader@example.com", "items": [item, item]})
+        oversized = CartCheckoutSerializer(data={"buyer_email": "reader@example.com", "items": [
+            {"slug": f"issue-{number}", "format": "digital", "quantity": 1} for number in range(21)
+        ]})
+        self.assertFalse(duplicate.is_valid())
+        self.assertFalse(oversized.is_valid())
+
+    def test_shipping_phone_is_validated_and_email_normalized(self):
+        payload = {
+            "buyer_email": " READER@Example.com ",
+            "items": [{"slug": "issue-1", "format": "print", "quantity": 1}],
+            "shipping_name": "Reader", "shipping_phone": "not-a-phone",
+            "shipping_address_line1": "1 High Street", "shipping_city": "Accra",
+            "shipping_region": "Greater Accra", "shipping_country": "GH",
+        }
+        invalid = CartCheckoutSerializer(data=payload)
+        self.assertFalse(invalid.is_valid())
+        payload["shipping_phone"] = "+233 50 938 8934"
+        valid = CartCheckoutSerializer(data=payload)
+        self.assertTrue(valid.is_valid(), valid.errors)
+        self.assertEqual(valid.validated_data["buyer_email"], "reader@example.com")
+
 
 class PaystackSignatureTests(SimpleTestCase):
     @override_settings(PAYSTACK_SECRET_KEY="secret")

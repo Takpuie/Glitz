@@ -184,6 +184,7 @@ STORAGES = {
 # Django sets a maximum of 1000 fields per form by default, but particularly complex page models
 # can exceed this limit within Wagtail's page editor.
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
+DATA_UPLOAD_MAX_NUMBER_FILES = 1
 
 
 # Wagtail settings
