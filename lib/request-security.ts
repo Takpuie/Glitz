@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export function frontendOrigin(request: NextRequest) {
+  return new URL(process.env.FRONTEND_BASE_URL ?? request.nextUrl.origin).origin;
+}
+
 export function rejectUnsafeRequest(request: NextRequest, maxBytes: number) {
   const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) {
+  if (!origin || origin !== frontendOrigin(request)) {
     return NextResponse.json({ detail: "Invalid request origin." }, { status: 403 });
   }
   const length = Number(request.headers.get("content-length") ?? "0");

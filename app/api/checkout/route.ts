@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
+import { frontendOrigin, noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
 
 // Proxies ticket checkout to Django server-side, per the build plan's
 // pattern for anything that shouldn't call the backend directly from the
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/checkout/`, {
-      method: "POST", headers: { "Content-Type": "application/json", Origin: request.nextUrl.origin },
+      method: "POST", headers: { "Content-Type": "application/json", Origin: frontendOrigin(request) },
       body: JSON.stringify({ ticket_type_id, buyer_name, buyer_email, payment_provider }),
       cache: "no-store", signal: AbortSignal.timeout(20000),
     });

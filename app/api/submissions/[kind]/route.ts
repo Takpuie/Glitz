@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
+import { frontendOrigin, noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
 
 const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: { kind: s
     }
     if (file && typeof file !== "string" && !file.size) form.delete("portfolio_file");
     const response = await fetch(`${BACKEND_URL}/api/submissions/${params.kind}/`, {
-      method: "POST", body: form, cache: "no-store", headers: { Origin: request.nextUrl.origin },
+      method: "POST", body: form, cache: "no-store", headers: { Origin: frontendOrigin(request) },
     });
     const data = await response.json();
     return noStoreJson(data, response.status);

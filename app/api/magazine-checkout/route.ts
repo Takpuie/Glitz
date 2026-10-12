@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
+import { frontendOrigin, noStoreJson, rejectUnsafeRequest } from "@/lib/request-security";
 
 const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const res = await fetch(`${BACKEND_URL}/api/magazine/checkout/`, {
-      method: "POST", headers: { "Content-Type": "application/json", Origin: request.nextUrl.origin },
+      method: "POST", headers: { "Content-Type": "application/json", Origin: frontendOrigin(request) },
       body: JSON.stringify({ items, buyer_email, ...shipping }),
       cache: "no-store", signal: AbortSignal.timeout(20000),
     });
