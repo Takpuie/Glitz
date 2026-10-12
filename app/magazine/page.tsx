@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { subscriptionPlans, currentIssue as localCurrentIssue, backIssues as localBackIssues } from "@/data/issues";
+import { currentIssue as localCurrentIssue, backIssues as localBackIssues } from "@/data/issues";
 import { getMagazineIssues, type BackendMagazineIssue } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 import MagazineCheckout from "./MagazineCheckout";
@@ -66,49 +66,6 @@ export default async function MagazinePage() {
           </div>
         </section>
       )}
-
-      {/* Subscriptions */}
-      <section id="subscribe" className="hairline bg-smoke">
-        <div className="container-editorial py-16 md:py-20">
-          <div className="mb-10 text-center">
-            <p className="eyebrow mb-2">Subscribe &amp; Save</p>
-            <h2 className="font-display text-4xl sm:text-5xl">Never Miss an Issue</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {subscriptionPlans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`flex flex-col border p-8 ${plan.highlight ? "border-ink bg-paper" : "border-ink/20 bg-paper"}`}
-              >
-                {plan.highlight && (
-                  <p className="mb-4 font-nav text-[10px] uppercase tracking-widest2 text-gray-500">
-                    Most Popular
-                  </p>
-                )}
-                <h3 className="font-display text-2xl">{plan.name}</h3>
-                <p className="mt-4">
-                  <span className="font-display text-4xl">{plan.price}</span>
-                  <span className="ml-1 text-sm text-gray-500">{plan.cadence}</span>
-                </p>
-                <ul className="mt-6 flex-1 space-y-3 border-t border-ink/10 pt-6 text-sm text-gray-700">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2">
-                      <span aria-hidden>&mdash;</span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button className={plan.highlight ? "btn-primary mt-8" : "btn-outline mt-8"}>
-                  Choose {plan.name}
-                </button>
-              </div>
-            ))}
-          </div>
-          <p className="mt-8 text-center text-xs text-gray-500">
-            Gift a subscription at checkout — schedule delivery for any start date.
-          </p>
-        </div>
-      </section>
 
       {/* Back issues */}
       <section className="container-editorial py-16 md:py-20">
