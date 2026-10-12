@@ -51,7 +51,9 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-X_FRAME_OPTIONS = "DENY"
+# Wagtail renders page previews in a same-origin iframe within the admin.
+# SAMEORIGIN keeps third-party framing blocked while allowing that editor UI.
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 try:
     from .local import *  # noqa: F401,F403
