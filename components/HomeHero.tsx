@@ -45,7 +45,8 @@ export default function HomeHero({ slides }: { slides: HomepageSlide[] }) {
       touch.current = null;
     }}>
     <div key={slide.id} className="hero-reveal absolute inset-0 -z-20">
-      <Image unoptimized src={slide.poster.full_url} alt="" fill priority={active === 0} sizes="100vw" className="object-cover" />
+      <Image unoptimized src="/images/hero/fashion-editorial-mobile.jpeg" alt="" fill priority={active === 0} sizes="100vw" className="object-cover md:hidden" />
+      <Image unoptimized src={slide.poster.full_url} alt="" fill priority={active === 0} sizes="100vw" className="hidden object-cover md:block" />
       {slide.video_url && !reduced && <video ref={video} src={slide.video_url} poster={slide.poster.full_url} autoPlay={moving} muted loop playsInline preload="metadata" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />}
     </div>
     <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/35 to-black/15" />
