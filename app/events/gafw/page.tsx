@@ -5,7 +5,7 @@ import { getBackendEvent, type BackendEvent } from "@/lib/backend";
 import TicketSelector from "./TicketSelector";
 import EnquiryForm from "@/components/EnquiryForm";
 
-const sponsors = ["MTN", "Kempinski", "Vodafone", "Absa", "Fidelity Bank", "Delta Air Lines"];
+const sponsors = ["Scent of Africa", "Lush Hair", "KIKO Milano", "Viva Boutique", "W. Emporium"];
 
 const STATUS_LABELS: Record<string, string> = {
   on_sale: "On sale",
