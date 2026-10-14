@@ -60,7 +60,7 @@ export default async function GafwPage() {
           <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{event.name}</h1>
           <p className="mt-5 max-w-md text-base text-gray-600">{event.description}</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <a href="#tickets" className="btn-primary">Get Tickets</a>
+            <a href="https://egtks.com/e/67969" target="_blank" rel="noopener noreferrer" className="btn-primary">Get Tickets</a>
             <a href="#apply" className="btn-outline">Apply: Young Designers</a>
           </div>
         </div>

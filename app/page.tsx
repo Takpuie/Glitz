@@ -105,7 +105,7 @@ export default async function Home() {
             <h2 className="font-display text-4xl leading-tight sm:text-5xl">{gafw.name}</h2>
             <p className="mt-5 max-w-md text-base text-gray-600">{gafw.description}</p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/events/gafw" className="btn-primary">Get Tickets</Link>
+              <a href="https://egtks.com/e/67969" target="_blank" rel="noopener noreferrer" className="btn-primary">Get Tickets</a>
               <Link href="/events" className="btn-outline">All Glitz Events</Link>
             </div>
           </div>
