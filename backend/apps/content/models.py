@@ -279,7 +279,7 @@ class Post(Page):
         APIField("category"),
         APIField("published_date"),
         APIField("read_time_minutes"),
-        APIField("cover_image", serializer=ImageRenditionField("fill-1200x1500")),
+        APIField("cover_image", serializer=ImageRenditionField("max-2000x2000")),
         APIField("body"),
         APIField("gallery"),
     ]

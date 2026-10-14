@@ -15,7 +15,7 @@ class GalleryItemSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if not obj.image:
             return None
-        return rendition_dict(obj.image.get_rendition("fill-1200x900"))
+        return rendition_dict(obj.image.get_rendition("max-2000x2000"))
 
 
 class TicketTypeSerializer(serializers.ModelSerializer):
@@ -44,6 +44,8 @@ class EventSerializer(serializers.ModelSerializer):
             "end_date",
             "status",
             "cover_image",
+            "external_payment_url",
+            "external_payment_label",
             "ticket_types",
             "gallery_items",
         ]
@@ -51,7 +53,7 @@ class EventSerializer(serializers.ModelSerializer):
     def get_cover_image(self, obj):
         if not obj.cover_image:
             return None
-        return rendition_dict(obj.cover_image.get_rendition("fill-1600x1000"))
+        return rendition_dict(obj.cover_image.get_rendition("max-2000x2000"))
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):

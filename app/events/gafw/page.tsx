@@ -45,6 +45,8 @@ export default async function GafwPage() {
     end_date: "2026-11-13",
     status: "save_the_date",
     cover_image: { url: staticFallback.image, full_url: staticFallback.image, width: 1600, height: 1000 },
+    external_payment_url: "https://egtks.com/e/67969",
+    external_payment_label: "Get Tickets",
     ticket_types: [],
   };
   event = {
@@ -56,6 +58,7 @@ export default async function GafwPage() {
       .replace(/three days/gi, "four days")
       .replace(/3-day/gi, "four-day"),
   };
+  const paymentUrl = event.external_payment_url || "https://egtks.com/e/67969";
 
   return (
     <div>
@@ -69,7 +72,7 @@ export default async function GafwPage() {
           <h1 className="font-display text-5xl leading-[1.03] sm:text-6xl">{event.name}</h1>
           <p className="mt-5 max-w-md text-base text-gray-600">{event.description}</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <a href="https://egtks.com/e/67969" target="_blank" rel="noopener noreferrer" className="btn-primary">Get Tickets</a>
+            <a href={paymentUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">{event.external_payment_label || "Get Tickets"}</a>
             <a href="#apply" className="btn-outline">Apply: Young Designers</a>
           </div>
         </div>
@@ -81,7 +84,7 @@ export default async function GafwPage() {
             fill
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
+            className="object-contain"
           />
         </div>
       </section>
@@ -138,7 +141,12 @@ export default async function GafwPage() {
             <p className="eyebrow mb-2">Ticketing</p>
             <h2 className="font-display text-4xl sm:text-5xl">Choose Your Access</h2>
           </div>
-          <TicketSelector slug={event.slug} ticketTypes={event.ticket_types} />
+          {paymentUrl ? (
+            <div className="text-center">
+              <p className="mx-auto max-w-xl text-sm text-gray-600">Tickets for this event are available through our official ticketing partner.</p>
+              <a href={paymentUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-6 inline-flex">{event.external_payment_label || "Get Tickets"}</a>
+            </div>
+          ) : <TicketSelector slug={event.slug} ticketTypes={event.ticket_types} />}
         </div>
       </section>
 

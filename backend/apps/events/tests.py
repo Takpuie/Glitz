@@ -4,6 +4,19 @@ from django.test import SimpleTestCase, TestCase
 
 from .checkout import TicketCheckoutSerializer, mark_ticket_paid
 from .models import Event, Ticket, TicketType
+from .api import EventSerializer
+
+
+class EventExternalPaymentTests(SimpleTestCase):
+    def test_external_payment_link_is_exposed_to_frontend(self):
+        event = Event(
+            name="Hosted checkout event", slug="hosted-checkout", start_date="2026-11-01",
+            external_payment_url="https://tickets.example.com/event/123",
+            external_payment_label="Buy passes",
+        )
+        data = EventSerializer(event).data
+        self.assertEqual(data["external_payment_url"], "https://tickets.example.com/event/123")
+        self.assertEqual(data["external_payment_label"], "Buy passes")
 
 
 class TicketPaymentProviderTests(SimpleTestCase):

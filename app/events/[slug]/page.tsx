@@ -69,7 +69,7 @@ export default async function EventEditionPage({ params }: { params: { slug: str
           <p className="mt-5 max-w-md text-base text-gray-600">{backendEvent?.tagline ?? event.tagline}</p>
         </div>
         <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
-          <Image unoptimized src={eventImage} alt={backendEvent?.name ?? event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          <Image unoptimized src={eventImage} alt={backendEvent?.name ?? event.name} fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-contain" />
         </div>
       </section>
 
@@ -81,7 +81,11 @@ export default async function EventEditionPage({ params }: { params: { slug: str
               {event.description}
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              {event.status === "Applications open" ? (
+              {backendEvent?.external_payment_url ? (
+                <a href={backendEvent.external_payment_url} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                  {backendEvent.external_payment_label || "Get Tickets"}
+                </a>
+              ) : event.status === "Applications open" ? (
                 <Link href="/nominate" className="btn-primary">Apply / Nominate</Link>
               ) : (
                 <a href="#register-interest" className="btn-primary">Register Interest</a>

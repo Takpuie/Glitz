@@ -208,6 +208,8 @@ export type BackendEvent = {
   end_date: string | null;
   status: "on_sale" | "applications_open" | "save_the_date" | "archived";
   cover_image: { url: string; full_url: string; width: number; height: number } | null;
+  external_payment_url: string;
+  external_payment_label: string;
   ticket_types: TicketTier[];
 };
 

@@ -81,7 +81,7 @@ export default async function ArticlePage({
       <div className="container-editorial grid grid-cols-1 gap-12 py-14 md:grid-cols-[1fr_260px] md:py-16">
         <div className="mx-auto w-full max-w-2xl">
           <div className="photo-card relative aspect-[16/10] w-full bg-gray-200">
-            <Image unoptimized src={article.image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 700px" className="object-cover" />
+            <Image unoptimized src={article.image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 700px" className="object-contain" />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-5 py-4">
               <p className="font-nav text-[10px] uppercase tracking-widest2 text-paper">Featured Story</p>
             </div>

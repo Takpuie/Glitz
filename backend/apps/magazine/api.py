@@ -28,7 +28,7 @@ class MagazineIssueSerializer(serializers.ModelSerializer):
     def get_cover_image(self, obj):
         if not obj.cover_image:
             return None
-        return rendition_dict(obj.cover_image.get_rendition("fill-1000x1300"))
+        return rendition_dict(obj.cover_image.get_rendition("max-2000x2000"))
 
 
 class MagazineIssueViewSet(viewsets.ReadOnlyModelViewSet):

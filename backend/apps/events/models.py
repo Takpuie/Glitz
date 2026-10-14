@@ -30,6 +30,13 @@ class Event(ClusterableModel):
     cover_image = models.ForeignKey(
         "wagtailimages.Image", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    external_payment_url = models.URLField(
+        blank=True,
+        help_text="Optional hosted ticket/payment page. When set, ticket buttons send visitors here.",
+    )
+    external_payment_label = models.CharField(
+        max_length=60, blank=True, default="Get Tickets", help_text="Button text for the external payment link."
+    )
 
     panels = [
         FieldPanel("name"),
@@ -41,6 +48,8 @@ class Event(ClusterableModel):
         FieldPanel("end_date"),
         FieldPanel("status"),
         FieldPanel("cover_image"),
+        FieldPanel("external_payment_url"),
+        FieldPanel("external_payment_label"),
         InlinePanel("ticket_types", label="Ticket types"),
         InlinePanel("gallery_items", label="Gallery"),
     ]
@@ -53,7 +62,9 @@ class Event(ClusterableModel):
         APIField("start_date"),
         APIField("end_date"),
         APIField("status"),
-        APIField("cover_image", serializer=ImageRenditionField("fill-1600x1000")),
+        APIField("cover_image", serializer=ImageRenditionField("max-2000x2000")),
+        APIField("external_payment_url"),
+        APIField("external_payment_label"),
         APIField("ticket_types"),
         APIField("gallery_items"),
     ]

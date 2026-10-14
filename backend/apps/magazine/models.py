@@ -55,7 +55,7 @@ class MagazineIssue(models.Model):
         APIField("issue_number"),
         APIField("season"),
         APIField("description"),
-        APIField("cover_image", serializer=ImageRenditionField("fill-1000x1300")),
+        APIField("cover_image", serializer=ImageRenditionField("max-2000x2000")),
         APIField("price"),
         APIField("is_digital_available"),
         APIField("is_print_available"),

@@ -89,7 +89,7 @@ export default async function Home() {
             </Link>
           </div>
           <div className="photo-card relative aspect-[4/5] w-full max-w-sm justify-self-center bg-gray-200 md:justify-self-end">
-            <Image unoptimized src={currentIssue?.cover_image?.full_url ?? editorialImage("magazine-cover-home", 1000, 1300)} alt={currentIssue?.title ?? "Glitz Africa Magazine"} fill sizes="(max-width: 768px) 80vw, 40vw" className="object-cover" />
+            <Image unoptimized src={currentIssue?.cover_image?.full_url ?? editorialImage("magazine-cover-home", 1000, 1300)} alt={currentIssue?.title ?? "Glitz Africa Magazine"} fill sizes="(max-width: 768px) 80vw, 40vw" className="object-contain" />
           </div>
         </div>
       </section>

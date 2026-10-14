@@ -52,7 +52,7 @@ export default async function MagazinePage() {
               alt={currentIssue.title}
               fill
               sizes="(max-width: 768px) 80vw, 40vw"
-              className="object-cover"
+              className="object-contain"
             />
           </div>
           <div className="flex flex-col justify-center">
@@ -88,7 +88,7 @@ export default async function MagazinePage() {
                   alt={issue.title}
                   fill
                   sizes="(max-width: 768px) 45vw, 16vw"
-                  className="object-cover"
+                  className="object-contain"
                 />
                 {issue.print_sold_out && (
                   <div className="absolute inset-x-0 bottom-0 bg-ink py-1.5 text-center font-nav text-[9.5px] uppercase tracking-widest2 text-paper">
