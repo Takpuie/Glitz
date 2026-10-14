@@ -31,9 +31,9 @@ export default async function Home() {
   const currentIssue = magazineIssues.find((issue) => issue.is_current_issue) ?? magazineIssues[0];
 
   const fallbackSlides: HomepageSlide[] = [
-    { id: -1, title: "The culture of now.", eyebrow: "Glitz Africa", description: "Your front-row seat to fashion, beauty, entertainment and the people shaping Africa.", poster: { full_url: "/images/gafw/hero-designer-and-model.jpg" }, video_url: null, button_label: "Explore the stories", button_path: "/articles" },
-    { id: -2, title: "Where fashion comes alive.", eyebrow: "Glitz Africa Fashion Week", description: "The designers, the details, the moments. Experience the runway with Glitz.", poster: { full_url: "/images/gafw/group-finale-walk.jpg" }, video_url: null, button_label: "Discover our events", button_path: "/events" },
-    { id: -3, title: "Women shaping what comes next.", eyebrow: "The Female CEO Summit", description: "Ideas, conversations and connections with the women leading change.", poster: { full_url: "/images/female-ceo-summit/panel-trade-opportunities.jpg" }, video_url: null, button_label: "Step inside", button_path: "/events/female-ceo-summit" },
+    { id: -1, title: "The culture of now.", eyebrow: "Glitz Africa", description: "Your front-row seat to fashion, beauty, entertainment and the people shaping Africa.", poster: { full_url: "/images/hero/fashion-editorial-architecture.webp" }, video_url: null, button_label: "Explore the stories", button_path: "/articles" },
+    { id: -2, title: "Where fashion comes alive.", eyebrow: "Glitz Africa Fashion Week", description: "The designers, the details, the moments. Experience the runway with Glitz.", poster: { full_url: "/images/hero/fashion-editorial-cattle.webp" }, video_url: null, button_label: "Discover our events", button_path: "/events" },
+    { id: -3, title: "Women shaping what comes next.", eyebrow: "The Female CEO Summit", description: "Ideas, conversations and connections with the women leading change.", poster: { full_url: "/images/hero/fashion-editorial-architecture.webp" }, video_url: null, button_label: "Step inside", button_path: "/events/female-ceo-summit" },
   ];
   const fallbackVideos: MediaVideo[] = [
     { id: -1, title: "Backstage at Glitz Africa Fashion Week", thumbnail: { full_url: "/images/gafw/hero-designer-and-model.jpg" }, embed_url: null, file_url: null, duration: "", event: { name: "Glitz Africa Fashion Week", slug: "gafw" } },
