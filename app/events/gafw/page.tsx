@@ -41,11 +41,20 @@ export default async function GafwPage() {
     tagline: staticFallback.tagline,
     description: staticFallback.description,
     venue: staticFallback.venue,
-    start_date: "2026-11-06",
-    end_date: "2026-11-09",
+    start_date: "2026-11-10",
+    end_date: "2026-11-13",
     status: "save_the_date",
     cover_image: { url: staticFallback.image, full_url: staticFallback.image, width: 1600, height: 1000 },
     ticket_types: [],
+  };
+  event = {
+    ...event,
+    venue: staticFallback.venue,
+    start_date: "2026-11-10",
+    end_date: "2026-11-13",
+    description: event.description
+      .replace(/three days/gi, "four days")
+      .replace(/3-day/gi, "four-day"),
   };
 
   return (

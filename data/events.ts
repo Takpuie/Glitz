@@ -18,13 +18,13 @@ export const events: EventEdition[] = [
     slug: "gafw",
     name: "Glitz Africa Fashion Week",
     shortName: "GAFW",
-    tagline: "The continent's runway, three days in Accra.",
+    tagline: "The continent's runway, four days in Accra.",
     dates: "10–13 November 2026",
-    venue: "Accra International Conference Centre",
+    venue: "The Underbridge Annex, Accra, Ghana",
     image: "/images/gafw/group-finale-walk.jpg",
     status: "On sale",
     description:
-      "Runway, exhibitions and the Young Designers Showcase — GAFW 2026 brings together established houses and emerging talent from across Africa and the diaspora for its landmark 3-day edition.",
+      "Runway, exhibitions and the Young Designers Showcase — GAFW 2026 brings together established houses and emerging talent from across Africa and the diaspora for its landmark four-day edition.",
   },
   {
     slug: "gwoty",

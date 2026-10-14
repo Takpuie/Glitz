@@ -30,10 +30,13 @@ export default async function EventsPage() {
   try { backendEvents = await getBackendEvents(); } catch { /* Use the local event catalogue below. */ }
   const eventList = backendEvents.length ? backendEvents.map((backend) => {
     const fallback = events.find((event) => event.slug === backend.slug);
+    const confirmedGafw = backend.slug === "gafw" && fallback;
     return {
       ...fallback,
       ...backend,
-      dates: formatDate(backend.start_date, backend.end_date),
+      dates: confirmedGafw ? fallback.dates : formatDate(backend.start_date, backend.end_date),
+      venue: confirmedGafw ? fallback.venue : backend.venue,
+      tagline: confirmedGafw ? fallback.tagline : backend.tagline,
       statusLabel: STATUS_LABELS[backend.status] ?? backend.status,
       image: backend.cover_image?.full_url ?? fallback?.image ?? editorialImage(backend.slug, 1600, 1000),
     };
