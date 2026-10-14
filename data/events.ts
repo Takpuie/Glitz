@@ -85,41 +85,36 @@ export const gafwProgramme = [
   {
     day: "Day One",
     date: "Tue 10 Nov",
-    theme: "Trade & Exhibitions",
+    theme: "Beauty Forum",
     items: [
-      { time: "10:00", title: "Trade tents open to the public" },
-      { time: "12:00", title: "Sustainability in African Textiles — panel" },
-      { time: "18:30", title: "Opening cocktail, GAFW Village" },
+      { time: "10:00–13:00", title: "Beauty Forum", venue: "W. Emporium" },
     ],
   },
   {
     day: "Day Two",
     date: "Wed 11 Nov",
-    theme: "Young Designers Showcase",
+    theme: "Young Design Talent Show",
     items: [
-      { time: "11:00", title: "Exhibitions continue" },
-      { time: "16:00", title: "Young Designers Showcase runway" },
-      { time: "19:30", title: "Press & media accreditation desk" },
+      { time: "15:00–18:00", title: "Young Design Talent Show", venue: "Viva Boutique" },
     ],
   },
   {
     day: "Day Three",
     date: "Thu 12 Nov",
-    theme: "Mainstage Runway",
+    theme: "Private Show & Main Runway",
     items: [
-      { time: "12:00", title: "Emerging designers runway" },
-      { time: "17:00", title: "VIP reception" },
-      { time: "19:00", title: "Mainstage runway — headline designers" },
+      { time: "17:00–18:00", title: "Atafo & Christie Brown Private Show", venue: "The Underbridge" },
+      { time: "19:00–23:00", title: "Main Runway — Day 1", venue: "The Underbridge" },
     ],
   },
   {
     day: "Day Four",
     date: "Fri 13 Nov",
-    theme: "Finale",
+    theme: "Business, Graduate & Main Runway",
     items: [
-      { time: "18:00", title: "Doors open, red carpet" },
-      { time: "20:00", title: "Finale runway & awards" },
-      { time: "22:30", title: "Closing gala" },
+      { time: "09:00–12:00", title: "Business of Fashion Seminar", venue: "The Underbridge" },
+      { time: "13:00–15:00", title: "Graduate Show", venue: "The Underbridge" },
+      { time: "17:00–23:00", title: "Main Runway — Day 2", venue: "The Underbridge" },
     ],
   },
 ];

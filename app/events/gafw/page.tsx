@@ -109,8 +109,11 @@ export default async function GafwPage() {
               <ul className="mt-5 space-y-4 border-t border-ink/10 pt-5">
                 {day.items.map((item) => (
                   <li key={item.title} className="flex gap-4 text-sm">
-                    <span className="w-12 shrink-0 font-nav text-[11px] tracking-wide text-gray-500">{item.time}</span>
-                    <span>{item.title}</span>
+                    <span className="w-24 shrink-0 font-nav text-[11px] tracking-wide text-gray-500">{item.time}</span>
+                    <span>
+                      <span className="block">{item.title}</span>
+                      <span className="mt-1 block text-xs text-gray-500">{item.venue}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
