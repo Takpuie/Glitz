@@ -66,13 +66,24 @@ export async function getPressCoverage(): Promise<PressCoverage[]> {
 }
 
 const POST_FIELDS =
-  "title,dek,author_name,category(name,slug),published_date,read_time_minutes,cover_image,body";
+  "title,dek,author_name,category(name,slug),published_date,read_time_minutes,cover_image,body,gallery";
 
 type WagtailImage = {
   full_url: string;
   width: number;
   height: number;
   alt: string;
+};
+
+export type ArticleBodyBlock = { type: string; value: unknown; id: string };
+export type ArticleGalleryItem = {
+  id?: number;
+  kind: "image" | "video";
+  image: WagtailImage | null;
+  video_file: string | null;
+  caption: string;
+  event_tag: string;
+  order: number;
 };
 
 type WagtailPost = {
@@ -85,7 +96,8 @@ type WagtailPost = {
   published_date: string | null;
   read_time_minutes: number | null;
   cover_image: WagtailImage | null;
-  body: { type: string; value: string; id: string }[];
+  body: ArticleBodyBlock[];
+  gallery?: ArticleGalleryItem[];
 };
 
 async function wagtailFetch(path: string) {
@@ -122,7 +134,13 @@ function toArticle(post: WagtailPost): Article {
     publishedDate: post.published_date,
     readTime: post.read_time_minutes ? `${post.read_time_minutes} min read` : "",
     image: post.cover_image?.full_url ?? editorialImage(post.meta.slug, 1200, 1500),
-    body: post.body.filter((b) => b.type === "paragraph").map((b) => b.value),
+    body: Array.isArray(post.body) ? post.body : [],
+    gallery: Array.isArray(post.gallery)
+      ? post.gallery.map((item) => ({
+          ...item,
+          video_file: item.video_file ? new URL(item.video_file, BACKEND_URL).toString() : null,
+        }))
+      : [],
   };
 }
 
@@ -139,7 +157,8 @@ export type Article = {
   publishedDate: string | null;
   readTime: string;
   image: string;
-  body: string[];
+  body: ArticleBodyBlock[];
+  gallery: ArticleGalleryItem[];
   featured?: boolean;
 };
 

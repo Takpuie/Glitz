@@ -25,8 +25,15 @@ class PostPreviewTests(SimpleTestCase):
             dek="An unpublished summary",
             author_name="Preview author",
             body=[
+                ("heading", {"text": "A new section", "level": "h2"}),
                 ("paragraph", "<p>Draft <strong>formatted text</strong></p>"),
                 ("quote", {"quote": "A draft quote", "attribution": "An editor"}),
+                ("highlight", {"heading": "Key detail", "text": "<p>Do not miss this.</p>"}),
+                ("call_to_action", {
+                    "heading": "Attend the event", "text": "<p>Book your place.</p>",
+                    "button_label": "Get tickets", "button_url": "https://example.com/tickets",
+                    "style": "gold",
+                }),
             ],
         )
         response = page.serve_preview(RequestFactory().get("/"), "")
@@ -36,6 +43,9 @@ class PostPreviewTests(SimpleTestCase):
         self.assertContains(response, "<strong>formatted text</strong>", html=True)
         self.assertContains(response, "A draft quote")
         self.assertContains(response, "An editor")
+        self.assertContains(response, "A new section")
+        self.assertContains(response, "Key detail")
+        self.assertContains(response, "Get tickets")
         self.assertNotIn("Location", response)
 
     def test_empty_post_can_be_previewed(self):

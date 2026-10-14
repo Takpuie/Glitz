@@ -1,0 +1,1 @@
+{% load wagtailimages_tags %}<div class="inline-gallery">{% for item in value %}<figure>{% image item.image width-900 %}{% if item.caption %}<figcaption>{{ item.caption }}</figcaption>{% endif %}</figure>{% endfor %}</div>

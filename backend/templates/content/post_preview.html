@@ -25,6 +25,10 @@
     blockquote cite { font: 14px Arial, sans-serif; }
     a { color: inherit; text-underline-offset: 3px; }
     .gallery { border-top: 1px solid #ddd; margin-top: 40px; }
+    .two-images, .inline-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .call-to-action, .highlight { margin: 32px 0; padding: 28px; background: #f4f0e7; }
+    .call-to-action a { display: inline-block; padding: 12px 20px; background: #151515; color: #fff; text-decoration: none; }
+    @media (max-width: 600px) { .two-images, .inline-gallery { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>

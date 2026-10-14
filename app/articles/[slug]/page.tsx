@@ -2,37 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import sanitizeHtml from "sanitize-html";
 import ArticleCard from "@/components/ArticleCard";
 import ReaderComments from "@/components/ReaderComments";
 import ArticleShare from "@/components/ArticleShare";
+import { ArticleBody, ArticleGallery } from "@/components/ArticleContent";
 import {
   getArticles,
   getArticle,
   relatedArticles,
 } from "@/lib/backend";
-
-function sanitizeArticleHtml(value: string) {
-  return sanitizeHtml(value, {
-    allowedTags: [
-      "p", "br", "strong", "em", "b", "i", "u", "s", "h2", "h3", "h4",
-      "ul", "ol", "li", "blockquote", "a", "figure", "figcaption", "img", "hr", "span",
-    ],
-    allowedAttributes: {
-      "*": ["class"],
-      a: ["href", "title"],
-      img: ["src", "alt", "width", "height", "loading"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowProtocolRelative: false,
-    transformTags: {
-      a: (_tagName, attributes) => ({
-        tagName: "a",
-        attribs: { ...attributes, rel: "noopener noreferrer" },
-      }),
-    },
-  });
-}
 
 export async function generateStaticParams() {
   const articles = await getArticles();
@@ -74,8 +52,6 @@ export default async function ArticlePage({
   const article = await getArticle(params.slug);
   if (!article) return notFound();
   const related = await relatedArticles(article.slug);
-  const body = article.body;
-  const safeBody = body.map(sanitizeArticleHtml);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -111,11 +87,8 @@ export default async function ArticlePage({
             </div>
           </div>
 
-          <div className="article-body mt-10">
-            {safeBody.map((html, i) => (
-              <div key={i} className="article-body-block" dangerouslySetInnerHTML={{ __html: html }} />
-            ))}
-          </div>
+          <ArticleBody blocks={article.body} />
+          <ArticleGallery items={article.gallery} />
 
           <ArticleShare title={article.title} />
         </div>

@@ -336,7 +336,10 @@ class MediaAsset(models.Model):
 
     api_fields = [
         APIField("kind"),
-        APIField("image", serializer=ImageRenditionField("fill-1200x900")),
+        # Preserve the original aspect ratio on article galleries. The
+        # frontend controls the grid crop instead of permanently cropping the
+        # API rendition.
+        APIField("image", serializer=ImageRenditionField("max-2000x2000")),
         APIField("video_file"),
         APIField("caption"),
         APIField("event_tag"),
