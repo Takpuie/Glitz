@@ -1,0 +1,13 @@
+{% extends "wagtailadmin/base.html" %}
+{% load static %}
+
+{% block branding_favicon %}
+    <link rel="icon" type="image/png" href="{% static 'images/glitz-icon.png' %}">
+{% endblock %}
+
+{% block branding_logo %}
+    <span class="glitz-admin-brand">
+        <img class="glitz-admin-wordmark" src="{% static 'images/glitz-logo-white.png' %}" alt="Glitz Africa">
+        <img class="glitz-admin-icon" src="{% static 'images/glitz-icon.png' %}" alt="Glitz Africa">
+    </span>
+{% endblock %}

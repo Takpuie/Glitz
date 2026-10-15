@@ -60,7 +60,12 @@ export default async function ArticlePage({
     image: [article.image],
     datePublished: article.publishedDate,
     author: { "@type": "Person", name: article.author || "Glitz Africa" },
-    publisher: { "@type": "Organization", name: "Glitz Africa", url: "https://glitzafrica.com" },
+    publisher: {
+      "@type": "Organization",
+      name: "Glitz Africa",
+      url: "https://glitzafrica.com",
+      logo: { "@type": "ImageObject", url: "https://glitzafrica.com/images/glitz-logo-black.png" },
+    },
     mainEntityOfPage: `https://glitzafrica.com/articles/${article.slug}`,
   };
 

@@ -94,12 +94,12 @@ export default function Nav({ events }: { events: EventLink[] }) {
 
           <Link href="/" aria-label="Glitz Africa home" className="justify-self-center">
             <Image
-              src="/images/glitz-logo-white.png"
+              src="/images/glitz-logo-black.png"
               alt="Glitz Africa"
               width={208}
               height={63}
               priority
-              className="h-auto w-[132px] brightness-0 sm:w-[150px]"
+              className="h-auto w-[132px] sm:w-[150px]"
             />
           </Link>
 
