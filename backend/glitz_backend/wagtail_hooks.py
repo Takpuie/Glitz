@@ -9,39 +9,6 @@ def global_admin_css():
             background: linear-gradient(135deg, #f6f0e7 0%, #efe7da 100%);
         }
 
-        .glitz-admin-brand {
-            display: flex;
-            min-height: 72px;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 18px;
-        }
-
-        .glitz-admin-wordmark {
-            display: block;
-            width: 180px;
-            height: auto;
-        }
-
-        .glitz-admin-icon {
-            display: none;
-            width: 42px;
-            height: 42px;
-        }
-
-        .sidebar--slim .glitz-admin-brand {
-            min-height: 64px;
-            padding: 10px 6px;
-        }
-
-        .sidebar--slim .glitz-admin-wordmark {
-            display: none;
-        }
-
-        .sidebar--slim .glitz-admin-icon {
-            display: block;
-        }
-
         .wrapper {
             background: rgba(255, 255, 255, 0.7);
             border: 1px solid rgba(21, 21, 21, 0.08);

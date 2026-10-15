@@ -1,5 +1,5 @@
 {% extends "wagtailadmin/admin_base.html" %}
-{% load i18n static wagtailadmin_tags %}
+{% load i18n wagtailadmin_tags %}
 {% block titletag %}{% trans "Sign in to Glitz" %}{% endblock %}
 {% block bodyclass %}login{% endblock %}
 
@@ -69,7 +69,7 @@
 
         {% block branding_logo %}
             <div class="login-logo" style="text-align:center; margin-top: 1.5rem;">
-                <img src="{% static 'images/glitz-logo-white.png' %}" alt="Glitz Africa" style="display:inline-block; width: 190px; height:auto; filter:brightness(0);">
+                <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: #1d1d1d;">Glitz</span>
             </div>
         {% endblock %}
     </main>
