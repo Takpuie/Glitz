@@ -16,7 +16,7 @@ export const partners: Partner[] = [
   { id: 7, name: "Access Bank Ghana", logo: { full_url: "/images/partners/access-bank.png" }, website: "https://www.ghana.accessbankplc.com/" },
   { id: 8, name: "Ghana Export Promotion Authority", logo: { full_url: "/images/partners/gepa.png" }, website: "https://www.gepaghana.org/" },
   { id: 9, name: "GIADEC", logo: { full_url: "/images/partners/giadec.png" }, website: "https://giadec.com/" },
-  { id: 10, name: "Darling Hair", logo: { full_url: "/images/partners/darling-hair.svg" }, website: "https://www.darlingafrica.com/ghana/" },
+  { id: 10, name: "Darling Hair", logo: { full_url: "/images/partners/darling-hair.jpg" }, website: "https://www.darlingafrica.com/ghana/" },
   { id: 11, name: "Guinness Ghana", logo: { full_url: "/images/partners/guinness-ghana.png" }, website: "https://www.guinnessghana.com/" },
   { id: 12, name: "M·A·C Cosmetics", logo: { full_url: "/images/partners/mac-cosmetics.png" }, website: "https://www.maccosmetics.com/" },
 ];
