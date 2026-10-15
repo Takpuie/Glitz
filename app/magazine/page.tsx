@@ -35,7 +35,7 @@ export default async function MagazinePage() {
     <div>
       <header className="container-editorial border-b border-ink/15 py-12 md:py-16">
         <p className="eyebrow mb-3">Glitz Magazine</p>
-        <h1 className="font-display text-5xl sm:text-6xl">Read Something Glitzy</h1>
+        <h1 className="font-display text-5xl sm:text-6xl">Read Latest Issue</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
           Single issues and subscriptions, print and digital — shipped across
           Ghana, the continent and internationally.

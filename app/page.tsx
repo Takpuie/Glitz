@@ -70,15 +70,15 @@ export default async function Home() {
 
       <HomeVideos videos={videos.length ? videos : fallbackVideos} />
 
-      {/* Read something glitzy */}
+      {/* Read latest issue */}
       <section className="hairline bg-smoke">
         <div className="container-editorial grid grid-cols-1 items-center gap-10 py-16 md:grid-cols-2 md:py-20">
           <div>
             <p className="eyebrow mb-4">Glitz Magazine</p>
             <h2 className="font-display text-4xl leading-[1.05] sm:text-5xl">
-              Read something
+              Read Latest
               <br />
-              <span className="italic">glitzy.</span>
+              <span className="italic">Issue</span>
             </h2>
             <p className="mt-5 max-w-sm text-base text-gray-600">
               A quarterly collection of our most thoughtful stories, designed
