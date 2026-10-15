@@ -2,12 +2,11 @@ import Image from "next/image";
 import { editorialImage } from "@/lib/img";
 
 const archive = [
-  { name: "GAFW 2025", year: "2025", winner: "Best Collection: Aisha Obed", img: "/images/gafw/look-red-rope-belt.jpg" },
-  { name: "Ghana Women of the Year 2025", year: "2025", winner: "16 honourees celebrated", img: editorialImage("archive-gwoty-2025", 900, 700) },
-  { name: "Glitz Style Awards 2025", year: "2025", winner: "Best Dressed: Efya", img: editorialImage("archive-style-2025", 900, 700) },
-  { name: "GAFW 2024", year: "2024", winner: "Best Collection: Christie Brown", img: "/images/gafw/look-menswear-necklace.jpg" },
-  { name: "SheBoss Global 2024", year: "2024", winner: "200+ founders convened", img: editorialImage("archive-sheboss-2024", 900, 700) },
-  { name: "Female CEO Summit 2024", year: "2024", winner: "Keynote: Bozoma Saint John", img: editorialImage("archive-ceo-2024", 900, 700) },
+  { name: "GAFW 2022", year: "2022", winner: "", img: "/images/gafw/look-red-rope-belt.jpg" },
+  { name: "Ghana Women of the Year 2026", year: "2026", winner: "12 honourees celebrated", img: editorialImage("archive-gwoty-2026", 900, 700) },
+  { name: "She Boss Global UK 2026", year: "2026", winner: "", img: editorialImage("archive-sheboss-global-uk-2026", 900, 700) },
+  { name: "She Boss Doha Retreat 2026", year: "2026", winner: "", img: editorialImage("archive-sheboss-doha-2026", 900, 700) },
+  { name: "Female CEO Summit 2026", year: "2026", winner: "Keynote: Matilda Asante", img: "/images/female-ceo-summit/podium-speaker.jpg" },
 ];
 
 export default function EventsArchivePage() {
@@ -30,7 +29,7 @@ export default function EventsArchivePage() {
             </div>
             <p className="mt-4 font-nav text-[10.5px] uppercase tracking-widest2 text-gray-500">{a.year}</p>
             <h3 className="mt-1 font-display text-2xl">{a.name}</h3>
-            <p className="mt-1 text-sm text-gray-600">{a.winner}</p>
+            {a.winner && <p className="mt-1 text-sm text-gray-600">{a.winner}</p>}
           </div>
         ))}
       </div>
