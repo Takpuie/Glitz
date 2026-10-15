@@ -11,7 +11,6 @@ from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
 
-@register_snippet
 class Event(ClusterableModel):
     class Status(models.TextChoices):
         ON_SALE = "on_sale", "On sale"
@@ -179,6 +178,26 @@ class TicketViewSet(SnippetViewSet):
     list_filter = ["status", "event"]
     search_fields = ["check_in_code", "buyer_name", "buyer_email", "stripe_session_id", "paystack_reference"]
     ordering = ["-created_at"]
+    list_export = [
+        "id", "check_in_code", "event", "ticket_type", "buyer_name", "buyer_email",
+        "payment_provider", "stripe_session_id", "paystack_reference", "status",
+        "checked_in_at", "created_at",
+    ]
+    export_filename = "event-tickets"
 
 
+class EventViewSet(SnippetViewSet):
+    model = Event
+    icon = "date"
+    list_display = ["name", "start_date", "end_date", "venue", "status"]
+    list_filter = ["status"]
+    search_fields = ["name", "tagline", "venue", "description"]
+    list_export = [
+        "name", "slug", "tagline", "description", "venue", "start_date", "end_date",
+        "status", "external_payment_url", "external_payment_label",
+    ]
+    export_filename = "events"
+
+
+register_snippet(EventViewSet)
 register_snippet(Ticket, viewset=TicketViewSet)

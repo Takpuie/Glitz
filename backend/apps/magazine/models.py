@@ -9,7 +9,6 @@ from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
 
-@register_snippet
 class MagazineIssue(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
@@ -126,8 +125,29 @@ class OrderViewSet(SnippetViewSet):
     list_filter = ["status"]
     search_fields = ["email", "payment_reference"]
     ordering = ["-created_at"]
+    list_export = [
+        "id", "email", "amount", "payment_reference", "status", "shipping_name",
+        "shipping_phone", "shipping_address_line1", "shipping_address_line2", "shipping_city",
+        "shipping_region", "shipping_postal_code", "shipping_country", "created_at",
+    ]
+    export_filename = "magazine-orders"
 
 
+class MagazineIssueViewSet(SnippetViewSet):
+    model = MagazineIssue
+    icon = "doc-full"
+    list_display = ["title", "issue_number", "price", "publish_date", "is_current_issue"]
+    list_filter = ["is_digital_available", "is_print_available", "print_sold_out", "is_current_issue"]
+    search_fields = ["title", "issue_number", "season", "print_sku"]
+    list_export = [
+        "title", "slug", "issue_number", "season", "description", "price",
+        "is_digital_available", "is_print_available", "print_sku", "print_sold_out",
+        "publish_date", "is_current_issue",
+    ]
+    export_filename = "magazine-issues"
+
+
+register_snippet(MagazineIssueViewSet)
 register_snippet(Order, viewset=OrderViewSet)
 
 

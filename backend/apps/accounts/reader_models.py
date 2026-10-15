@@ -82,6 +82,8 @@ class ReaderAccountViewSet(SnippetViewSet):
     list_display = ["display_name", "email", "verified_at", "commenting_suspended"]
     list_filter = ["commenting_suspended"]
     search_fields = ["display_name", "email"]
+    list_export = ["display_name", "email", "verified_at", "commenting_suspended", "created_at"]
+    export_filename = "reader-accounts"
 
 
 class ReaderCommentViewSet(SnippetViewSet):
@@ -90,6 +92,8 @@ class ReaderCommentViewSet(SnippetViewSet):
     list_display = ["body", "post", "reader", "hidden", "created_at"]
     list_filter = ["hidden", "post"]
     search_fields = ["body", "reader__display_name"]
+    list_export = ["id", "post", "reader", "body", "hidden", "created_at", "edited_at"]
+    export_filename = "reader-comments"
 
 
 class CommentReportViewSet(SnippetViewSet):
@@ -97,6 +101,8 @@ class CommentReportViewSet(SnippetViewSet):
     icon = "warning"
     list_display = ["comment", "reader", "reason", "resolved", "created_at"]
     list_filter = ["resolved"]
+    list_export = ["id", "comment", "reader", "reason", "resolved", "created_at"]
+    export_filename = "comment-reports"
 
 
 for viewset in (ReaderAccountViewSet, ReaderCommentViewSet, CommentReportViewSet):

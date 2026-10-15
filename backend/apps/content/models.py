@@ -46,6 +46,10 @@ class PhotoViewSet(SnippetViewSet):
     list_display = ["title", "event", "display_order", "is_visible"]
     list_filter = ["is_visible", "event"]
     search_fields = ["title", "caption", "credit"]
+    list_export = [
+        "title", "alt_text", "caption", "credit", "event", "display_order", "is_visible",
+    ]
+    export_filename = "media-gallery"
 
 
 register_snippet(PhotoViewSet)
@@ -120,6 +124,8 @@ class VideoViewSet(SnippetViewSet):
     list_display = ["title", "event", "duration", "display_order", "is_visible"]
     list_filter = ["is_visible", "event"]
     search_fields = ["title"]
+    list_export = ["title", "video_url", "duration", "event", "display_order", "is_visible"]
+    export_filename = "videos"
 
 
 class PressCoverageViewSet(SnippetViewSet):
@@ -128,13 +134,16 @@ class PressCoverageViewSet(SnippetViewSet):
     list_display = ["headline", "publication", "published_date", "display_order", "is_visible"]
     list_filter = ["is_visible"]
     search_fields = ["headline", "publication"]
+    list_export = [
+        "headline", "publication", "article_url", "published_date", "display_order", "is_visible",
+    ]
+    export_filename = "press-coverage"
 
 
 register_snippet(VideoViewSet)
 register_snippet(PressCoverageViewSet)
 
 
-@register_snippet
 class HomepageSlide(models.Model):
     title = models.CharField(max_length=120)
     eyebrow = models.CharField(max_length=100, blank=True)
@@ -162,7 +171,6 @@ class HomepageSlide(models.Model):
             raise ValidationError({"video": "Choose a visible video with an uploaded MP4 or WebM file."})
 
 
-@register_snippet
 class PartnerLogo(models.Model):
     name = models.CharField(max_length=120)
     logo = models.ForeignKey("wagtailimages.Image", on_delete=models.PROTECT, related_name="+")
@@ -179,7 +187,6 @@ class PartnerLogo(models.Model):
         return self.name
 
 
-@register_snippet
 class Category(models.Model):
     """News / Entertainment / Fashion / Hair & Beauty / Lifestyle — managed
     in the CMS rather than hardcoded, so an editor can add one without a
@@ -205,6 +212,43 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class HomepageSlideViewSet(SnippetViewSet):
+    model = HomepageSlide
+    icon = "image"
+    list_display = ["title", "video", "button_label", "display_order", "is_visible"]
+    list_filter = ["is_visible"]
+    search_fields = ["title", "eyebrow", "description", "button_label"]
+    list_export = [
+        "title", "eyebrow", "description", "video", "button_label", "button_path",
+        "display_order", "is_visible",
+    ]
+    export_filename = "homepage-slides"
+
+
+class PartnerLogoViewSet(SnippetViewSet):
+    model = PartnerLogo
+    icon = "image"
+    list_display = ["name", "website", "display_order", "is_visible"]
+    list_filter = ["is_visible"]
+    search_fields = ["name", "website"]
+    list_export = ["name", "website", "display_order", "is_visible"]
+    export_filename = "partner-logos"
+
+
+class CategoryViewSet(SnippetViewSet):
+    model = Category
+    icon = "tag"
+    list_display = ["name", "slug"]
+    search_fields = ["name", "slug"]
+    list_export = ["name", "slug"]
+    export_filename = "story-categories"
+
+
+register_snippet(HomepageSlideViewSet)
+register_snippet(PartnerLogoViewSet)
+register_snippet(CategoryViewSet)
 
 
 class PostIndexPage(Page):

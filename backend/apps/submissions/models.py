@@ -111,6 +111,8 @@ class NewsletterSubscriberViewSet(SnippetViewSet):
     list_display = ["email", "is_active", "consent_at"]
     list_filter = ["is_active"]
     search_fields = ["email"]
+    list_export = ["email", "is_active", "consent_at"]
+    export_filename = "newsletter-subscribers"
 
 
 class NominationViewSet(SnippetViewSet):
@@ -119,6 +121,11 @@ class NominationViewSet(SnippetViewSet):
     list_display = ["full_name", "email", "open_call", "status", "created_at"]
     list_filter = ["open_call", "status"]
     search_fields = ["full_name", "email"]
+    list_export = [
+        "reference", "open_call", "full_name", "email", "portfolio_link",
+        "statement", "status", "notes", "created_at",
+    ]
+    export_filename = "nominations"
 
 
 class EnquiryViewSet(SnippetViewSet):
@@ -127,6 +134,11 @@ class EnquiryViewSet(SnippetViewSet):
     list_display = ["full_name", "email", "kind", "event", "status", "created_at"]
     list_filter = ["kind", "status", "event"]
     search_fields = ["full_name", "email", "company", "message"]
+    list_export = [
+        "reference", "kind", "full_name", "email", "company", "event",
+        "message", "status", "notes", "created_at",
+    ]
+    export_filename = "enquiries"
 
 
 class SubmissionPermissionPolicy(ModelPermissionPolicy):
