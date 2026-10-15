@@ -31,11 +31,12 @@ LOGGING = {
     },
 }
 
-# ManifestStaticFilesStorage is recommended in production, to prevent
-# outdated JavaScript / CSS assets being served from cache
-# (e.g. after a Wagtail upgrade).
+# Apache serves the collected static directory directly on TechNE. Avoid
+# manifest-only lookups here: a partially refreshed manifest would otherwise
+# turn an absent admin asset into a 500 response before Apache can serve the
+# unhashed file collected by Django.
 STORAGES["staticfiles"]["BACKEND"] = (  # noqa: F405
-    "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    "django.contrib.staticfiles.storage.StaticFilesStorage"
 )
 
 # Transport security — HTTPS is already terminated at TechNE via its issued
