@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AccountLink } from "@/components/AccountModal";
@@ -91,13 +92,15 @@ export default function Nav({ events }: { events: EventLink[] }) {
             </button>
           </div>
 
-          <Link href="/" className="justify-self-center text-center leading-none">
-            <span className="block whitespace-nowrap font-display text-[22px] font-bold tracking-[0.06em] sm:text-[26px]">
-              GLITZ
-            </span>
-            <span className="mt-0.5 block font-nav text-[8px] uppercase tracking-widest2 text-gray-500">
-              Africa
-            </span>
+          <Link href="/" aria-label="Glitz Africa home" className="justify-self-center">
+            <Image
+              src="/images/glitz-logo-white.png"
+              alt="Glitz Africa"
+              width={208}
+              height={63}
+              priority
+              className="h-auto w-[132px] brightness-0 sm:w-[150px]"
+            />
           </Link>
 
           <div className="flex items-center justify-end gap-2 sm:gap-5">

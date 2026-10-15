@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Newsletter from "@/components/Newsletter";
 
@@ -28,8 +29,13 @@ export default function Footer() {
     <footer className="bg-ink text-gray-300">
       <div className="container-editorial grid grid-cols-2 gap-10 py-16 lg:grid-cols-4 lg:py-20">
         <div className="col-span-2 lg:col-span-1">
-          <span className="block font-display text-2xl font-bold tracking-[0.06em] text-paper">GLITZ</span>
-          <span className="mt-0.5 block font-nav text-[9px] uppercase tracking-widest2 text-gray-500">Africa</span>
+          <Image
+            src="/images/glitz-logo-white.png"
+            alt="Glitz Africa"
+            width={208}
+            height={63}
+            className="h-auto w-[170px]"
+          />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-gray-400">
             Ghana&rsquo;s destination for fashion, beauty, culture, entertainment
             and lifestyle.
