@@ -1,7 +1,7 @@
 export const INITIATIVES = [
   { label: "Glitz Magazine", href: "/magazine" },
-  { label: "Sheboss", href: "/events/sheboss-global" },
-  { label: "Ghana Women of the Year", href: "/events/gwoty" },
-  { label: "Female CEO Summit", href: "/events/female-ceo-summit" },
-  { label: "Fashion Week", href: "/events/gafw" },
+  { label: "Sheboss Global", href: "/events/sheboss-global" },
+  { label: "Ghana Female CEO Summit", href: "/events/female-ceo-summit" },
+  { label: "Ghana Women of the Year Honors", href: "/events/gwoty" },
+  { label: "Glitz Africa Fashion Week", href: "/events/gafw" },
 ];
