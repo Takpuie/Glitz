@@ -1,3 +1,4 @@
+import InitiativeMedia from "@/components/InitiativeMedia";
 import Image from "next/image";
 import Link from "next/link";
 import { gafwGallery, gafwProgramme, getEvent } from "@/data/events";
@@ -222,6 +223,7 @@ export default async function GafwPage() {
           </div>
         </div>
       </section>
+      <InitiativeMedia slug={"gafw"} />
     </div>
   );
 }

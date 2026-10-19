@@ -5,8 +5,6 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { AccountModalProvider } from "@/components/AccountModal";
 import { CartProvider } from "@/lib/cart-context";
-import { getBackendEvents } from "@/lib/backend";
-import { events } from "@/data/events";
 
 const display = localFont({
   src: [
@@ -55,20 +53,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let eventLinks = events.map(({ name, slug }) => ({ name, slug }));
-  try {
-    eventLinks = (await getBackendEvents()).map(({ name, slug }) => ({ name, slug }));
-  } catch (error) {
-    // Keep navigation usable if the CMS is temporarily unavailable.
-    console.error("Unable to load navigation events", error);
-  }
-
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <CartProvider>
           <AccountModalProvider>
-          <Nav events={eventLinks} />
+          <Nav />
           <main>{children}</main>
           <Footer />
           </AccountModalProvider>

@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { currentIssue as localCurrentIssue, backIssues as localBackIssues } from "@/data/issues";
 import { getMagazineIssues, type BackendMagazineIssue } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
+import { getArticles, CATEGORIES } from "@/data/articles";
+import ArticleCard from "@/components/ArticleCard";
 import MagazineCheckout from "./MagazineCheckout";
 
 export const metadata: Metadata = {
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MagazinePage() {
+  const articles = await getArticles();
   let cmsAvailable = true;
   let issues: BackendMagazineIssue[];
   try {
@@ -35,12 +38,27 @@ export default async function MagazinePage() {
     <div>
       <header className="container-editorial border-b border-ink/15 py-12 md:py-16">
         <p className="eyebrow mb-3">Glitz Magazine</p>
-        <h1 className="font-display text-5xl sm:text-6xl">Read Latest Issue</h1>
+        <h1 className="font-display text-5xl sm:text-6xl">Glitz Magazine</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
           Single issues and subscriptions, print and digital — shipped across
           Ghana, the continent and internationally.
         </p>
       </header>
+
+      <section className="container-editorial py-12">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <h2 className="font-display text-4xl">Latest Stories</h2>
+          <Link href="/articles" className="btn-outline">All Stories</Link>
+        </div>
+        <nav aria-label="Magazine categories" className="mb-10 flex flex-wrap gap-3">
+          {CATEGORIES.map((category) => (
+            <Link key={category} href={`/articles?category=${encodeURIComponent(category)}`} className="rounded-full border border-ink/20 px-4 py-2 text-sm hover:bg-smoke">{category}</Link>
+          ))}
+        </nav>
+        {articles.length ? <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.slice(0, 6).map((article) => <ArticleCard key={article.slug} article={article} />)}
+        </div> : <p className="text-sm text-gray-600">New stories will appear here as they are published.</p>}
+      </section>
 
       {/* Current issue */}
       {currentIssue && (

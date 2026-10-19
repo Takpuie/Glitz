@@ -6,22 +6,18 @@ import { usePathname } from "next/navigation";
 import { AccountLink } from "@/components/AccountModal";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-context";
-import EventsDropdown, { type EventLink } from "@/components/EventsDropdown";
+import MagazineDropdown from "@/components/MagazineDropdown";
+import { CATEGORIES } from "@/data/articles";
+import { INITIATIVES } from "@/data/initiatives";
 import { visitorRequest, type Reader, type VisitorSession } from "@/lib/visitor";
 
-const PRIMARY_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "News", href: "/articles?category=News" },
-  { label: "Entertainment", href: "/articles?category=Entertainment" },
-  { label: "Fashion", href: "/articles?category=Fashion" },
-  { label: "Hair & Beauty", href: "/articles?category=Hair+%26+Beauty" },
-  { label: "Lifestyle", href: "/articles?category=Lifestyle" },
-  { label: "Magazine", href: "/magazine" },
-  { label: "Glitz Events", href: "/events" },
-  { label: "Media", href: "/media" },
+const PRIMARY_LINKS = INITIATIVES;
+const MAGAZINE_CATEGORIES = [
+  { name: "All Stories", slug: "all", href: "/articles" },
+  ...CATEGORIES.map((category) => ({ name: category, slug: category, href: `/articles?category=${encodeURIComponent(category)}` })),
 ];
 
-export default function Nav({ events }: { events: EventLink[] }) {
+export default function Nav() {
   const [open, setOpen] = useState(false);
   const { count } = useCart();
   const [reader, setReader] = useState<Reader | null>(null);
@@ -127,9 +123,9 @@ export default function Nav({ events }: { events: EventLink[] }) {
           </div>
         </div>
 
-        <nav className="hidden justify-center gap-6 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 lg:flex xl:gap-9">
+        <nav aria-label="Main navigation" className="hidden justify-center gap-6 border-t border-ink/8 py-3 font-nav text-[11px] uppercase tracking-[0.14em] text-gray-700 lg:flex xl:gap-9">
           {PRIMARY_LINKS.map((l) => (
-            l.href === "/events" ? <EventsDropdown key={l.label} events={events} /> :
+            l.href === "/magazine" ? <MagazineDropdown key={l.label} events={MAGAZINE_CATEGORIES} /> :
             <Link key={l.label} href={l.href} className="link-underline hover:text-ink">
               {l.label}
             </Link>
@@ -146,7 +142,7 @@ export default function Nav({ events }: { events: EventLink[] }) {
       >
         <nav className="container-editorial flex flex-col divide-y divide-ink/10 pt-2">
           {PRIMARY_LINKS.map((l) => (
-            l.href === "/events" ? <EventsDropdown key={l.label} events={events} mobile onNavigate={() => setOpen(false)} /> :
+            l.href === "/magazine" ? <MagazineDropdown key={l.label} events={MAGAZINE_CATEGORIES} mobile onNavigate={() => setOpen(false)} /> :
             <Link
               key={l.label}
               href={l.href}

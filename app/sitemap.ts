@@ -1,3 +1,4 @@
+import { INITIATIVES } from "@/data/initiatives";
 import type { MetadataRoute } from "next";
 import { getBackendEvents, getSitemapPosts } from "@/lib/backend";
 
@@ -19,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = eventsResult.status === "fulfilled" ? eventsResult.value : [];
 
   return [
-    ...STATIC_PATHS.map((path) => ({
+    ...Array.from(new Set([...STATIC_PATHS, ...INITIATIVES.map((initiative) => initiative.href)])).map((path) => ({
       url: `${BASE_URL}${path}`,
       changeFrequency: path === "" || path === "/articles" ? "daily" as const : "weekly" as const,
       priority: path === "" ? 1 : path === "/articles" ? 0.9 : 0.7,
@@ -30,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),
-    ...events.map((event) => ({
+    ...events.filter((event) => !INITIATIVES.some((initiative) => initiative.href === `/events/${event.slug}`) && !STATIC_PATHS.includes(`/events/${event.slug}`)).map((event) => ({
       url: `${BASE_URL}/events/${encodeURIComponent(event.slug)}`,
       lastModified: event.start_date ? new Date(`${event.start_date}T00:00:00Z`) : undefined,
       changeFrequency: "weekly" as const,

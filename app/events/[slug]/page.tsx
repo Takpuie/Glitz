@@ -1,3 +1,4 @@
+import InitiativeMedia from "@/components/InitiativeMedia";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -143,6 +144,7 @@ export default async function EventEditionPage({ params }: { params: { slug: str
           </div>
         </section>
       )}
+      <InitiativeMedia slug={params.slug} />
     </div>
   );
 }

@@ -1,16 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { INITIATIVES } from "@/data/initiatives";
 import Newsletter from "@/components/Newsletter";
 
-const EXPLORE: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "News", href: "/articles?category=News" },
-  { label: "Entertainment", href: "/articles?category=Entertainment" },
-  { label: "Fashion", href: "/articles?category=Fashion" },
-  { label: "Hair & Beauty", href: "/articles?category=Hair+%26+Beauty" },
-  { label: "Lifestyle", href: "/articles?category=Lifestyle" },
-  { label: "Magazine", href: "/magazine" },
-  { label: "Glitz Events", href: "/events" },
+const EXPLORE = [
+  ...INITIATIVES,
+  { label: "All Glitz Events", href: "/events" },
   { label: "Media", href: "/media" },
 ];
 
