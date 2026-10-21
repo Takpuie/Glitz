@@ -1,4 +1,5 @@
 export const INITIATIVES = [
+  { label: "Home", href: "/" },
   { label: "Glitz Magazine", href: "/magazine" },
   { label: "Sheboss Global", href: "/events/sheboss-global" },
   { label: "Ghana Female CEO Summit", href: "/events/female-ceo-summit" },
