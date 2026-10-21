@@ -149,6 +149,9 @@ export default function Nav() {
                 {l.label}
               </Link>
             ))}
+            <Link href="/events/archive" onClick={() => setOpen(false)} className="py-5 font-nav text-sm uppercase tracking-[0.12em]">
+              Events Archive
+            </Link>
           </nav>
 
           <div className="py-7">
