@@ -194,7 +194,7 @@ function BagIcon() {
 }
 
 function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
-  return <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/20 transition-colors hover:bg-ink hover:text-paper">{children}</a>;
+  return <a href={href} aria-label={`Visit Glitz Africa on ${label}`} title={label} className="relative z-10 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-ink/20 transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper focus-visible:outline-none">{children}</a>;
 }
 
 function InstagramIcon() {
