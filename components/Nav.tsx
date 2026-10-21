@@ -7,6 +7,7 @@ import { AccountLink } from "@/components/AccountModal";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import MagazineDropdown from "@/components/MagazineDropdown";
+import Newsletter from "@/components/Newsletter";
 import { CATEGORIES } from "@/data/articles";
 import { INITIATIVES } from "@/data/initiatives";
 import { visitorRequest, type Reader, type VisitorSession } from "@/lib/visitor";
@@ -140,20 +141,35 @@ export default function Nav() {
         onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
         className="fixed inset-0 top-24 z-40 overflow-y-auto bg-paper md:top-[104px] lg:hidden"
       >
-        <nav className="container-editorial flex flex-col divide-y divide-ink/10 pt-2">
-          {PRIMARY_LINKS.map((l) => (
-            l.href === "/magazine" ? <MagazineDropdown key={l.label} events={MAGAZINE_CATEGORIES} mobile onNavigate={() => setOpen(false)} /> :
-            <Link
-              key={l.label}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="py-4 font-display text-xl"
-            >
-              {l.label}
-            </Link>
-          ))}
-          {reader ? <Link href="/account" onClick={() => setOpen(false)} className="break-words py-4 font-nav text-sm text-gray-600">{reader.display_name}</Link> : <AccountLink onClick={() => setOpen(false)} className="py-4 font-nav text-[11px] uppercase tracking-widest2 text-gray-600">Sign in</AccountLink>}
-        </nav>
+        <div className="mx-auto w-full max-w-lg px-8 pb-12 pt-5 text-center">
+          <nav aria-label="Mobile navigation" className="flex flex-col divide-y divide-ink/15 border-b border-ink/15">
+            {PRIMARY_LINKS.map((l) => (
+              l.href === "/magazine" ? <MagazineDropdown key={l.label} events={MAGAZINE_CATEGORIES} mobile onNavigate={() => setOpen(false)} /> :
+              <Link key={l.label} href={l.href} onClick={() => setOpen(false)} className="py-5 font-nav text-sm uppercase tracking-[0.12em]">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="py-7">
+            <p className="font-nav text-[11px] uppercase tracking-widest2 text-gray-500">Follow Glitz Africa</p>
+            <div className="mt-5 flex items-center justify-center gap-9">
+              <SocialLink href="https://www.instagram.com/glitzafrica_hq/" label="Instagram"><InstagramIcon /></SocialLink>
+              <SocialLink href="https://www.tiktok.com/@glitz.africa" label="TikTok"><TikTokIcon /></SocialLink>
+              <SocialLink href="https://x.com/glitzafrica" label="X"><XIcon /></SocialLink>
+            </div>
+          </div>
+
+          <div className="border-t border-ink/15 pt-7">
+            <h2 className="font-display text-2xl">Stay in the know</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-600">Get the latest stories, style and events from Glitz Africa in your inbox.</p>
+            <Newsletter buttonLabel="Subscribe" className="mx-auto text-left [&_button]:w-full" />
+          </div>
+
+          <div className="mt-7 border-t border-ink/15 pt-5">
+            {reader ? <Link href="/account" onClick={() => setOpen(false)} className="break-words font-nav text-xs uppercase tracking-widest2 text-gray-600">{reader.display_name}</Link> : <AccountLink onClick={() => setOpen(false)} className="font-nav text-xs uppercase tracking-widest2 text-gray-600">Sign in</AccountLink>}
+          </div>
+        </div>
       </div>
     </header>
   );
@@ -175,4 +191,20 @@ function BagIcon() {
       <path d="M7.3 7V5.3a2.7 2.7 0 0 1 5.4 0V7" strokeLinecap="round" />
     </svg>
   );
+}
+
+function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+  return <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/20 transition-colors hover:bg-ink hover:text-paper">{children}</a>;
+}
+
+function InstagramIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5"><rect x="3.5" y="3.5" width="17" height="17" rx="4" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.7" r=".8" fill="currentColor" stroke="none" /></svg>;
+}
+
+function TikTokIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M14 4v10.2a4.2 4.2 0 1 1-3.2-4.1" /><path d="M14 4c.7 2.6 2.4 4.1 5 4.4" /></svg>;
+}
+
+function XIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M4.2 3h4.5l4.1 5.5L17.6 3h2.1l-6 7 6.3 11h-4.5l-4.7-6.3L5.4 21H3.3l6.5-7.8L4.2 3Zm3.4 1.7 8.8 14.6h1.9L9.5 4.7H7.6Z" /></svg>;
 }

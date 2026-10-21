@@ -61,11 +61,11 @@ export default function MagazineDropdown({
         aria-controls={id}
         onClick={() => setOpen((value) => !value)}
         className={mobile
-          ? "flex w-full items-center justify-between py-4 text-left font-display text-xl"
+          ? "relative flex w-full items-center justify-center py-5 text-center font-nav text-sm uppercase tracking-[0.12em]"
           : "flex items-center gap-2 uppercase tracking-[0.14em] hover:text-ink"}
       >
         {label}
-        <svg aria-hidden="true" viewBox="0 0 12 12" fill="none" className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}>
+        <svg aria-hidden="true" viewBox="0 0 12 12" fill="none" className={`${mobile ? "absolute right-1" : ""} h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}>
           <path d="m2 4 4 4 4-4" stroke="currentColor" strokeWidth="1.2" />
         </svg>
       </button>
@@ -73,7 +73,7 @@ export default function MagazineDropdown({
         id={id}
         hidden={!open}
         className={mobile
-          ? "mb-4 space-y-1 border-l border-ink/15 pl-4"
+          ? "mb-3 space-y-1 border-t border-ink/10 pt-2 text-center"
           : "absolute right-0 top-full z-50 mt-3 max-h-[65vh] w-80 overflow-y-auto border border-ink/15 bg-paper p-2 shadow-lg"}
       >
         <li>
