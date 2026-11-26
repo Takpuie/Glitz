@@ -15,18 +15,20 @@ def _headers():
     return {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}", "Content-Type": "application/json"}
 
 
-def initialize_transaction(*, email, amount, reference, callback_url, metadata):
+def initialize_transaction(*, email, amount, reference, callback_url, metadata, currency="GHS"):
     try:
         response = requests.post("https://api.paystack.co/transaction/initialize", headers=_headers(), json={
-            "email": email, "amount": amount, "currency": "GHS", "reference": reference,
+            "email": email, "amount": amount, "currency": currency.upper(), "reference": reference,
             "callback_url": callback_url, "metadata": metadata,
         }, timeout=15)
         payload = response.json()
-        response.raise_for_status()
+        if not response.ok:
+            # e.g. "Currency not supported by merchant" when USD isn't enabled.
+            raise PaystackError(payload.get("message") or "Paystack could not initialize the payment.")
         if not payload.get("status") or not payload.get("data", {}).get("authorization_url"):
             raise PaystackError(payload.get("message", "Paystack could not initialize the payment."))
         return payload["data"]
-    except requests.RequestException as exc:
+    except (requests.RequestException, ValueError) as exc:
         raise PaystackError("Paystack could not initialize the payment.") from exc
 
 

@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/account", "/cart", "/api/"],
+      disallow: ["/account", "/cart", "/api/", "/events/*/registration/"],
     },
     sitemap: "https://glitzafrica.com/sitemap.xml",
     host: "https://glitzafrica.com",

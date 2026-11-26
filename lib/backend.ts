@@ -211,7 +211,60 @@ export type BackendEvent = {
   external_payment_url: string;
   external_payment_label: string;
   ticket_types: TicketTier[];
+  /** Plans still open for sign-up (on-site payment-plan checkout). */
+  payment_plans?: PaymentPlan[];
+  /** On-site payment providers configured on the backend. */
+  payment_providers?: PaymentProvider[];
 };
+
+export type PaymentProvider = "stripe" | "paystack";
+
+export type PaymentPlan = {
+  id: number;
+  name: string;
+  description: string;
+  currency: string;
+  available_until: string | null;
+  final_deadline: string | null;
+  total: string;
+  installments: { label: string; amount: string; months_after_signup: number }[];
+};
+
+/** Returned when an on-site plan payment starts; never contains secrets. */
+export type PlanPaymentStart = {
+  reference: string;
+  provider: PaymentProvider;
+  amount: string;
+  currency: string;
+  manage_token: string;
+  client_secret?: string;
+  publishable_key?: string;
+  access_code?: string;
+  public_key?: string;
+};
+
+export type PlanRegistrationStatus = {
+  event: { name: string; slug: string };
+  plan: { id: number; name: string; currency: string; total: string };
+  name: string;
+  status: "pending" | "active" | "complete" | "cancelled";
+  amount_paid: string;
+  balance: string;
+  amount_due_now: string;
+  schedule: { label: string; amount: string; due_date: string; paid: boolean; overdue: boolean }[];
+  payments: { amount: string; currency: string; paid_at: string | null; provider: string }[];
+  providers: PaymentProvider[];
+};
+
+export async function getPlanRegistration(token: string): Promise<PlanRegistrationStatus | undefined> {
+  const res = await fetch(`${BACKEND_URL}/api/plan-registrations/${encodeURIComponent(token)}/`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
+  });
+  if (res.status === 404) return undefined;
+  if (!res.ok) throw new Error(`Backend request failed: plan registration (${res.status})`);
+  return res.json();
+}
 
 export async function getBackendEvent(slug: string): Promise<BackendEvent | undefined> {
   const res = await fetch(`${BACKEND_URL}/api/events/${encodeURIComponent(slug)}/`, {

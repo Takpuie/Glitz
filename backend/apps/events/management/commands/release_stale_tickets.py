@@ -12,7 +12,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.events.models import Ticket
+from apps.events.models import InstallmentPayment, Ticket
 
 STALE_AFTER = timedelta(minutes=30)
 
@@ -26,3 +26,10 @@ class Command(BaseCommand):
         count = stale.count()
         stale.update(status=Ticket.Status.CANCELLED)
         self.stdout.write(self.style.SUCCESS(f"Released {count} stale pending ticket(s)."))
+
+        # Abandoned on-site plan payments. If one completes later anyway, the
+        # webhook still records it (mark_plan_payment_paid accepts cancelled).
+        plan_count = InstallmentPayment.objects.filter(
+            status=InstallmentPayment.Status.PENDING, created_at__lt=cutoff
+        ).update(status=InstallmentPayment.Status.CANCELLED)
+        self.stdout.write(self.style.SUCCESS(f"Cancelled {plan_count} abandoned plan payment(s)."))

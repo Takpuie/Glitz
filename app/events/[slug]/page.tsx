@@ -8,6 +8,9 @@ import { events, getEvent } from "@/data/events";
 import { editorialImage } from "@/lib/img";
 import EnquiryForm from "@/components/EnquiryForm";
 
+// Slugs with their own folder under app/events/ — rendered there, not here.
+const DEDICATED_ROUTES = new Set(["gafw", "sheboss-global", "sheboss-marrakech-retreat-2027"]);
+
 const STATUS_LABELS: Record<string, string> = {
   on_sale: "On sale",
   applications_open: "Applications open",
@@ -16,7 +19,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export async function generateStaticParams() {
-  return events.filter((e) => e.slug !== "gafw").map((e) => ({ slug: e.slug }));
+  return events.filter((e) => !DEDICATED_ROUTES.has(e.slug)).map((e) => ({ slug: e.slug }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {

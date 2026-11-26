@@ -16,7 +16,7 @@ from wagtail.images.models import Image
 from wagtail.models import Page
 
 from apps.content.models import Category, Post, PostIndexPage
-from apps.events.models import Event, TicketType
+from apps.events.models import Event, PaymentPlan, PlanInstallment, TicketType
 from apps.magazine.models import MagazineIssue
 
 FRONTEND_IMAGES = Path(__file__).resolve().parents[5] / "public" / "images"
@@ -34,6 +34,37 @@ def get_or_create_image(relative_path: str, title: str) -> Image | None:
 
 
 CATEGORIES = ["News", "Entertainment", "Fashion", "Hair & Beauty", "Lifestyle"]
+
+RETREAT_PLANS = [
+    {
+        "name": "Early Bird — full payment",
+        "description": "One full payment at the early bird rate, available until 15 December 2026.",
+        "currency": "USD",
+        "available_until": date(2026, 12, 15),
+        "final_deadline": None,
+        "installments": [("Full payment", 3300, 0)],
+    },
+    {
+        "name": "Standard — full payment",
+        "description": "One full payment of the standard registration fee.",
+        "currency": "USD",
+        "available_until": date(2027, 2, 2),
+        "final_deadline": None,
+        "installments": [("Full payment", 3550, 0)],
+    },
+    {
+        "name": "Monthly installments",
+        "description": "Three monthly payments, starting at registration. All payments are due by 22 January 2027.",
+        "currency": "USD",
+        "available_until": date(2027, 1, 22),
+        "final_deadline": date(2027, 1, 22),
+        "installments": [
+            ("First installment", 1184, 0),
+            ("Second installment", 1184, 1),
+            ("Third installment", 1184, 2),
+        ],
+    },
+]
 
 EVENTS = [
     {
@@ -61,13 +92,24 @@ EVENTS = [
     {
         "slug": "sheboss-global",
         "name": "SheBoss Global",
-        "tagline": "Entrepreneurship, scaled beyond borders.",
-        "description": "Glitz Africa's founder-focused summit expands to Lagos — bringing SheBoss Global's mentorship, capital and community programming to a second market.",
-        "venue": "Lagos, Nigeria",
-        "start_date": date(2027, 4, 1),
-        "end_date": None,
-        "status": Event.Status.SAVE_THE_DATE,
-        "image": ("female-ceo-summit/podium-speaker.jpg", "SheBoss Global — keynote speaker"),
+        "tagline": "Women in business, networking and growing together, worldwide.",
+        "description": "A Glitz Africa initiative bringing together corporate executives, professionals and entrepreneurs to network and share ideas, with 2027 editions in Marrakech, the UK, South Africa, the USA, Nigeria and Ghana.",
+        "venue": "Global",
+        "start_date": date(2027, 2, 3),
+        "end_date": date(2027, 12, 31),
+        "status": Event.Status.ON_SALE,
+        "image": ("sheboss/group-in-white.jpg", "SheBoss Global — retreat guests in white"),
+    },
+    {
+        "slug": "sheboss-marrakech-retreat-2027",
+        "name": "SheBoss Global Marrakech Retreat 2027",
+        "tagline": "A curated escape for women who lead, inspire and shape what's next.",
+        "description": "Two conference days, four curated luxury dinners, a closing gala in the Agafay Desert, spa and wellness, and cultural visits to Jardin Majorelle and the Musée Yves Saint Laurent.",
+        "venue": "Marrakech, Morocco",
+        "start_date": date(2027, 2, 3),
+        "end_date": date(2027, 2, 7),
+        "status": Event.Status.ON_SALE,
+        "image": ("sheboss/yacht-sunset-portrait.jpg", "SheBoss Global — Marrakech Retreat cover"),
     },
     {
         "slug": "style-awards",
@@ -472,6 +514,23 @@ class Command(BaseCommand):
             defaults["cover_image"] = cover_image
             event, _ = Event.objects.update_or_create(slug=data["slug"], defaults=defaults)
             self.stdout.write(self.style.SUCCESS(f"Event: {event.name}"))
+
+        # On-site payment plans for the Marrakech Retreat. Prices mirror the
+        # Luma ticket types so both checkouts charge the same.
+        retreat = Event.objects.get(slug="sheboss-marrakech-retreat-2027")
+        for order, plan_data in enumerate(RETREAT_PLANS):
+            installments = plan_data["installments"]
+            defaults = {key: value for key, value in plan_data.items() if key not in {"name", "installments"}}
+            plan, _ = PaymentPlan.objects.update_or_create(
+                event=retreat, name=plan_data["name"], defaults={**defaults, "display_order": order},
+            )
+            if not plan.registrations.exists():
+                plan.installments.all().delete()
+                for sort_order, (label, amount, months) in enumerate(installments):
+                    PlanInstallment.objects.create(
+                        plan=plan, label=label, amount=amount, months_after_signup=months, sort_order=sort_order,
+                    )
+            self.stdout.write(self.style.SUCCESS(f"Payment plan: {plan.name} ({plan.currency} {plan.total})"))
 
         issues = [
             {

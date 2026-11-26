@@ -7,6 +7,7 @@ export const revalidate = 3600;
 const BASE_URL = "https://glitzafrica.com";
 const STATIC_PATHS = [
   "", "/articles", "/events", "/events/archive", "/events/gafw",
+  "/events/sheboss-global", "/events/sheboss-marrakech-retreat-2027",
   "/magazine", "/media", "/about", "/foundation", "/partners",
   "/contact", "/nominate",
 ];

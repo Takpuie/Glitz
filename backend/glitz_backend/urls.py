@@ -12,6 +12,9 @@ from wagtail.documents import urls as wagtaildocs_urls
 from apps.content.api import CategoryViewSet, PhotoViewSet, PressCoverageViewSet, VideoViewSet, HomepageSlideViewSet, PartnerLogoViewSet, sitemap_content
 from apps.events.api import EventViewSet
 from apps.events.checkout import TicketCheckoutView, TicketVerifyView
+from apps.events.plan_checkout import (
+    PlanPaymentVerifyView, PlanRegisterView, PlanRegistrationPayView, PlanRegistrationView,
+)
 from apps.magazine.api import MagazineIssueViewSet
 from apps.magazine.checkout import DigitalDownloadView, MagazineCheckoutView, OrderVerifyView
 from apps.submissions.api import SubmissionView, nomination_portfolio
@@ -87,6 +90,14 @@ urlpatterns = [
         TicketCheckoutView.as_view(),
         name="ticket-checkout",
     ),
+    path(
+        "api/events/<slug:slug>/plans/<int:plan_id>/register/",
+        PlanRegisterView.as_view(),
+        name="plan-register",
+    ),
+    path("api/plan-registrations/<str:token>/", PlanRegistrationView.as_view(), name="plan-registration"),
+    path("api/plan-registrations/<str:token>/pay/", PlanRegistrationPayView.as_view(), name="plan-registration-pay"),
+    path("api/plan-payments/verify/<str:reference>/", PlanPaymentVerifyView.as_view(), name="plan-payment-verify"),
     path(
         "api/tickets/verify/<str:reference>/",
         TicketVerifyView.as_view(),

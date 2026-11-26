@@ -24,6 +24,16 @@ class StripeWebhookView(APIView):
         if event is None:
             return Response(status=401)
 
+        if event["type"] == "payment_intent.succeeded":
+            # On-site payment-plan payments (Payment Element). Ticket and
+            # magazine Checkout Sessions also emit this event; their intent
+            # ids match no plan payment, so they fall through harmlessly.
+            from apps.events.plan_checkout import mark_plan_payment_paid
+
+            intent = event["data"]["object"]
+            mark_plan_payment_paid(intent["id"], amount_minor=intent["amount_received"], currency=intent["currency"])
+            return Response(status=200)
+
         if event["type"] != "checkout.session.completed":
             return Response(status=200)
 
@@ -61,6 +71,9 @@ class PaystackWebhookView(APIView):
         data = event.get("data", {})
         reference = data.get("reference")
         if not reference:
+            return Response(status=200)
+        from apps.events.plan_checkout import mark_plan_payment_paid
+        if mark_plan_payment_paid(reference, amount_minor=data.get("amount") or 0, currency=data.get("currency") or ""):
             return Response(status=200)
         from apps.events.models import Ticket
         from apps.events.checkout import mark_ticket_paid

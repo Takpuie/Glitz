@@ -50,6 +50,31 @@ def create_checkout_session(*, email, currency, line_items, success_url, cancel_
         raise StripeError(str(exc)) from exc
 
 
+def create_payment_intent(*, amount, currency, email, description, metadata=None):
+    """A PaymentIntent for an on-site payment (the Payment Element). Only its
+    client_secret goes to the browser; `amount` is in minor units."""
+    _configure()
+    try:
+        return stripe.PaymentIntent.create(
+            amount=amount,
+            currency=currency.lower(),
+            receipt_email=email,
+            description=description,
+            metadata=metadata or {},
+            automatic_payment_methods={"enabled": True},
+        )
+    except stripe.error.StripeError as exc:
+        raise StripeError(str(exc)) from exc
+
+
+def retrieve_payment_intent(intent_id):
+    _configure()
+    try:
+        return stripe.PaymentIntent.retrieve(intent_id)
+    except stripe.error.StripeError as exc:
+        raise StripeError(str(exc)) from exc
+
+
 def retrieve_checkout_session(session_id):
     _configure()
     try:
