@@ -28,10 +28,9 @@ export default function AboutPage() {
             A Pan-African Media &amp; Events House
           </h1>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-gray-600 md:text-base">
-            Glitz Africa is published by Kollage Media — a group running
-            publishing, advertising, project management and experiential
-            production as one operation, reaching 1M+ people across print,
-            digital and events.
+            Glitz Africa is published by Kollage Media — a group running publishing, advertising,
+            project management and experiential production as one operation, reaching 1M+ people
+            across print, digital and live events.
           </p>
         </div>
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-100">
@@ -42,14 +41,14 @@ export default function AboutPage() {
       <section className="container-editorial py-16 md:py-20">
         <p className="eyebrow mb-2">The Portfolio</p>
         <h2 className="mb-10 font-display text-4xl sm:text-5xl">One House, Six Brands</h2>
-        <ul className="grid grid-cols-1 divide-y divide-ink/15 border-y border-ink/15 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-0 overflow-hidden rounded-none border-y border-ink/15 sm:grid-cols-2">
           {brands.map((b, i) => (
-            <li key={b} className="flex items-center gap-4 py-5 sm:px-6">
+            <div key={b} className="flex items-center gap-4 border-b border-ink/15 py-5 sm:px-6 sm:border-b-0 sm:[&:nth-child(odd)]:border-r sm:[&:nth-child(odd)]:border-ink/15">
               <span className="font-nav text-xs text-gray-400">{String(i + 1).padStart(2, "0")}</span>
               <span className="font-display text-xl">{b}</span>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
       <section id="contact" className="hairline bg-smoke">

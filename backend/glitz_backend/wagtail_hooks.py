@@ -9,6 +9,10 @@ def global_admin_css():
             background: linear-gradient(135deg, #f6f0e7 0%, #efe7da 100%);
         }
 
+        .wagtail-logo {
+            display: none;
+        }
+
         .wrapper {
             background: rgba(255, 255, 255, 0.7);
             border: 1px solid rgba(21, 21, 21, 0.08);

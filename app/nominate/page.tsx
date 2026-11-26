@@ -25,8 +25,8 @@ export default function NominatePage() {
         <p className="eyebrow mb-3">Open Calls</p>
         <h1 className="font-display text-5xl sm:text-6xl">Awards &amp; Nominations</h1>
         <p className="mt-4 max-w-xl text-sm text-gray-600 md:text-base">
-          Structured, transparent open calls for every designer showcase and
-          honours process on the Glitz Africa calendar.
+          Structured, transparent open calls for every designer showcase and honours process on the
+          Glitz Africa calendar.
         </p>
       </header>
 

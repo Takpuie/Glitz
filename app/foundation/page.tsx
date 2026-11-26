@@ -19,8 +19,8 @@ export default function FoundationPage() {
         <p className="eyebrow mb-3">Kollage Media</p>
         <h1 className="font-display text-5xl sm:text-6xl">Glitz Africa Care Foundation</h1>
         <p className="mt-4 max-w-lg text-sm text-gray-600 md:text-base">
-          The philanthropic arm behind the brand — investing in the next
-          generation of African designers, founders and storytellers.
+          The philanthropic arm behind the brand — investing in the next generation of African
+          designers, founders and storytellers.
         </p>
       </header>
 
@@ -29,9 +29,9 @@ export default function FoundationPage() {
           <p className="eyebrow mb-2">Programmes</p>
           <h2 className="font-display text-4xl sm:text-5xl">Where the Support Goes</h2>
         </div>
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {programmes.map((p) => (
-            <div key={p.title}>
+            <div key={p.title} className="border border-ink/15 bg-smoke p-6">
               <h3 className="font-display text-2xl">{p.title}</h3>
               <p className="mt-3 text-sm text-gray-600">{p.copy}</p>
             </div>
@@ -44,8 +44,7 @@ export default function FoundationPage() {
           <p className="eyebrow mb-3">Get Involved</p>
           <h2 className="font-display text-3xl sm:text-4xl">Support the Foundation</h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-gray-600">
-            Every subscription and ticket purchase contributes a portion to the
-            Foundation&rsquo;s programmes.
+            Every subscription and ticket purchase contributes a portion to the Foundation’s programmes.
           </p>
           <button className="btn-primary mt-8">Donate</button>
         </div>
