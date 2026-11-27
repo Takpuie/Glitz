@@ -24,7 +24,7 @@ export function PhotoGrid({ photos, columns = 4 }: { photos: EditorialPhoto[]; c
             alt={photo.alt}
             fill
             sizes={photo.wide ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 50vw, 25vw"}
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-cover object-[center_22%] transition-transform duration-700 group-hover:scale-105"
           />
           {photo.caption && (
             <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-4 pb-3 pt-10 font-nav text-[10px] uppercase tracking-widest2 text-paper">

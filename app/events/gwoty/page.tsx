@@ -47,7 +47,7 @@ export default async function GwotyPage() {
     <div>
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-ink text-paper">
-        <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours 2026" fill priority sizes="100vw" className="-z-10 object-cover opacity-60" />
+        <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours 2026" fill priority sizes="100vw" className="-z-10 object-cover object-[center_22%] opacity-60" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
         <div className="container-editorial flex min-h-[min(72vh,680px)] flex-col justify-end py-14 md:min-h-[min(80vh,780px)] md:py-20">
           <p className="font-nav text-[11px] uppercase tracking-widest2 text-paper/80">{gwoty.edition} &middot; {gwoty.dressCode}</p>
@@ -109,7 +109,7 @@ export default async function GwotyPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {gwotyAwardMoments.map((m, i) => (
             <figure key={m.src} className={`group relative overflow-hidden rounded-md bg-gray-200 ${i === 0 ? "sm:col-span-2 lg:row-span-2" : ""} aspect-[3/2]`}>
-              <Image unoptimized src={m.src} alt={m.alt} fill sizes={i === 0 ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 640px) 100vw, 33vw"} className="object-cover transition-transform duration-700 group-hover:scale-105" />
+              <Image unoptimized src={m.src} alt={m.alt} fill sizes={i === 0 ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 640px) 100vw, 33vw"} className="object-cover object-[center_22%] transition-transform duration-700 group-hover:scale-105" />
               {m.caption && (
                 <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-3 pt-10 font-nav text-[10px] uppercase tracking-widest2 text-paper">{m.caption}</figcaption>
               )}
@@ -123,10 +123,10 @@ export default async function GwotyPage() {
         <div className="container-editorial grid grid-cols-1 items-center gap-12 py-16 md:grid-cols-2 md:gap-16 md:py-24">
           <div className="grid grid-cols-2 gap-4">
             <div className="relative col-span-2 aspect-[3/2] overflow-hidden rounded-md bg-gray-200">
-              <Image unoptimized src={gwotyImages.evening} alt="A live performance at the Honours" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              <Image unoptimized src={gwotyImages.evening} alt="A live performance at the Honours" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
             </div>
             <div className="relative col-span-2 aspect-[3/2] overflow-hidden rounded-md bg-gray-200">
-              <Image unoptimized src={gwotyImages.dinner} alt="Guests at the gala dinner" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              <Image unoptimized src={gwotyImages.dinner} alt="Guests at the gala dinner" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
             </div>
           </div>
           <div>
@@ -174,7 +174,7 @@ export default async function GwotyPage() {
             <Link href="/events/female-ceo-summit" className="mt-8 inline-flex items-center justify-center rounded-sm border border-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-paper transition-colors hover:bg-paper hover:text-ink">Explore the Summit</Link>
           </div>
           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-md bg-gray-800">
-            <Image unoptimized src={summitImages.hero} alt="Speakers on stage at the Ghana Female CEO Summit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src={summitImages.hero} alt="Speakers on stage at the Ghana Female CEO Summit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
           </div>
         </div>
       </section>
@@ -217,8 +217,8 @@ export default async function GwotyPage() {
       </section>
 
       {/* Closing image */}
-      <section className="relative h-[46vh] min-h-[320px] overflow-hidden bg-ink">
-        <Image unoptimized src={gwotyImages.closing} alt="Honourees celebrating on stage" fill sizes="100vw" className="object-cover opacity-90" />
+      <section className="relative aspect-[4/3] overflow-hidden bg-ink sm:aspect-[21/9]">
+        <Image unoptimized src={gwotyImages.closing} alt="Honourees celebrating on stage" fill sizes="100vw" className="object-cover object-[center_45%] opacity-90" />
       </section>
     </div>
   );

@@ -96,7 +96,7 @@ export default async function MarrakechRetreatPage() {
           </div>
         </div>
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-200">
-          <Image unoptimized src={shebossImages.retreatHero} alt="A SheBoss Global guest at sunset" fill priority sizes="(max-width: 768px) 100vw, 45vw" className="object-cover" />
+          <Image unoptimized src={shebossImages.retreatHero} alt="A SheBoss Global guest at sunset" fill priority sizes="(max-width: 768px) 100vw, 45vw" className="object-cover object-[center_22%]" />
         </div>
       </section>
 
@@ -181,7 +181,7 @@ export default async function MarrakechRetreatPage() {
       <section className="hairline">
         <div className="container-editorial grid grid-cols-1 gap-12 py-16 md:grid-cols-[1fr_1.1fr] md:gap-16 md:py-20">
           <div className="photo-card relative aspect-[4/5] w-full bg-gray-200 md:aspect-auto md:min-h-[560px]">
-            <Image unoptimized src={dohaGallery[9].src} alt={dohaGallery[9].alt} fill sizes="(max-width: 768px) 100vw, 45vw" className="object-cover" />
+            <Image unoptimized src={dohaGallery[9].src} alt={dohaGallery[9].alt} fill sizes="(max-width: 768px) 100vw, 45vw" className="object-cover object-[center_22%]" />
           </div>
           <div>
             <p className="eyebrow mb-2">{String(next()).padStart(2, "0")} &middot; Your Retreat Experience</p>

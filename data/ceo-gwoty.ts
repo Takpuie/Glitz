@@ -99,6 +99,8 @@ export type Masterclass = {
   audience: string;
   objectives: string[];
   image: string;
+  /** CSS object-position for the card crop; defaults to "center 22%". */
+  position?: string;
 };
 
 export const masterclasses: Masterclass[] = [
@@ -145,6 +147,7 @@ export const masterclasses: Masterclass[] = [
       "Integrate climate-smart and gender-inclusive practices.",
     ],
     image: `${CEO}/masterclass-trade-industry.jpg`,
+    position: "center 45%",
   },
 ];
 

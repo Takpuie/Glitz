@@ -48,7 +48,7 @@ export default function SheBossGlobalPage() {
     <div>
       {/* Cover */}
       <section className="relative isolate overflow-hidden bg-ink text-paper">
-        <Image unoptimized src={shebossImages.hero} alt="SheBoss Global retreat guests dressed in white" fill priority sizes="100vw" className="-z-10 object-cover opacity-60" />
+        <Image unoptimized src={shebossImages.hero} alt="SheBoss Global retreat guests dressed in white" fill priority sizes="100vw" className="-z-10 object-cover object-[center_22%] opacity-60" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
         <div className="container-editorial flex min-h-[min(70vh,640px)] flex-col justify-end py-14 md:min-h-[min(78vh,760px)] md:py-20">
           <p className="font-nav text-[11px] uppercase tracking-widest2 text-paper/80">A Glitz Africa Initiative</p>
@@ -77,7 +77,7 @@ export default function SheBossGlobalPage() {
           </div>
         </div>
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-200">
-          <Image unoptimized src={shebossImages.overview} alt="A speaker at the SheBoss Global podium" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
+          <Image unoptimized src={shebossImages.overview} alt="A speaker at the SheBoss Global podium" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover object-[center_22%]" />
         </div>
       </section>
 
@@ -99,7 +99,7 @@ export default function SheBossGlobalPage() {
       {/* Impact */}
       <section className="container-editorial grid grid-cols-1 gap-12 py-16 md:grid-cols-[1fr_1.4fr] md:gap-16 md:py-24">
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-200">
-          <Image unoptimized src={shebossImages.impact} alt="A SheBoss delegate at the retreat" fill sizes="(max-width: 768px) 100vw, 35vw" className="object-cover" />
+          <Image unoptimized src={shebossImages.impact} alt="A SheBoss delegate at the retreat" fill sizes="(max-width: 768px) 100vw, 35vw" className="object-cover object-[center_22%]" />
         </div>
         <div className="flex flex-col justify-center">
           <p className="eyebrow mb-2">The SheBoss Impact Globally</p>
@@ -176,7 +176,7 @@ export default function SheBossGlobalPage() {
       {/* Retreat feature */}
       <section className="container-editorial grid grid-cols-1 items-center gap-10 py-16 md:grid-cols-2 md:gap-16 md:py-24">
         <div className="photo-card relative aspect-[3/2] w-full bg-gray-200">
-          <Image unoptimized src={shebossImages.retreatFeature} alt="Retreat guests in white on the promenade" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          <Image unoptimized src={shebossImages.retreatFeature} alt="Retreat guests in white on the promenade" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
         </div>
         <div>
           <p className="eyebrow mb-2">The SheBoss Global Retreat &middot; February 2027</p>
@@ -217,7 +217,7 @@ export default function SheBossGlobalPage() {
         <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {dohaGallery.map((photo) => (
             <figure key={photo.src} className={`relative overflow-hidden rounded-md bg-gray-200 ${photo.wide ? "col-span-2 aspect-[3/2]" : "aspect-[2/3]"}`}>
-              <Image unoptimized src={photo.src} alt={photo.alt} fill sizes={photo.wide ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 50vw, 25vw"} className="object-cover transition-transform duration-700 hover:scale-105" />
+              <Image unoptimized src={photo.src} alt={photo.alt} fill sizes={photo.wide ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 50vw, 25vw"} className="object-cover object-[center_22%] transition-transform duration-700 hover:scale-105" />
             </figure>
           ))}
         </div>

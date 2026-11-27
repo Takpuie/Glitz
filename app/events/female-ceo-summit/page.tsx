@@ -55,7 +55,7 @@ export default async function FemaleCeoSummitPage() {
     <div>
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-ink text-paper">
-        <Image unoptimized src={summitImages.hero} alt="Speakers on stage at the Ghana Female CEO Summit 2026" fill priority sizes="100vw" className="-z-10 object-cover opacity-55" />
+        <Image unoptimized src={summitImages.hero} alt="Speakers on stage at the Ghana Female CEO Summit 2026" fill priority sizes="100vw" className="-z-10 object-cover object-[center_22%] opacity-55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
         <div className="container-editorial flex min-h-[min(72vh,680px)] flex-col justify-end py-14 md:min-h-[min(80vh,780px)] md:py-20">
           <p className="font-nav text-[11px] uppercase tracking-widest2 text-paper/80">Glitz Africa presents</p>
@@ -100,7 +100,7 @@ export default async function FemaleCeoSummitPage() {
           <p className="mt-6 text-[17px] leading-relaxed text-gray-700">{edition2027.focus}</p>
         </div>
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-200 md:aspect-auto md:min-h-[560px]">
-          <Image unoptimized src={summitImages.intro} alt="An address from the Ghana Female CEO Summit podium" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
+          <Image unoptimized src={summitImages.intro} alt="An address from the Ghana Female CEO Summit podium" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover object-[center_22%]" />
         </div>
       </section>
 
@@ -125,7 +125,7 @@ export default async function FemaleCeoSummitPage() {
       {/* Focus areas & highlights */}
       <section className="container-editorial grid grid-cols-1 gap-12 py-16 md:grid-cols-[1fr_1.3fr] md:gap-16 md:py-24">
         <div className="photo-card relative aspect-[4/5] w-full bg-gray-200 md:aspect-auto md:min-h-[620px]">
-          <Image unoptimized src={summitImages.focus} alt="A delegate at the Ghana Female CEO Summit" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
+          <Image unoptimized src={summitImages.focus} alt="A delegate at the Ghana Female CEO Summit" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover object-[center_22%]" />
         </div>
         <div>
           <p className="eyebrow mb-2">Day 2 · The Summit</p>
@@ -161,7 +161,7 @@ export default async function FemaleCeoSummitPage() {
             <a href="#register" className="mt-8 inline-flex items-center justify-center rounded-sm bg-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors hover:bg-gray-200">Express Interest</a>
           </div>
           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-md bg-gray-800">
-            <Image unoptimized src={summitImages.dealRoom} alt="Business leaders in conversation at a roundtable" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src={summitImages.dealRoom} alt="Business leaders in conversation at a roundtable" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
           </div>
         </div>
       </section>
@@ -178,7 +178,7 @@ export default async function FemaleCeoSummitPage() {
           {masterclasses.map((m) => (
             <article key={m.title}>
               <div className="photo-card relative aspect-[3/2] w-full bg-gray-200">
-                <Image unoptimized src={m.image} alt={`${m.title} masterclass`} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+                <Image unoptimized src={m.image} alt={`${m.title} masterclass`} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" style={{ objectPosition: m.position ?? "center 22%" }} />
               </div>
               <p className="mt-6 font-nav text-[11px] uppercase tracking-widest2 text-[#a88418]">Masterclass</p>
               <h3 className="mt-1 font-display text-3xl leading-tight">{m.title}</h3>
@@ -260,7 +260,7 @@ export default async function FemaleCeoSummitPage() {
           </div>
           <div>
             <div className="photo-card relative aspect-[3/2] w-full bg-gray-200">
-              <Image unoptimized src={summitImages.partner} alt="Women leaders on stage at the summit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              <Image unoptimized src={summitImages.partner} alt="Women leaders on stage at the summit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_22%]" />
             </div>
             <h3 className="mt-10 font-nav text-[11px] uppercase tracking-widest2 text-gray-600">Supported in 2026 by</h3>
             <p className="mt-3 font-display text-xl leading-relaxed">{partners2026.join(" · ")}</p>
@@ -301,7 +301,7 @@ export default async function FemaleCeoSummitPage() {
 
       {/* Cross-link */}
       <section className="relative isolate overflow-hidden bg-ink text-paper">
-        <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours" fill sizes="100vw" className="-z-10 object-cover opacity-45" />
+        <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours" fill sizes="100vw" className="-z-10 object-cover object-[center_30%] opacity-45" />
         <div className="container-editorial py-20 text-center md:py-28">
           <p className="font-nav text-[11px] uppercase tracking-widest2 text-[#d4af37]">Day 3 · Evening Gala · 30 April 2027</p>
           <h2 className="mx-auto mt-3 max-w-3xl font-display text-4xl sm:text-6xl">Ghana Women of the Year Honours</h2>
