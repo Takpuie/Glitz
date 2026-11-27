@@ -125,6 +125,7 @@ export default async function MarrakechRetreatPage() {
               eyebrow="Installment Plan"
               price={installmentPlan.price}
               label={installmentPlan.label}
+              detail={<strong>{installmentPlan.summary}</strong>}
               note="For participants choosing the structured monthly installment option."
             />
           </div>
@@ -148,31 +149,30 @@ export default async function MarrakechRetreatPage() {
         <div>
           <h2 className="font-display text-3xl sm:text-4xl"><SectionNumber n={next()} /> &nbsp;Monthly Installment Plan</h2>
           <p className="mt-4 text-[17px] leading-relaxed text-gray-700">{installmentPlan.copy}</p>
-          <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[480px] border border-ink/15 text-left text-sm">
-              <thead className="bg-ink text-paper">
-                <tr>
-                  <th scope="col" className="px-5 py-4 font-nav text-[11px] uppercase tracking-widest2">Payment</th>
-                  <th scope="col" className="px-5 py-4 font-nav text-[11px] uppercase tracking-widest2">Amount</th>
-                  <th scope="col" className="px-5 py-4 font-nav text-[11px] uppercase tracking-widest2">When</th>
+          {/* Fits a phone screen: no fixed minimum width, tighter padding on small screens. */}
+          <table className="mt-8 w-full border border-ink/15 text-left text-sm">
+            <thead className="bg-ink text-paper">
+              <tr>
+                <th scope="col" className="px-3 py-4 font-nav text-[10px] uppercase tracking-widest sm:px-5 sm:text-[11px] sm:tracking-widest2">Payment</th>
+                <th scope="col" className="px-3 py-4 font-nav text-[10px] uppercase tracking-widest sm:px-5 sm:text-[11px] sm:tracking-widest2">Amount</th>
+                <th scope="col" className="px-3 py-4 font-nav text-[10px] uppercase tracking-widest sm:px-5 sm:text-[11px] sm:tracking-widest2">When</th>
+              </tr>
+            </thead>
+            <tbody>
+              {installmentPlan.installments.map((row) => (
+                <tr key={row.label} className="border-t border-ink/15">
+                  <td className="px-3 py-4 sm:px-5">{row.label}</td>
+                  <td className="whitespace-nowrap px-3 py-4 font-semibold sm:px-5">{row.amount}</td>
+                  <td className="px-3 py-4 sm:px-5">{row.due}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {installmentPlan.installments.map((row) => (
-                  <tr key={row.label} className="border-t border-ink/15">
-                    <td className="px-5 py-4">{row.label}</td>
-                    <td className="px-5 py-4 font-semibold">{row.amount}</td>
-                    <td className="px-5 py-4">{row.due}</td>
-                  </tr>
-                ))}
-                <tr className="border-t border-ink/15 bg-smoke">
-                  <th scope="row" className="px-5 py-4 font-nav text-[11px] uppercase tracking-widest2">Total</th>
-                  <td className="px-5 py-4 font-semibold">{installmentPlan.total}</td>
-                  <td className="px-5 py-4 text-gray-600">Three monthly payments</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+              <tr className="border-t border-ink/15 bg-smoke">
+                <th scope="row" className="px-3 py-4 font-nav text-[10px] uppercase tracking-widest sm:px-5 sm:text-[11px] sm:tracking-widest2">Total</th>
+                <td className="whitespace-nowrap px-3 py-4 font-semibold sm:px-5">{installmentPlan.total}</td>
+                <td className="px-3 py-4 text-gray-600 sm:px-5">Three payments</td>
+              </tr>
+            </tbody>
+          </table>
           <p className="mt-4 text-sm text-gray-600">{installmentPlan.note}</p>
         </div>
       </section>

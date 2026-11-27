@@ -54,14 +54,14 @@ RETREAT_PLANS = [
     },
     {
         "name": "Monthly installments",
-        "description": "Three monthly payments, starting at registration. All payments are due by 22 January 2027.",
+        "description": "$1,000 at registration, $1,000 a month later and a final $1,550. All payments are due by 22 January 2027.",
         "currency": "USD",
         "available_until": date(2027, 1, 22),
         "final_deadline": date(2027, 1, 22),
         "installments": [
-            ("First installment", 1184, 0),
-            ("Second installment", 1184, 1),
-            ("Third installment", 1184, 2),
+            ("First installment", 1000, 0),
+            ("Second installment", 1000, 1),
+            ("Final installment", 1550, 2),
         ],
     },
 ]

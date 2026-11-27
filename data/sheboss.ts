@@ -130,15 +130,16 @@ export const standardFull = {
 };
 
 export const installmentPlan = {
-  price: "$1,184",
-  label: "× 3 monthly installments",
-  copy: "Make your booking more flexible with our three-month installment option: three scheduled monthly payments of $1,184.",
+  price: "$3,550",
+  label: "Three monthly installments",
+  summary: "$1,000 · $1,000 · $1,550",
+  copy: "Make your booking more flexible with our three-month installment option: $1,000 at booking, $1,000 the following month and a final $1,550.",
   installments: [
-    { label: "First installment", amount: "$1,184", due: "At booking" },
-    { label: "Second installment", amount: "$1,184", due: "Monthly, per your payment schedule" },
-    { label: "Third installment", amount: "$1,184", due: "Monthly, per your payment schedule" },
+    { label: "First installment", amount: "$1,000", due: "At booking" },
+    { label: "Second installment", amount: "$1,000", due: "One month later" },
+    { label: "Final installment", amount: "$1,550", due: "Two months later" },
   ],
-  total: "$3,552",
+  total: "$3,550",
   note: "Your booking is subject to the agreed payment schedule and is not considered fully paid until all three installments have been received. All outstanding payments must be completed by the final payment deadline communicated at booking, and before the retreat begins.",
 };
 
