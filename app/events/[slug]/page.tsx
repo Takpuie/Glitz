@@ -9,7 +9,7 @@ import { editorialImage } from "@/lib/img";
 import EnquiryForm from "@/components/EnquiryForm";
 
 // Slugs with their own folder under app/events/ — rendered there, not here.
-const DEDICATED_ROUTES = new Set(["gafw", "sheboss-global", "sheboss-marrakech-retreat-2027"]);
+const DEDICATED_ROUTES = new Set(["gafw", "sheboss-global", "sheboss-marrakech-retreat-2027", "female-ceo-summit", "gwoty"]);
 
 const STATUS_LABELS: Record<string, string> = {
   on_sale: "On sale",

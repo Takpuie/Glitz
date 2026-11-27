@@ -4,10 +4,10 @@ import { editorialImage } from "@/lib/img";
 
 const archive = [
   { name: "GAFW 2022", year: "2022", winner: "", img: "/images/gafw/look-red-rope-belt.jpg" },
-  { name: "Ghana Women of the Year 2026", year: "2026", winner: "12 honourees celebrated", img: editorialImage("archive-gwoty-2026", 900, 700) },
+  { name: "Ghana Women of the Year Honours 2026", year: "2026", winner: "500+ distinguished guests · Kempinski Hotel Gold Coast City", img: "/images/gwoty/honourees-on-stage.jpg", href: "/events/gwoty" },
   { name: "She Boss Global UK 2026", year: "2026", winner: "", img: editorialImage("archive-sheboss-global-uk-2026", 900, 700), href: "/events/sheboss-global" },
   { name: "She Boss Doha Retreat 2026", year: "2026", winner: "Marsa Malaz Kempinski, The Pearl, Doha", img: "/images/sheboss/white-group-promenade.jpg", href: "/events/sheboss-global" },
-  { name: "Female CEO Summit 2026", year: "2026", winner: "Keynote: Matilda Asante", img: "/images/female-ceo-summit/podium-speaker.jpg" },
+  { name: "Ghana Female CEO Summit 2026", year: "2026", winner: "Keynote: Hon. Julius Debrah · 7–8 May 2026", img: "/images/ceo-summit/summit-family-photo.jpg", href: "/events/female-ceo-summit" },
 ];
 
 export default function EventsArchivePage() {
