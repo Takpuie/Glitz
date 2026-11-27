@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{ email.subject }}</title>
+<!--[if mso]><style>table,td,div,p,a{font-family:Arial,Helvetica,sans-serif !important;}</style><![endif]-->
+<style>
+  body { margin: 0; padding: 0; background: #f2f2f2; }
+  a { color: #000000; }
+  @media (max-width: 620px) {
+    .container { width: 100% !important; }
+    .px { padding-left: 24px !important; padding-right: 24px !important; }
+    .heading { font-size: 30px !important; line-height: 36px !important; }
+    .code-value { font-size: 30px !important; letter-spacing: 6px !important; }
+    .cell { padding-left: 8px !important; padding-right: 8px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f2f2f2;-webkit-text-size-adjust:100%;">
+{% if email.preheader %}<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f2f2f2;font-size:1px;line-height:1px;">{{ email.preheader }}&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;</div>{% endif %}
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f2f2f2" style="background:#f2f2f2;">
+<tr><td align="center" style="padding:24px 12px;">
+
+  <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+
+    <!-- Tagline strip -->
+    <tr><td align="center" bgcolor="#000000" style="background:#000000;padding:10px 24px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bdbdbd;">
+      Glitz Africa &middot; Fashion, Culture, Lifestyle &amp; Entertainment
+    </td></tr>
+
+    <!-- Masthead -->
+    <tr><td align="center" bgcolor="#000000" style="background:#000000;padding:22px 24px 26px;border-top:1px solid #262626;">
+      <a href="{{ site_url }}" style="text-decoration:none;">
+        <img src="{{ logo_url }}" width="150" height="44" alt="GLITZ AFRICA" style="display:block;border:0;width:150px;height:auto;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-size:28px;letter-spacing:10px;">
+      </a>
+    </td></tr>
+
+    <!-- Gold rule -->
+    <tr><td bgcolor="#a88418" style="background:#a88418;height:3px;line-height:3px;font-size:3px;">&nbsp;</td></tr>
+
+    <!-- Body -->
+    <tr><td class="px" bgcolor="#ffffff" style="background:#ffffff;padding:44px 48px 40px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#212121;">
+
+      {% if email.eyebrow %}
+      <p style="margin:0 0 12px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#a88418;">{{ email.eyebrow }}</p>
+      {% endif %}
+      <h1 class="heading" style="margin:0 0 24px;font-family:'Bodoni Moda',Didot,'Bodoni 72',Georgia,'Times New Roman',serif;font-weight:400;font-size:36px;line-height:42px;color:#000000;">{{ email.heading }}</h1>
+
+      {% for block in email.blocks %}
+        {% if block.title %}
+        <p style="margin:28px 0 10px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#525252;">{{ block.title }}</p>
+        {% endif %}
+
+        {% if block.type == "para" %}
+        <p style="margin:0 0 16px;font-size:15px;line-height:24px;color:{% if block.muted %}#757575{% else %}#383838{% endif %};">{{ block.text|linebreaksbr }}</p>
+
+        {% elif block.type == "details" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;border-top:1px solid #e0e0e0;">
+          {% for label, value in block.rows %}
+          <tr>
+            <td class="cell" style="padding:12px 12px 12px 0;border-bottom:1px solid #e0e0e0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#757575;vertical-align:top;width:42%;">{{ label }}</td>
+            <td class="cell" style="padding:12px 0;border-bottom:1px solid #e0e0e0;font-size:15px;line-height:22px;color:#000000;font-weight:600;vertical-align:top;">{{ value|linebreaksbr }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+
+        {% elif block.type == "table" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;border:1px solid #e0e0e0;border-collapse:collapse;">
+          <tr>
+            {% for header in block.headers %}
+            <td class="cell" bgcolor="#000000" style="background:#000000;padding:10px 12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#ffffff;">{{ header }}</td>
+            {% endfor %}
+          </tr>
+          {% for row in block.rows %}
+          <tr>
+            {% for cell in row.cells %}
+            <td class="cell" style="padding:12px;border-top:1px solid #e0e0e0;font-size:14px;line-height:20px;{% if forloop.last and row.tone == 'ok' %}color:#1b5e20;font-weight:600;{% elif forloop.last and row.tone == 'alert' %}color:#b71c1c;font-weight:600;{% elif forloop.last and row.tone == 'muted' %}color:#757575;{% else %}color:#212121;{% endif %}">{{ cell }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+
+        {% elif block.type == "button" %}
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0 28px;">
+          <tr><td bgcolor="#000000" style="background:#000000;border-radius:2px;">
+            <a href="{{ block.url }}" target="_blank" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#ffffff;text-decoration:none;">{{ block.label }}</a>
+          </td></tr>
+        </table>
+        <p style="margin:-16px 0 24px;font-size:11px;line-height:16px;color:#9e9e9e;word-break:break-all;">Or open: <a href="{{ block.url }}" style="color:#757575;">{{ block.url }}</a></p>
+
+        {% elif block.type == "bullets" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+          {% for item in block.items %}
+          <tr>
+            <td width="18" style="vertical-align:top;padding:4px 0;font-size:12px;line-height:22px;color:#a88418;">&#9670;</td>
+            <td style="padding:4px 0;font-size:15px;line-height:22px;color:#383838;">{{ item }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+
+        {% elif block.type == "note" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;">
+          <tr><td bgcolor="#f7f3ea" style="background:#f7f3ea;border-left:3px solid #a88418;padding:16px 18px;font-size:14px;line-height:22px;color:#383838;">{{ block.text|linebreaksbr }}</td></tr>
+        </table>
+
+        {% elif block.type == "code" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px;">
+          <tr><td align="center" style="border:1px solid #000000;padding:22px 12px;">
+            <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#757575;">{{ block.label }}</p>
+            <p class="code-value" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:600;font-size:34px;letter-spacing:10px;color:#000000;">{{ block.value }}</p>
+          </td></tr>
+        </table>
+
+        {% elif block.type == "divider" %}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;"><tr><td style="border-top:1px solid #e0e0e0;font-size:1px;line-height:1px;">&nbsp;</td></tr></table>
+        {% endif %}
+      {% endfor %}
+
+    </td></tr>
+
+    <!-- Footer -->
+    <tr><td class="px" align="center" bgcolor="#000000" style="background:#000000;padding:32px 48px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+      <p style="margin:0 0 14px;font-size:11px;letter-spacing:3px;text-transform:uppercase;">
+        {% for label, url in social_links %}<a href="{{ url }}" style="color:#ffffff;text-decoration:none;">{{ label }}</a>{% if not forloop.last %}<span style="color:#525252;">&nbsp;&nbsp;&middot;&nbsp;&nbsp;</span>{% endif %}{% endfor %}
+      </p>
+      <p style="margin:0 0 14px;font-size:12px;"><a href="{{ site_url }}" style="color:#d4af37;text-decoration:none;">{{ site_label }}</a></p>
+      {% if email.reason %}<p style="margin:0 0 10px;font-size:11px;line-height:17px;color:#9e9e9e;">{{ email.reason }}</p>{% endif %}
+      <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#757575;">&copy; {{ year }} Glitz Africa Magazine &middot; Kollage Media</p>
+    </td></tr>
+
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>

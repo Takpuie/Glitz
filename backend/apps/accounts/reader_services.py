@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
+from glitz_backend.branded_email import Email, build_message, button, note, para
 from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
@@ -92,10 +92,36 @@ def send_account_email(reader, purpose):
     token = AccountToken.objects.create(reader=reader, digest=hashlib.sha256(raw.encode()).hexdigest(),
         purpose=purpose, expires_at=timezone.now() + lifetime)
     url = settings.FRONTEND_BASE_URL.rstrip("/") + "/account?" + urlencode({"action": purpose, "token": raw})
-    subject = "Verify your Glitz Africa email" if purpose == "verify" else "Reset your Glitz Africa password"
-    body = f"{subject}\n\nOpen this link and follow the instructions:\n{url}\n\nIf you did not request this, ignore this message."
+    if purpose == "verify":
+        email = Email(
+            subject="Verify your Glitz Africa email",
+            eyebrow="Your Glitz account",
+            heading="Confirm your email address.",
+            preheader="One click to verify your Glitz Africa account.",
+            blocks=[
+                para("Welcome to Glitz Africa. Please confirm this is your email address to finish setting up your account."),
+                button("Verify my email", url),
+                note("This link expires in 24 hours and can only be used once."),
+                para("If you didn't create a Glitz Africa account, you can safely ignore this email.", muted=True),
+            ],
+            reason="You're receiving this because this address was used to create a Glitz Africa account.",
+        )
+    else:
+        email = Email(
+            subject="Reset your Glitz Africa password",
+            eyebrow="Your Glitz account",
+            heading="Reset your password.",
+            preheader="Use this link to choose a new password.",
+            blocks=[
+                para("We received a request to reset the password for your Glitz Africa account."),
+                button("Choose a new password", url),
+                note("This link expires in 60 minutes and can only be used once."),
+                para("If you didn't ask to reset your password, you can ignore this email. Your password won't change.", muted=True),
+            ],
+            reason="You're receiving this because a password reset was requested for your Glitz Africa account.",
+        )
     try:
-        if send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [reader.email]) != 1:
+        if build_message(email, [reader.email]).send() != 1:
             raise RuntimeError("Email not accepted")
     except Exception:
         token.delete()

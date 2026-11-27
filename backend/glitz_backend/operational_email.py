@@ -1,25 +1,20 @@
-import logging
-
 from django.conf import settings
-from django.core.mail import send_mail
 
-logger = logging.getLogger(__name__)
+from .branded_email import Email, from_plain_text, send
 
 
 def deliver(subject, body, recipients):
-    """Send an operational email without breaking the completed action."""
-    if not settings.AUTH_EMAIL_ENABLED:
-        return False
-    recipients = [address for address in recipients if address]
-    if not recipients:
-        return False
-    try:
-        return send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, recipients) == 1
-    except Exception:
-        logger.exception("Operational email delivery failed: %s", subject)
-        return False
+    """Send an operational email without breaking the completed action.
+
+    Accepts either a plain-text body (wrapped in the branded layout) or a
+    ready-made branded Email."""
+    email = body if isinstance(body, Email) else from_plain_text(subject, body)
+    return send(email, recipients)
 
 
 def notify_operations(subject, body):
-    return deliver(subject, body, settings.OPERATIONS_EMAILS)
-
+    email = body if isinstance(body, Email) else from_plain_text(
+        subject, body, eyebrow="Team notification",
+        reason="Sent to the Glitz Africa operations team.",
+    )
+    return send(email, settings.OPERATIONS_EMAILS)
