@@ -300,13 +300,18 @@ export default async function FemaleCeoSummitPage() {
       </section>
 
       {/* Cross-link */}
-      <section className="relative isolate overflow-hidden bg-ink text-paper">
-        <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours" fill sizes="100vw" className="-z-10 object-cover object-[center_30%] opacity-45" />
-        <div className="container-editorial py-20 text-center md:py-28">
-          <p className="font-nav text-[11px] uppercase tracking-widest2 text-[#d4af37]">Day 3 · Evening Gala · 30 April 2027</p>
-          <h2 className="mx-auto mt-3 max-w-3xl font-display text-4xl sm:text-6xl">Ghana Women of the Year Honours</h2>
-          <p className="mx-auto mt-5 max-w-xl text-paper/85">The red tie evening that closes the summit, celebrating the women shaping Ghana.</p>
-          <Link href="/events/gwoty" className="mt-8 inline-flex items-center justify-center rounded-sm bg-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors hover:bg-gray-200">Discover the Honours</Link>
+      {/* The photo keeps its own 3:2 shape here, so nothing is cropped away. */}
+      <section className="bg-ink text-paper">
+        <div className="container-editorial grid grid-cols-1 items-center gap-10 py-16 md:grid-cols-[1fr_1.3fr] md:gap-16 md:py-24">
+          <div>
+            <p className="font-nav text-[11px] uppercase tracking-widest2 text-[#d4af37]">Day 3 · Evening Gala · 30 April 2027</p>
+            <h2 className="mt-3 font-display text-4xl sm:text-5xl lg:text-6xl">Ghana Women of the Year Honours</h2>
+            <p className="mt-5 max-w-md text-paper/85">The red tie evening that closes the summit, celebrating the women shaping Ghana.</p>
+            <Link href="/events/gwoty" className="mt-8 inline-flex items-center justify-center rounded-sm bg-paper px-7 py-3 font-nav text-[11px] uppercase tracking-widest2 text-ink transition-colors hover:bg-gray-200">Discover the Honours</Link>
+          </div>
+          <div className="relative aspect-[3/2] w-full overflow-hidden rounded-md bg-gray-800">
+            <Image unoptimized src={gwotyImages.hero} alt="Honourees on stage at the Ghana Women of the Year Honours 2026" fill sizes="(max-width: 768px) 100vw, 55vw" className="object-cover" />
+          </div>
         </div>
       </section>
     </div>
