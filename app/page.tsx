@@ -7,9 +7,9 @@ import HomeHero from "@/components/HomeHero";
 import HomeVideos from "@/components/HomeVideos";
 import PartnerMarquee from "@/components/PartnerMarquee";
 import { getArticles } from "@/data/articles";
-import { events } from "@/data/events";
 import { partners } from "@/data/partners";
-import { getBackendEvent, getMagazineIssues, getHomepageSlides, getMediaVideos, type HomepageSlide, type MediaVideo } from "@/lib/backend";
+import { EARLY_BIRD_CLOSES_AT, earlyBird, installmentPlan, retreat, shebossImages, standardFull } from "@/data/sheboss";
+import { getMagazineIssues, getHomepageSlides, getMediaVideos, type HomepageSlide, type MediaVideo } from "@/lib/backend";
 import { editorialImage } from "@/lib/img";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -17,14 +17,12 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 export default async function Home() {
   const articles = await getArticles();
   const rest = articles.slice(0, 7);
-  const gafw = events[0];
-  const [backendGafwResult, magazineResult, slidesResult, videosResult] = await Promise.allSettled([
-    getBackendEvent("gafw"),
+  const earlyBirdOpen = Date.now() < Date.parse(EARLY_BIRD_CLOSES_AT);
+  const [magazineResult, slidesResult, videosResult] = await Promise.allSettled([
     getMagazineIssues(),
     getHomepageSlides(),
     getMediaVideos(),
   ]);
-  const backendGafw = backendGafwResult.status === "fulfilled" ? backendGafwResult.value : undefined;
   const magazineIssues = magazineResult.status === "fulfilled" ? magazineResult.value : [];
   const homepageSlides = slidesResult.status === "fulfilled" ? slidesResult.value : [];
   const videos = videosResult.status === "fulfilled" ? videosResult.value : [];
@@ -94,20 +92,45 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Glitz Events */}
+      {/* Glitz Events: featured event */}
       <section className="container-editorial py-16 md:py-20">
         <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
           <div className="photo-card relative aspect-[4/3] w-full bg-gray-200">
-            <Image unoptimized src={backendGafw?.cover_image?.full_url ?? gafw.image} alt={backendGafw?.name ?? gafw.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src={shebossImages.retreatFeature} alt="SheBoss Global retreat guests dressed in white" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-[center_40%]" />
           </div>
           <div>
-            <p className="eyebrow mb-4">Glitz Events &middot; {gafw.dates}</p>
-            <h2 className="font-display text-4xl leading-tight sm:text-5xl">{gafw.name}</h2>
-            <p className="mt-5 max-w-md text-base text-gray-600">{gafw.description}</p>
+            <p className="eyebrow mb-4">Glitz Events &middot; SheBoss Global</p>
+            <h2 className="font-display text-4xl leading-tight sm:text-5xl">
+              Marrakech Retreat <span className="italic text-[#a88418]">2027</span>
+            </h2>
+            <p className="mt-3 font-nav text-[11px] uppercase tracking-widest2 text-gray-700">
+              {retreat.dates} &nbsp;|&nbsp; {retreat.location}
+            </p>
+            <p className="mt-5 max-w-md text-base text-gray-600">{retreat.tagline}</p>
+            <dl className="mt-6 grid max-w-md grid-cols-1 gap-px border border-ink/15 bg-ink/15 sm:grid-cols-3">
+              {earlyBirdOpen && (
+                <div className="bg-paper px-4 py-3">
+                  <dt className="font-nav text-[10px] uppercase tracking-widest2 text-[#a88418]">Early bird</dt>
+                  <dd className="mt-1 font-display text-2xl">{earlyBird.price}</dd>
+                  <dd className="text-xs text-gray-500">until {earlyBird.deadline}</dd>
+                </div>
+              )}
+              <div className="bg-paper px-4 py-3">
+                <dt className="font-nav text-[10px] uppercase tracking-widest2 text-gray-600">Standard</dt>
+                <dd className="mt-1 font-display text-2xl">{standardFull.price}</dd>
+                <dd className="text-xs text-gray-500">one payment</dd>
+              </div>
+              <div className="bg-paper px-4 py-3">
+                <dt className="font-nav text-[10px] uppercase tracking-widest2 text-gray-600">Installments</dt>
+                <dd className="mt-1 font-display text-2xl">{installmentPlan.price}</dd>
+                <dd className="text-xs text-gray-500">{installmentPlan.summary}</dd>
+              </div>
+            </dl>
             <div className="mt-8 flex flex-wrap gap-4">
-              <a href="https://egtks.com/e/67969" target="_blank" rel="noopener noreferrer" className="btn-primary">Get Tickets</a>
-              <Link href="/events" className="btn-outline">All Glitz Events</Link>
+              <Link href={`/events/${retreat.slug}#register`} className="btn-primary">Register &amp; Pay</Link>
+              <Link href={`/events/${retreat.slug}`} className="btn-outline">View the Retreat</Link>
             </div>
+            <Link href="/events" className="link-underline mt-6 inline-block font-nav text-[11px] uppercase tracking-widest2 text-gray-600">All Glitz Events &rarr;</Link>
           </div>
         </div>
       </section>
